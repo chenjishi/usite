@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/view_container"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:background="@color/background">
+    <LinearLayout
+            android:id="@+id/home_menu"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            >
+        <ListView android:id="@+id/menu_list"
+                  android:layout_width="80dp"
+                  android:layout_height="fill_parent"
+                  android:cacheColorHint="#00000000"
+                  android:background="#FFFF0000"/>
+        <ImageView android:id="@+id/menu_space"
+                   android:layout_width="match_parent"
+                   android:layout_height="fill_parent"
+                   android:src="@drawable/black_15_transparent"/>
+
+    </LinearLayout>
+    <LinearLayout
+            android:id="@+id/home_root"
+            android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
+                  android:orientation="vertical"
+                  android:background="@color/background">
+        <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="48dp"
+                android:background="@color/action_bar_bg">
+            <Button
+                android:id="@+id/button_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="菜单"
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:layout_centerInParent="true"/>
+        </RelativeLayout>
+        <ListView
+            android:id="@+id/feed_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="#00000000"
+            android:listSelector="@color/transparent"
+            android:scrollbars="none"
+            android:fadingEdge="none"
+            android:divider="@drawable/line_light"
+            android:dividerHeight="1px"/>
+        <include android:id="@+id/main_list_empty" layout="@layout/empty_view"/>
+
+
+    </LinearLayout>
+
+
+</FrameLayout>
