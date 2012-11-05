@@ -75,10 +75,6 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         mViewContainer = (FrameLayout) findViewById(R.id.view_container);
         mRootView = (LinearLayout) findViewById(R.id.home_root);
 
-
-        ListView listView = (ListView) findViewById(R.id.menu_list);
-        new MenuListAdapter(this, listView);
-
         findViewById(R.id.button_menu).setOnClickListener(this);
 
         mEmptyView = findViewById(R.id.main_list_empty);
@@ -296,72 +292,6 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             TextView tvAuthor;
             TextView tvTime;
             TextView tvContent;
-        }
-    }
-
-
-
-    class MenuListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
-        Context context;
-        LayoutInflater inflater;
-        ListView listView;
-        String[] menuItems;
-
-        public MenuListAdapter(Context context, ListView listView) {
-           this.context = context;
-            this.listView = listView;
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            menuItems = context.getResources().getStringArray(R.array.menu_category);
-
-            this.listView.setAdapter(this);
-            this.listView.setOnItemClickListener(this);
-
-        }
-
-        @Override
-        public int getCount() {
-            return menuItems.length;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return menuItems[i];
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            ViewHolder holder;
-
-            if (null == view) {
-                view = inflater.inflate(R.layout.home_menu_list_item, null);
-                holder = new ViewHolder();
-
-                holder.menuText = (TextView) view.findViewById(R.id.menu_item_text);
-
-                view.setTag(holder);
-
-            } else {
-                holder = (ViewHolder) view.getTag();
-            }
-
-            holder.menuText.setText(menuItems[i]);
-
-
-            return view;
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            Toast.makeText(context, menuItems[i], Toast.LENGTH_SHORT).show();
-        }
-
-        class ViewHolder {
-            TextView menuText;
         }
     }
 }

@@ -8,13 +8,104 @@
     <LinearLayout
             android:id="@+id/home_menu"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            >
-        <ListView android:id="@+id/menu_list"
-                  android:layout_width="80dp"
-                  android:layout_height="fill_parent"
-                  android:cacheColorHint="#00000000"
-                  android:background="#FFFF0000"/>
+            android:layout_height="fill_parent">
+        <LinearLayout android:id="@+id/menu_list"
+                      android:layout_width="100dp"
+                      android:layout_height="fill_parent"
+                      android:background="#FF3F3F3F"
+                      android:orientation="vertical">
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="48dp"
+                      android:text="类别"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:padding="8dp"
+                      android:gravity="center_vertical"/>
+            <View android:layout_width="match_parent"
+                  android:layout_height="1dp"
+                  android:background="#FFF9F9F9"/>
+            <TextView android:id="@+id/video"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="影像"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/picture"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="图画"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/audio"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="音频"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/article"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="文字"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/miscell"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="杂碎"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/puzi"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="铺子"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/group"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="小组"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+            <TextView android:id="@+id/about"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="关于"
+                      android:textSize="16sp"
+                      android:textColor="@color/white"
+                      android:paddingLeft="8dp"
+                      android:paddingTop="12dp"
+                      android:paddingBottom="8dp"
+                      android:gravity="center_vertical"/>
+
+        </LinearLayout>
         <ImageView android:id="@+id/menu_space"
                    android:layout_width="match_parent"
                    android:layout_height="fill_parent"
@@ -24,21 +115,21 @@
     <LinearLayout
             android:id="@+id/home_root"
             android:layout_width="fill_parent"
-                  android:layout_height="fill_parent"
-                  android:orientation="vertical"
-                  android:background="@color/background">
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:background="@color/background">
         <RelativeLayout
                 android:layout_width="fill_parent"
                 android:layout_height="48dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:background="@color/action_bar_bg">
-            <Button
-                android:id="@+id/button_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:text="菜单"
-                android:textSize="16sp"
-                android:textColor="@color/white"/>
+            <ImageView
+                    android:id="@+id/button_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/icon_menu"/>
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -48,15 +139,15 @@
                     android:layout_centerInParent="true"/>
         </RelativeLayout>
         <ListView
-            android:id="@+id/feed_list"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:cacheColorHint="#00000000"
-            android:listSelector="@color/transparent"
-            android:scrollbars="none"
-            android:fadingEdge="none"
-            android:divider="@drawable/line_light"
-            android:dividerHeight="1px"/>
+                android:id="@+id/feed_list"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:cacheColorHint="#00000000"
+                android:listSelector="@color/transparent"
+                android:scrollbars="none"
+                android:fadingEdge="none"
+                android:divider="@drawable/line_light"
+                android:dividerHeight="1px"/>
         <include android:id="@+id/main_list_empty" layout="@layout/empty_view"/>
 
 
