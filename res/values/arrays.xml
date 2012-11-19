@@ -1,5 +1,6 @@
 <resources>
     <string-array name="menu_category">
+        <item>首页</item>
         <item>影像</item>
         <item>图画</item>
         <item>音频</item>

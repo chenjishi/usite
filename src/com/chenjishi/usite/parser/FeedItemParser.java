@@ -8,7 +8,6 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,8 +19,8 @@ import java.util.List;
 public class FeedItemParser {
     //http://www.u148.net/article/66142.html
 
-    public static List<FeedItem> getMainList(String url) {
-        List<FeedItem> mainLists = new ArrayList<FeedItem>();
+    public static ArrayList<FeedItem> getMainList(String url) {
+        ArrayList<FeedItem> mainLists = new ArrayList<FeedItem>();
 
         try {
             Document doc = Jsoup.connect(url).get();

@@ -1,14 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:padding="8dp"
-              android:orientation="vertical"
-        >
-    <com.chenjishi.usite.multitouch.ImageViewTouch
-        android:id="@+id/image_touch"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:background="#FF666666">
+    <ViewFlipper
+            android:id="@+id/image_fliper"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:padding="4dp">
+        <com.chenjishi.usite.multitouch.ImageViewTouch
+                android:id="@+id/image_touch1"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:src="@drawable/icon"
+                android:layout_gravity="center"
+                />
+        <com.chenjishi.usite.multitouch.ImageViewTouch
+                android:id="@+id/image_touch2"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"/>
 
-</LinearLayout>
+    </ViewFlipper>
+
+    <RelativeLayout android:id="@+id/pic_tools"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_gravity="bottom"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:background="#77000000">
+        <ImageView android:id="@+id/img_close"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/delete"
+                   android:layout_centerVertical="true"/>
+        <ImageView android:id="@+id/img_download"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_centerInParent="true"
+                   android:src="@drawable/more_add_normal"/>
+
+    </RelativeLayout>
+
+</FrameLayout>

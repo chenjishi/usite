@@ -1,6 +1,5 @@
 package com.chenjishi.usite.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -8,23 +7,28 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
 import com.chenjishi.usite.R;
+import com.chenjishi.usite.base.BaseActivity;
 import com.chenjishi.usite.entity.FeedItem;
 import com.chenjishi.usite.image.IImageCallback;
 import com.chenjishi.usite.image.ImagePool;
-import com.chenjishi.usite.parser.FeedItemParser;
+import com.chenjishi.usite.service.FeedItemDataService;
 import com.chenjishi.usite.util.ApiUtils;
-import org.w3c.dom.Text;
+import com.chenjishi.usite.util.CommonUtil;
+import com.chenjishi.usite.util.FileUtils;
+import com.chenjishi.usite.util.UsiteConfig;
+import com.chenjishi.usite.view.ExitDialog;
+import com.chenjishi.usite.view.PullToRefreshBase;
+import com.chenjishi.usite.view.PullToRefreshListView;
+import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,7 +37,7 @@ import java.util.List;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends Activity implements View.OnClickListener {
+public class HomeActivity extends BaseActivity implements View.OnClickListener {
     private static final int MODE_NORMAL = 0;
     private static final int MODE_MENU = 1;
 
@@ -43,24 +47,45 @@ public class HomeActivity extends Activity implements View.OnClickListener {
 
     private int mViewMode = MODE_NORMAL;
 
-    private ListView mListView;
+    private PullToRefreshListView mListView;
+    private ListView actualListView;
     private View mEmptyView;
     private View mLoadingBar;
 
     private int mCurrentPage = 1;
+    private boolean isRefresh = false;
 
-    private FeedListAdapter mFeedListAdapter;
+    private String[] categories;
+
+    private int currentCategory = 0;
+
+    private TextView cateText;
+
+    private String cacheFilePath;
 
 
-    private List<FeedItem> mFeedItems = new ArrayList<FeedItem>();
+    private ArrayList<FeedItem> mFeedItems = new ArrayList<FeedItem>();
+    private FeedItemDataService dataService;
+
+    private String[] urls = {
+            "/list/",
+            "/video/",
+            "/image/",
+            "/audio/",
+            "/text/",
+            "/mix/"
+    };
 
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (1 == msg.what) {
-                HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) mListView.getAdapter();
-                ((BaseAdapter) headerAdapter.getWrappedAdapter()).notifyDataSetChanged();
-                mLoadingBar.setVisibility(View.GONE);
+                dataChangeNotify();
+                if (isRefresh) {
+                    mListView.onRefreshComplete();
+                    FileUtils.deleteFile(cacheFilePath);
+                    isRefresh = false;
+                }
             }
         }
     };
@@ -75,30 +100,75 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         mViewContainer = (FrameLayout) findViewById(R.id.view_container);
         mRootView = (LinearLayout) findViewById(R.id.home_root);
 
+        categories = getResources().getStringArray(R.array.menu_category);
+
         findViewById(R.id.button_menu).setOnClickListener(this);
+        cateText = (TextView) findViewById(R.id.category_text);
+
+        ListView menuListView = (ListView) findViewById(R.id.my_menu_list);
+        new MenuListAdapter(this, menuListView);
 
         mEmptyView = findViewById(R.id.main_list_empty);
-        mListView = (ListView) findViewById(R.id.feed_list);
+        mListView = (PullToRefreshListView) findViewById(R.id.feed_list);
+
+        actualListView = mListView.getRefreshableView();
+
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLoadingBar = layoutInflater.inflate(R.layout.bottom_loading_bar, null);
         mLoadingBar.setVisibility(View.GONE);
 
-        mListView.addFooterView(mLoadingBar, null, false);
-        mListView.setEmptyView(mEmptyView);
-
-        mFeedListAdapter = new FeedListAdapter(this, mListView);
-        requestData(false);
+        actualListView.addFooterView(mLoadingBar, null, false);
+        actualListView.setEmptyView(mEmptyView);
 
 
+        new FeedListAdapter(this, actualListView);
+
+        mListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (CommonUtil.didNetworkConnected(HomeActivity.this)) {
+                    isRefresh = true;
+                    dataService.clearCaches();
+                    if (null != mFeedItems) {
+                        mFeedItems.clear();
+                    }
+                    requestData();
+                }
+            }
+        });
+
+        dataService = new FeedItemDataService();
+
+        setCateText();
+
+        cacheFilePath = getIntent().getExtras().getString("file_path");
+
+        initData(cacheFilePath);
     }
 
-    private void requestData(final boolean isPage) {
+    private void initData(String path) {
+        if (null == path) return;
+
+        Object o = FileUtils.unserializeObject(path);
+        if (null != o) {
+            mFeedItems = (ArrayList<FeedItem>) o;
+//            dataService.addToCaches(ApiUtils.BASE_URL + "/list/1.html", mFeedItems);
+            dataChangeNotify();
+        }
+    }
+
+    private void dataChangeNotify() {
+        HeaderViewListAdapter headerAdapter = (HeaderViewListAdapter) actualListView.getAdapter();
+        ((BaseAdapter) headerAdapter.getWrappedAdapter()).notifyDataSetChanged();
+        mLoadingBar.setVisibility(View.GONE);
+    }
+
+    private void requestData() {
         new Thread() {
             @Override
             public void run() {
-                String requestUrl = isPage ? getNextPageUrl() : getFirstPage();
-                Log.i("test", "requestUrl ---> " + requestUrl);
-                List<FeedItem> feedItems = FeedItemParser.getMainList(requestUrl);
+                Log.i("test", "getUrl " + getUrl());
+                ArrayList<FeedItem> feedItems = dataService.getFeedItemList(getUrl());
                 mFeedItems.addAll(feedItems);
                 mHandler.sendEmptyMessage(1);
 
@@ -106,19 +176,12 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         }.start();
     }
 
-    private String getNextPageUrl() {
-        String url = getUrl("/list/");
-        return url;
-    }
+    //http://www.u148.net/list/2.html
+    //http://www.u148.net/video/2.html
 
+    private String getUrl() {
+        return ApiUtils.BASE_URL + urls[currentCategory] + mCurrentPage + ".html";
 
-    private String getUrl(String str) {
-        return ApiUtils.BASE_URL + str + mCurrentPage + ".html";
-
-    }
-
-    private String getFirstPage() {
-        return ApiUtils.BASE_URL;
     }
 
     private void showMenu() {
@@ -196,6 +259,38 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (KeyEvent.KEYCODE_BACK == event.getKeyCode()) {
+            if (MODE_MENU == mViewMode) {
+                hiddenMenu();
+                mViewMode = MODE_NORMAL;
+            } else {
+                ExitDialog dialog = new ExitDialog(this, R.style.FullHeightDialog);
+                dialog.setCallback(new ExitDialog.IAppExitCallback() {
+                    @Override
+                    public void onAppExitCallback() {
+                        long t = UsiteConfig.getUpdateTime(HomeActivity.this);
+                        if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
+                            FileUtils.deleteFile(cacheFilePath);
+                        }
+                        finish();
+                    }
+                });
+                dialog.show();
+            }
+        } else if (KeyEvent.KEYCODE_MENU == event.getKeyCode()) {
+            if (MODE_MENU == mViewMode) {
+                hiddenMenu();
+                mViewMode = MODE_NORMAL;
+            } else {
+                showMenu();
+                mViewMode = MODE_MENU;
+            }
+        }
+        return true;
+    }
+
     class FeedListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
         ListView listView;
         LayoutInflater inflater;
@@ -234,12 +329,12 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 view = inflater.inflate(R.layout.feed_list_item, null);
                 holder = new ViewHolder();
 
-                holder.ivImage = (ImageView) view.findViewById(R.id.iv_image);
-                holder.tvCate = (TextView) view.findViewById(R.id.tv_cate);
-                holder.tvTitle = (TextView) view.findViewById(R.id.tv_title);
-                holder.tvAuthor = (TextView) view.findViewById(R.id.tv_author);
-                holder.tvTime = (TextView) view.findViewById(R.id.tv_time_line);
-                holder.tvContent = (TextView) view.findViewById(R.id.tv_summary);
+                holder.ivImage = (ImageView) view.findViewById(R.id.feed_image);
+                holder.tvCate = (TextView) view.findViewById(R.id.feed_type);
+                holder.tvTitle = (TextView) view.findViewById(R.id.feed_title);
+                holder.tvAuthor = (TextView) view.findViewById(R.id.feed_author);
+                holder.tvTime = (TextView) view.findViewById(R.id.feed_time);
+                holder.tvContent = (TextView) view.findViewById(R.id.feed_content);
 
                 view.setTag(holder);
             } else {
@@ -267,8 +362,15 @@ public class HomeActivity extends Activity implements View.OnClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            FeedItem item = mFeedItems.get(i);
             Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
-            intent.putExtra("link", mFeedItems.get(i).link);
+            intent.putExtra("link", item.link);
+
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("article_title", item.title);
+            params.put("article_author", item.author);
+            FlurryAgent.logEvent("read_article", params);
+
             startActivity(intent);
         }
 
@@ -277,7 +379,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             if (i == SCROLL_STATE_IDLE && absListView.getLastVisiblePosition() == absListView.getCount() - 1) {
                 mLoadingBar.setVisibility(View.VISIBLE);
                 mCurrentPage++;
-                requestData(true);
+                requestData();
             }
         }
 
@@ -293,5 +395,84 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             TextView tvTime;
             TextView tvContent;
         }
+    }
+
+    class MenuListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
+        ListView listView;
+        LayoutInflater inflater;
+
+        public MenuListAdapter(Context context, ListView listView) {
+            this.listView = listView;
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            this.listView.setOnItemClickListener(this);
+            this.listView.setAdapter(this);
+        }
+
+        @Override
+        public int getCount() {
+            return categories.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return categories[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            TextView v;
+            if (null == view) {
+                v = (TextView) inflater.inflate(R.layout.menu_item, null);
+            } else {
+                v = (TextView) view;
+            }
+
+            v.setText(categories[i]);
+
+            return v;
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            hiddenMenu();
+            mViewMode = MODE_NORMAL;
+            switch (i) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    mCurrentPage = 1;
+                    currentCategory = i;
+                    setCateText();
+                    if (mFeedItems != null) {
+                        mFeedItems.clear();
+                    }
+                    dataChangeNotify();
+                    requestData();
+                    break;
+                case 6:
+                    startActivity(new Intent(HomeActivity.this, PuziActivity.class));
+                    break;
+                case 7:
+                    startActivity(new Intent(HomeActivity.this, GroupActivity.class));
+                    break;
+                case 8:
+                    startActivity(new Intent(HomeActivity.this, AboutActivity.class));
+                    break;
+            }
+
+        }
+    }
+
+    private void setCateText() {
+        cateText.setText(categories[currentCategory]);
     }
 }

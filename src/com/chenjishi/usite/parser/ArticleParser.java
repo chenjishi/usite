@@ -1,5 +1,6 @@
 package com.chenjishi.usite.parser;
 
+import android.util.Log;
 import com.chenjishi.usite.entity.Article;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,6 +36,10 @@ public class ArticleParser {
             for (Element tag : tags) {
                 if (tag.tagName().equalsIgnoreCase("p")) {
                     sb.append(tag.html() + "<br />");
+                }
+
+                if (tag.tagName().equalsIgnoreCase("img")) {
+                    article.imgUrls.add(tag.attr("src"));
                 }
             }
             article.content = sb.toString();

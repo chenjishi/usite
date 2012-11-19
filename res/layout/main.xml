@@ -1,18 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:background="#FFFF0000"
-              android:gravity="center"
-        >
-    <Button
-            android:id="@+id/to_home"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:orientation="vertical"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent"
+             android:padding="20dp"
+             android:background="#FFF6F6F6">
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_big"
+                android:layout_marginTop="80dp"
+                />
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:src="@drawable/usite_name"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/usite"
+                android:textColor="#FF666666"
+                android:textSize="12sp"/>
+    </LinearLayout>
+    <LinearLayout
+            android:id="@+id/loading_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="to mainActivity"
-            android:textSize="18sp"
-            android:textColor="#FF000000"
-            />
-</LinearLayout>
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="60dp">
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="4dp"
+                style="@android:style/Widget.ProgressBar.Small"
+                android:indeterminateDrawable="@drawable/progress_bar"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/loading"
+                android:textColor="#FF666666"
+                android:textSize="12sp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:orientation="vertical">
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tips"
+                android:textColor="#FF666666"
+                android:layout_gravity="bottom|center_horizontal"
+                android:textSize="14sp"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/developer"
+                android:layout_marginTop="6dp"
+                android:textColor="#FF666666"
+                android:layout_gravity="bottom|center_horizontal"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+</FrameLayout>
 

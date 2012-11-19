@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#FFFEFEFE">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="48dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:background="@color/action_bar_bg">
+            <ImageView android:id="@+id/icon_back"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:src="@drawable/icon_back"
+                       android:layout_centerVertical="true"/>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="@string/about"
+                      android:textSize="18sp"
+                      android:textColor="@color/white"
+                      android:layout_centerInParent="true"/>
+        </RelativeLayout>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/icon_big"
+                />
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/usite_name"
+                />
+        <TextView android:id="@+id/version_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textColor="#FF666666"
+                  android:textSize="12sp"/>
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="16dp"
+                  android:paddingRight="16dp"
+                  android:layout_marginTop="20dp"
+                  android:text="@string/about_tip"
+                  android:textColor="#FF666666"
+                  android:textSize="14sp"/>
+
+
+        <Button
+                android:id="@+id/feedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/feedback"
+                android:textColor="#FF666666"
+                android:textSize="18sp"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/weibo"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="bottom|right"
+              android:padding="4dp"
+              android:background="@drawable/button_bg"
+              android:layout_marginBottom="20dp"
+              android:layout_marginRight="20dp"
+              android:gravity="center"
+              android:text="@string/weibo"
+              android:textColor="@color/black"
+              android:textSize="14sp"
+              android:drawableLeft="@drawable/weibo"
+              android:drawablePadding="4dp"/>
+
+
+
+</FrameLayout>

@@ -3,9 +3,11 @@ package com.chenjishi.usite.activity;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import com.chenjishi.usite.R;
+import com.chenjishi.usite.base.BaseActivity;
 import com.chenjishi.usite.entity.Article;
 import com.chenjishi.usite.parser.ArticleParser;
 import com.chenjishi.usite.util.ApiUtils;
@@ -18,7 +20,7 @@ import com.chenjishi.usite.util.JavascriptBridge;
  * Time: 下午7:56
  * To change this template use File | Settings | File Templates.
  */
-public class DetailActivity extends Activity implements View.OnClickListener {
+public class DetailActivity extends BaseActivity implements View.OnClickListener {
     private WebView mWebView;
     private JavascriptBridge mJsBridge;
 

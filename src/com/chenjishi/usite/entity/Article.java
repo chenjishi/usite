@@ -1,5 +1,8 @@
 package com.chenjishi.usite.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: chenjishi
@@ -11,6 +14,8 @@ public class Article {
     public String content;
 
     public String title;
+
+    public List<String> imgUrls = new ArrayList<String>();
 
     public Article() {};
 

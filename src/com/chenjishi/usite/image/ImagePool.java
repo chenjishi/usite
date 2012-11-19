@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -35,6 +36,10 @@ public class ImagePool {
 
     public ImagePool(int taskNum) {
         this(taskNum, new Handler());
+    }
+
+    public Drawable getCachedDrawable(String url) {
+        return mDrawableMap.get(url).get();
     }
 
     public ImagePool(int taskNum, Handler handler) {

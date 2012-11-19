@@ -10,6 +10,7 @@
     <color name="text_color_weak">#ff999999</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="feedback_color">#4DFF9900</color>
+    <color name="feedback_color2">#EA7500</color>
 
 
 </resources>

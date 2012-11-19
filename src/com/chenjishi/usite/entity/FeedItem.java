@@ -1,5 +1,7 @@
 package com.chenjishi.usite.entity;
 
+import java.io.Serializable;
+
 /**
  * Created with IntelliJ IDEA.
  * User: chenjishi
@@ -7,7 +9,9 @@ package com.chenjishi.usite.entity;
  * Time: 下午6:26
  * To change this template use File | Settings | File Templates.
  */
-public class FeedItem {
+public class FeedItem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public String imageUrl;
     public String title;
     public String summary;
