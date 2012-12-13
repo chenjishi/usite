@@ -10,7 +10,7 @@ import java.io.Serializable;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedItem implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public String imageUrl;
     public String title;
@@ -21,4 +21,6 @@ public class FeedItem implements Serializable {
     public int level;
     public String link;
     public String comment;
+
+    public boolean isRead;
 }

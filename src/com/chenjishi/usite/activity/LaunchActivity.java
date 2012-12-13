@@ -16,9 +16,10 @@ import com.chenjishi.usite.util.CommonUtil;
 import com.chenjishi.usite.util.FileUtils;
 import com.chenjishi.usite.util.UsiteConfig;
 
+import java.io.File;
 import java.util.ArrayList;
 
-public class WelcomeActivity extends BaseActivity {
+public class LaunchActivity extends BaseActivity {
     private Context context;
 
     @Override
@@ -40,24 +41,21 @@ public class WelcomeActivity extends BaseActivity {
                 return false;
             }
 
-            filePath = App.instance().getCacheDirectory() + ApiUtils.CACHED_FILE_NAME;
-
-            ArrayList<FeedItem> feedItems = (ArrayList<FeedItem>) FileUtils.unserializeObject(filePath);
-
-            if (null != feedItems && feedItems.size() > 0) {
-                return true;
-            } else {
-
-                feedItems = FeedItemParser.getMainList(strings[0]);
-
-                if (null != feedItems) {
-                    FileUtils.serializeObject(filePath, feedItems);
-                    UsiteConfig.saveUpdateTime(context, System.currentTimeMillis());
-                    return true;
-                }
+            String oldVersionCachePath = App.instance().getCacheDirectory() + "cache.obj";
+            if (new File(oldVersionCachePath).exists()) {
+                FileUtils.deleteFile(oldVersionCachePath);
             }
 
-            return false;
+            filePath = App.instance().getCacheDirectory() + ApiUtils.CACHED_FILE_NAME;
+            File cacheFile = new File(filePath);
+            if (!cacheFile.exists()) {
+                ArrayList<FeedItem> feedItems = FeedItemParser.getMainList(strings[0]);
+                if (null != feedItems && feedItems.size() > 0) {
+                    FileUtils.serializeObject(filePath, feedItems);
+                    UsiteConfig.saveUpdateTime(LaunchActivity.this, System.currentTimeMillis());
+                }
+            }
+            return true;
         }
 
         @Override

@@ -5,16 +5,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.support.v4.util.LruCache;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +24,7 @@ import java.util.concurrent.Executors;
  */
 public class ImagePool {
     private ExecutorService mService;
-    private Map<String, SoftReference<Drawable>> mDrawableMap;
+    private LruCache<String, Drawable> cache = new LruCache<String, Drawable>(10);
     private Handler mHandler;
 
     public ImagePool() {
@@ -39,12 +36,11 @@ public class ImagePool {
     }
 
     public Drawable getCachedDrawable(String url) {
-        return mDrawableMap.get(url).get();
+        return cache.get(url);
     }
 
     public ImagePool(int taskNum, Handler handler) {
         mService = Executors.newFixedThreadPool(taskNum);
-        mDrawableMap = new HashMap<String, SoftReference<Drawable>>();
         mHandler = handler;
     }
 
@@ -63,9 +59,9 @@ public class ImagePool {
             throw new IllegalArgumentException("handler can't be null");
         }
 
-        SoftReference<Drawable> oldRef = mDrawableMap.get(url);
-        if (null != oldRef && null != oldRef.get()) {
-            callback.onImageResponse(oldRef.get());
+        Drawable oldDrawable = cache.get(url);
+        if (null != oldDrawable) {
+            callback.onImageResponse(oldDrawable);
         } else {
             mService.execute(new Runnable() {
                 @Override
@@ -73,8 +69,7 @@ public class ImagePool {
                     final Drawable d = getDrawableFromUrl(url);
                     if (null == d) return;
 
-                    SoftReference<Drawable> sr = new SoftReference<Drawable>(d);
-                    mDrawableMap.put(url, sr);
+                    cache.put(url, d);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

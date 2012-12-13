@@ -53,6 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="20dp"
         android:orientation="vertical">
         <TextView
                 android:layout_width="wrap_content"
@@ -61,15 +62,6 @@
                 android:textColor="#FF666666"
                 android:layout_gravity="bottom|center_horizontal"
                 android:textSize="14sp"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/developer"
-                android:layout_marginTop="6dp"
-                android:textColor="#FF666666"
-                android:layout_gravity="bottom|center_horizontal"
-                android:textSize="12sp"/>
-
         </LinearLayout>
 </FrameLayout>
 

@@ -1,6 +1,5 @@
 package com.chenjishi.usite.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -8,9 +7,9 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.View;
+import android.util.DisplayMetrics;
+import android.view.*;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -19,10 +18,14 @@ import com.chenjishi.usite.base.App;
 import com.chenjishi.usite.base.BaseActivity;
 import com.chenjishi.usite.image.IImageCallback;
 import com.chenjishi.usite.image.ImagePool;
-import com.chenjishi.usite.multitouch.ImageViewTouch;
 import com.chenjishi.usite.util.JavascriptBridge;
+import com.chenjishi.usite.view.TouchImageView;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,16 +35,15 @@ import java.util.List;
  * Time: 下午3:25
  * To change this template use File | Settings | File Templates.
  */
-public class PictureViewActivity extends BaseActivity implements GestureDetector.OnGestureListener, View.OnClickListener {
+public class PictureViewActivity extends BaseActivity implements GestureDetector.OnGestureListener, View.OnClickListener, TouchImageView.ImageListener {
     private ViewFlipper viewFlipper;
-    private ImageViewTouch imageTouch1;
-    private ImageViewTouch imageTouch2;
+    private TouchImageView currentImage;
 
     private RelativeLayout imgToolBar;
 
     private GestureDetector detector;
 
-    private List<String> imageList;
+    private List<String> imageList = new ArrayList<String>();
 
     private ImagePool pool;
 
@@ -54,13 +56,11 @@ public class PictureViewActivity extends BaseActivity implements GestureDetector
         setContentView(R.layout.picture_view);
 
         viewFlipper = (ViewFlipper) findViewById(R.id.image_fliper);
-        imageTouch1 = (ImageViewTouch) findViewById(R.id.image_touch1);
-        imageTouch2 = (ImageViewTouch) findViewById(R.id.image_touch2);
         findViewById(R.id.img_close).setOnClickListener(this);
         findViewById(R.id.img_download).setOnClickListener(this);
 
-        imageTouch1.setDoubleTapToZoomEnabled(false);
-        imageTouch2.setDoubleTapToZoomEnabled(false);
+        currentImage = getTouchImageView();
+
 
         imgToolBar = (RelativeLayout) findViewById(R.id.pic_tools);
 
@@ -81,9 +81,34 @@ public class PictureViewActivity extends BaseActivity implements GestureDetector
         pool.requestImage(imgUrl, new IImageCallback() {
             @Override
             public void onImageResponse(Drawable d) {
-                imageTouch1.setImageDrawable(d);
+                currentImage.setImageDrawable(d);
             }
         });
+
+        viewFlipper.addView(currentImage, 0);
+    }
+
+    @Override
+    public boolean dragNext() {
+        return false;
+    }
+
+    @Override
+    public boolean dragPrev() {
+        return false;
+    }
+
+    @Override
+    public void singleClick() {
+    }
+
+    @Override
+    public boolean doubleClick() {
+        return false;
+    }
+
+    @Override
+    public void loadingSuccess() {
     }
 
     @Override
@@ -145,7 +170,19 @@ public class PictureViewActivity extends BaseActivity implements GestureDetector
 
             if (currentImgIdx < imageList.size() - 1) {
                 currentImgIdx++;
-                setDisplayView();
+                currentImage = getTouchImageView();
+
+                pool.requestImage(imageList.get(currentImgIdx), new IImageCallback() {
+                    @Override
+                    public void onImageResponse(Drawable d) {
+                        currentImage.setImageDrawable(d);
+                    }
+                });
+
+                viewFlipper.addView(currentImage, 1);
+                viewFlipper.showNext();
+                viewFlipper.removeViewAt(0);
+
             }
         }
 
@@ -155,40 +192,21 @@ public class PictureViewActivity extends BaseActivity implements GestureDetector
 
             if (currentImgIdx > 0) {
                 currentImgIdx--;
-                setDisplayView();
+                currentImage = getTouchImageView();
+                pool.requestImage(imageList.get(currentImgIdx), new IImageCallback() {
+                    @Override
+                    public void onImageResponse(Drawable d) {
+                        currentImage.setImageDrawable(d);
+                    }
+                });
+
+                viewFlipper.addView(currentImage, -1);
+                viewFlipper.showPrevious();
+                viewFlipper.removeViewAt(0);
             }
         }
 
         return true;
-    }
-
-    private void setDisplayView() {
-        String url = imageList.get(currentImgIdx);
-
-        if (viewFlipper.getDisplayedChild() == 0) {
-            imageTouch2.setImageDrawable(null);
-            initImages(1, url);
-            viewFlipper.setDisplayedChild(1);
-        } else if (viewFlipper.getDisplayedChild() == 1) {
-            imageTouch1.setImageDrawable(null);
-            initImages(0, url);
-            viewFlipper.setDisplayedChild(0);
-        }
-    }
-
-    private void initImages(final int idx, String imgUrl) {
-        pool.requestImage(imgUrl, new IImageCallback() {
-            @Override
-            public void onImageResponse(Drawable d) {
-                if (idx == 0) {
-                    imageTouch1.setImageDrawable(d);
-                }
-
-                if (idx == 1) {
-                    imageTouch2.setImageDrawable(d);
-                }
-            }
-        });
     }
 
     class ImageSaveTask extends AsyncTask<String, Void, Boolean> {
@@ -246,6 +264,15 @@ public class PictureViewActivity extends BaseActivity implements GestureDetector
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    private TouchImageView getTouchImageView() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        TouchImageView imageView = new TouchImageView(this, metrics.widthPixels, metrics.heightPixels, this);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.gravity = Gravity.CENTER;
+        imageView.setLayoutParams(lp);
+        return imageView;
     }
 }
 

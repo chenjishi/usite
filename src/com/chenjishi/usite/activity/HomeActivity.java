@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -21,7 +20,6 @@ import com.chenjishi.usite.util.ApiUtils;
 import com.chenjishi.usite.util.CommonUtil;
 import com.chenjishi.usite.util.FileUtils;
 import com.chenjishi.usite.util.UsiteConfig;
-import com.chenjishi.usite.view.ExitDialog;
 import com.chenjishi.usite.view.PullToRefreshBase;
 import com.chenjishi.usite.view.PullToRefreshListView;
 import com.flurry.android.FlurryAgent;
@@ -82,9 +80,9 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
             if (1 == msg.what) {
                 dataChangeNotify();
                 if (isRefresh) {
-                    mListView.onRefreshComplete();
                     FileUtils.deleteFile(cacheFilePath);
                     isRefresh = false;
+                    mListView.onRefreshComplete();
                 }
             }
         }
@@ -152,7 +150,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         Object o = FileUtils.unserializeObject(path);
         if (null != o) {
             mFeedItems = (ArrayList<FeedItem>) o;
-//            dataService.addToCaches(ApiUtils.BASE_URL + "/list/1.html", mFeedItems);
             dataChangeNotify();
         }
     }
@@ -167,7 +164,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         new Thread() {
             @Override
             public void run() {
-                Log.i("test", "getUrl " + getUrl());
                 ArrayList<FeedItem> feedItems = dataService.getFeedItemList(getUrl());
                 mFeedItems.addAll(feedItems);
                 mHandler.sendEmptyMessage(1);
@@ -266,18 +262,11 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                 hiddenMenu();
                 mViewMode = MODE_NORMAL;
             } else {
-                ExitDialog dialog = new ExitDialog(this, R.style.FullHeightDialog);
-                dialog.setCallback(new ExitDialog.IAppExitCallback() {
-                    @Override
-                    public void onAppExitCallback() {
-                        long t = UsiteConfig.getUpdateTime(HomeActivity.this);
-                        if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
-                            FileUtils.deleteFile(cacheFilePath);
-                        }
-                        finish();
-                    }
-                });
-                dialog.show();
+                long t = UsiteConfig.getUpdateTime(this);
+                if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
+                    FileUtils.deleteFile(cacheFilePath);
+                }
+                finish();
             }
         } else if (KeyEvent.KEYCODE_MENU == event.getKeyCode()) {
             if (MODE_MENU == mViewMode) {
@@ -362,7 +351,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            FeedItem item = mFeedItems.get(i);
+            FeedItem item = mFeedItems.get(i - 1);
             Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
             intent.putExtra("link", item.link);
 
@@ -459,7 +448,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                     requestData();
                     break;
                 case 6:
-                    startActivity(new Intent(HomeActivity.this, AboutActivity.class));
+                    startActivity(new Intent(HomeActivity.this, LoginActivity.class));
                     break;
 //                case 7:
 //                    startActivity(new Intent(HomeActivity.this, GroupActivity.class));

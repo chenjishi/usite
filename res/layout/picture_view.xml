@@ -3,26 +3,23 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="fill_parent"
              android:layout_height="fill_parent"
-             android:background="#FF666666">
+             android:background="#FF000000">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center">
+        <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.ProgressBar.Large"
+                />
+
+        </LinearLayout>
+
     <ViewFlipper
             android:id="@+id/image_fliper"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:padding="4dp">
-        <com.chenjishi.usite.multitouch.ImageViewTouch
-                android:id="@+id/image_touch1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:src="@drawable/icon"
-                android:layout_gravity="center"
-                />
-        <com.chenjishi.usite.multitouch.ImageViewTouch
-                android:id="@+id/image_touch2"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"/>
-
-    </ViewFlipper>
+            android:layout_height="fill_parent"/>
 
     <RelativeLayout android:id="@+id/pic_tools"
                     android:layout_width="fill_parent"
@@ -30,7 +27,7 @@
                     android:layout_gravity="bottom"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:background="#77000000">
+                    android:background="#FF666666">
         <ImageView android:id="@+id/img_close"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
