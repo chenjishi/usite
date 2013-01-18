@@ -29,9 +29,9 @@ public class JavascriptBridge {
 
     public void setContent(Article article) {
         this.article = article;
-        String p1 = "{'title':\'" + article.title + "\'}";
-        String p2 = "{'content':\'" + article.content + "\'}";
-        webView.loadUrl("javascript:setArticle(" + p1 + ", " + p2 + ")");
+//        String p1 = "{'title':\'" + article.title + "\'}";
+//        String p2 = "{'content':\'" + article.content + "\'}";
+//        webView.loadUrl("javascript:setArticle(" + p1 + ", " + p2 + ")");
     }
 
     public void onImageClick(String src) {
@@ -42,7 +42,7 @@ public class JavascriptBridge {
 
     public static List<String> getImageList() {
         if (null != article) {
-            return article.imgUrls;
+            return article.getImgUrls();
         }
         return null;
     }

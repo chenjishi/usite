@@ -36,8 +36,7 @@ function loadData(){
 }
 
 function init() {
-    content = '<div class="content-loading">正在加载...</div>';
-    document.getElementById('content').innerHTML = content;
+    initImages();
 }
 
 function setArticle(p1, p2) {

@@ -1,7 +1,6 @@
 package com.chenjishi.usite.base;
 
 import android.app.Activity;
-import android.os.Bundle;
 import com.chenjishi.usite.util.ApiUtils;
 import com.flurry.android.FlurryAgent;
 

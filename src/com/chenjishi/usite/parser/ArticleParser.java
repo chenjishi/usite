@@ -1,6 +1,5 @@
 package com.chenjishi.usite.parser;
 
-import android.util.Log;
 import com.chenjishi.usite.entity.Article;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -8,6 +7,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,23 +27,28 @@ public class ArticleParser {
             article = new Article();
 
             Elements title = doc.getElementsByClass("link2");
-            article.title = title.get(0).text();
+            String articleTitle = title.get(0).text();
+            if (null != article) {
+                article.setTitle(articleTitle);
+            }
 
             Elements content = doc.getElementsByClass("content");
 
             Elements tags = content.get(0).getAllElements();
             StringBuilder sb = new StringBuilder();
 
+            List<String> imgUrls = new ArrayList<String>();
             for (Element tag : tags) {
                 if (tag.tagName().equalsIgnoreCase("p")) {
                     sb.append(tag.html() + "<br />");
                 }
 
                 if (tag.tagName().equalsIgnoreCase("img")) {
-                    article.imgUrls.add(tag.attr("src"));
+                    imgUrls.add(tag.attr("src"));
                 }
             }
-            article.content = sb.toString();
+            article.setContent(sb.toString());
+            article.setImgUrls(imgUrls);
         } catch (IOException e) {
             e.printStackTrace();
         }
