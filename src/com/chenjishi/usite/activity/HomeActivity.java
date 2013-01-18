@@ -448,7 +448,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                     requestData();
                     break;
                 case 6:
-                    startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+                    startActivity(new Intent(HomeActivity.this, AboutActivity.class));
                     break;
 //                case 7:
 //                    startActivity(new Intent(HomeActivity.this, GroupActivity.class));
