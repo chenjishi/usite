@@ -8,7 +8,6 @@ import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.chenjishi.usite.R;
 import com.chenjishi.usite.base.BaseActivity;
@@ -49,7 +48,8 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         mJsBridge = new JavascriptBridge(this, mWebView);
 
         mWebView.addJavascriptInterface(mJsBridge, "U148");
-        mWebView.setWebChromeClient(new MyWebChromeClient());
+        //for debug javascript only
+//        mWebView.setWebChromeClient(new MyWebChromeClient());
 //        mWebView.loadUrl("file:///android_asset/usite.html");
 
         new LoadPageTask().execute(url);
@@ -61,7 +61,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         @Override
         protected void onPreExecute() {
             progressDialog = new ProgressDialog(DetailActivity.this);
-            progressDialog.setMessage("加载中...");
+            progressDialog.setMessage(getString(R.string.loading));
             progressDialog.show();
         }
 

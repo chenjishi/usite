@@ -101,6 +101,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
         categories = getResources().getStringArray(R.array.menu_category);
 
         findViewById(R.id.button_menu).setOnClickListener(this);
+//        findViewById(R.id.button_refresh).setOnClickListener(this);
         cateText = (TextView) findViewById(R.id.category_text);
 
         ListView menuListView = (ListView) findViewById(R.id.my_menu_list);
@@ -252,6 +253,16 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener {
                     hiddenMenu();
                 }
                 break;
+//            case R.id.button_refresh:
+//                if (CommonUtil.didNetworkConnected(this)) {
+//                    isRefresh = true;
+//                    dataService.clearCaches();
+//                    if (null != mFeedItems) {
+//                        mFeedItems.clear();
+//                    }
+//                    requestData();
+//                }
+//                break;
         }
     }
 

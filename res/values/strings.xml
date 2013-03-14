@@ -14,14 +14,14 @@
     <string name="net_error">网络无连接，请检查网络设置</string>
     <string name="weibo">countryhouses</string>
     <string name="about_tip">有意思吧android客户端是为了方便亲们使用手机浏览(www.u148.net)精品文章而开发的一款免费App。对网页进行了
-    重新排版，阅读更舒适，支持图片单独浏览、保存。目前，此版本暂不支持音频、视频播放、离线查看等功能，后续版本会陆续增加。
-    \n\n欢迎各位亲们提供反馈意见，你们的改进建议是我改进版本最大的动力！</string>
+    重新排版，阅读更舒适，支持图片单独浏览、保存，支持视频播放，目前暂时不支持音频播放。\n\n欢迎各位亲们提供反馈意见，你们的改进建议是我改进版本最大的动力！</string>
 
     <string name="pull_to_refresh_pull_label">下拉刷新</string>
     <string name="pull_to_refresh_release_label">松开手指刷新...</string>
     <string name="pull_to_refresh_refreshing_label">载入中...</string>
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
     <string name="tips">小提示:首页手指下拉可刷新当日最新内容</string>
+    <string name="video_play_failed">此视频无法播放</string>
 
 
 </resources>

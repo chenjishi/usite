@@ -13,15 +13,20 @@ function initImages() {
 		{	
 			this.style.display="none";
 		}
-		//处理图片链接
+
+
 		if(images[i].parentNode && images[i].parentNode.tagName == "A") {
 			images[i].parentNode.setAttribute("href", 'javascript:void(0);');
 			images[i].parentNode.setAttribute('onclick','U148.onImageClick("'+ images[i].src +'")');
 			if(images[i].parentNode.parentNode.tagName=="P" && images[i].parentNode.parentNode.childNodes.length==1){
 				images[i].parentNode.parentNode.style.textIndent ='0em';
 			}
-		}else{
-			images[i].setAttribute('onclick','U148.onImageClick("'+ images[i].src +'")');
+		} else {
+		    if(images[i].src == 'file:///android_asset/video.png') {
+		        images[i].parentNode.setAttribute('onclick','U148.onVideoClick("'+ images[i].title +'")');
+		    } else {
+     			images[i].setAttribute('onclick','U148.onImageClick("'+ images[i].src +'")');
+		    }
 			if(images[i].parentNode.tagName=="P" && images[i].parentNode.childNodes.length==1){
 				images[i].parentNode.style.textIndent ='0em';
 			}

@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ArticleParser {
     public static Article getContent(String url) {
-        Article article = null;
+        Article article;
 
         try {
             Document doc = Jsoup.connect(url).get();
@@ -28,29 +28,32 @@ public class ArticleParser {
 
             Elements title = doc.getElementsByClass("link2");
             String articleTitle = title.get(0).text();
-            if (null != article) {
-                article.setTitle(articleTitle);
-            }
+            article.setTitle(articleTitle);
 
             Elements content = doc.getElementsByClass("content");
-
-            Elements tags = content.get(0).getAllElements();
-            StringBuilder sb = new StringBuilder();
-
+            String s = "";
             List<String> imgUrls = new ArrayList<String>();
-            for (Element tag : tags) {
-                if (tag.tagName().equalsIgnoreCase("p")) {
-                    sb.append(tag.html() + "<br />");
+            if (content.size() > 0) {
+                Element c = content.get(0);
+
+                Elements imgs = c.select("img");
+                for (Element e : imgs) {
+                    imgUrls.add(e.attr("src"));
                 }
 
-                if (tag.tagName().equalsIgnoreCase("img")) {
-                    imgUrls.add(tag.attr("src"));
+                Elements videos = c.select("embed");
+                for (Element e : videos) {
+                    String videoUrl = e.attr("src");
+
+                    e.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
                 }
+                s = c.html();
             }
-            article.setContent(sb.toString());
+
+            article.setContent(s);
             article.setImgUrls(imgUrls);
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
 
         return article;

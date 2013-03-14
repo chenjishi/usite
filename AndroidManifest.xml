@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.chenjishi.usite"
-          android:versionCode="4"
-          android:versionName="1.0.4">
+          android:versionCode="5"
+          android:versionName="1.0.5">
     <uses-sdk android:minSdkVersion="8"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -35,6 +35,11 @@
         <activity android:name=".activity.PuziActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.GroupActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.LoginActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".activity.VideoPlayerActivity" android:configChanges="orientation|keyboardHidden"/>
+        <activity android:name="io.vov.vitamio.activity.InitActivity"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+                  android:launchMode="singleTop"
+                  android:windowSoftInputMode="stateAlwaysHidden" />
 
     </application>
 </manifest> 
