@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/black">
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager_photo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <RelativeLayout android:id="@+id/tool_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/action_bar_height"
+                    android:layout_gravity="bottom"
+                    android:background="#44000000">
+        <ImageView android:id="@+id/btn_close"
+                   android:layout_width="wrap_content"
+                   android:layout_height="match_parent"
+                   android:paddingLeft="16dp"
+                   android:paddingRight="16dp"
+                   android:background="@drawable/highlight_bg"
+                   android:src="@drawable/ic_close"
+                   android:layout_centerVertical="true"/>
+        <ImageView android:id="@+id/btn_download"
+                   android:layout_width="wrap_content"
+                   android:layout_height="match_parent"
+                   android:paddingLeft="16dp"
+                   android:paddingRight="16dp"
+                   android:background="@drawable/highlight_bg"
+                   android:layout_centerInParent="true"
+                   android:src="@drawable/ic_download"/>
+        <TextView
+                android:layout_width="wrap_content"
+                   android:layout_height="match_parent"
+                   android:background="@drawable/highlight_bg"
+                   android:paddingLeft="16dp"
+                   android:paddingRight="16dp"
+                   android:layout_alignParentRight="true"
+                   android:visibility="gone"
+                   android:src="@drawable/ic_download"/>
+
+    </RelativeLayout>
+</FrameLayout>
