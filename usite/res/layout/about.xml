@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#FFFEFEFE">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+        <include layout="@layout/action_bar_layout"/>
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_logo_large"
+                />
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/usite_name"
+                />
+        <TextView android:id="@+id/version_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:textColor="#FF666666"
+                  android:textSize="12sp"/>
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="16dp"
+                  android:paddingRight="16dp"
+                  android:layout_marginTop="10dp"
+                  android:text="@string/about_tip"
+                  android:textColor="#FF666666"
+                  android:textSize="14sp"/>
+
+
+        <Button
+                android:id="@+id/feedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/feedback"
+                android:textColor="#FF666666"
+                android:textSize="16sp"/>
+
+        <TextView android:id="@+id/tag_cache"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textColor="#FF666666"
+                  android:textSize="14sp"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="10dp"/>
+        <Button
+                android:id="@+id/btn_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:text="清除缓存"
+                android:textColor="#FF666666"
+                android:textSize="16sp"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/weibo"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="bottom|right"
+              android:padding="4dp"
+              android:background="@drawable/button_bg"
+              android:layout_marginBottom="20dp"
+              android:layout_marginRight="20dp"
+              android:gravity="center"
+              android:text="@string/weibo"
+              android:textColor="@color/black"
+              android:textSize="14sp"
+              android:drawableLeft="@drawable/weibo"
+              android:drawablePadding="4dp"/>
+</FrameLayout>

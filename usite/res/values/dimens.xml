@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="slide_menu_offset">160dp</dimen>
+
+    <dimen name="indicator_right_padding">10dp</dimen>
+    <dimen name="indicator_corner_radius">12dp</dimen>
+    <dimen name="indicator_internal_padding">4dp</dimen>
+    <dimen name="header_footer_left_right_padding">24dp</dimen>
+    <dimen name="header_footer_top_bottom_padding">12dp</dimen>
+
+    <dimen name="action_bar_height">48dp</dimen>
+
+    <dimen name="action_bar_icon_vertical_padding">4dp</dimen>
+    <dimen name="action_bar_title_text_size">18dp</dimen>
+    <dimen name="action_bar_subtitle_size">14dp</dimen>
+</resources>

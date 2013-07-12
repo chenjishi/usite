@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../VitamioBundle/VitamioBundle.iml" filepath="$PROJECT_DIR$/../VitamioBundle/VitamioBundle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/usite.iml" filepath="$PROJECT_DIR$/usite.iml" />
+    </modules>
+  </component>
+</project>
+
