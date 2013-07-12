@@ -6,7 +6,7 @@
               android:background="#FFFEFEFE"
               android:orientation="vertical"
         >
-
+    <include layout="@layout/action_bar_layout"/>
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="Coming Soon"

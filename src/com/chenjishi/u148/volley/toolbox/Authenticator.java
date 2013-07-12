@@ -17,7 +17,7 @@
 package com.chenjishi.u148.volley.toolbox;
 
 
-import com.chenjishi.meizi.volley.AuthFailureError;
+import com.chenjishi.u148.volley.AuthFailureError;
 
 /**
  * An interface for interacting with auth tokens.

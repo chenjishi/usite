@@ -17,14 +17,8 @@
 package com.chenjishi.u148.volley.toolbox;
 
 import android.os.SystemClock;
-
-
-import com.chenjishi.meizi.volley.*;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
+import com.chenjishi.u148.volley.*;
+import org.apache.http.*;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.cookie.DateUtils;
 

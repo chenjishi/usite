@@ -16,18 +16,13 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-import com.chenjishi.meizi.volley.AuthFailureError;
-import com.chenjishi.meizi.volley.Request;
+import com.chenjishi.u148.volley.AuthFailureError;
+import com.chenjishi.u148.volley.Request;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;

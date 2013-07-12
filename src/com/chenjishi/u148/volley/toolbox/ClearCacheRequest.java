@@ -19,10 +19,10 @@ package com.chenjishi.u148.volley.toolbox;
 
 import android.os.Handler;
 import android.os.Looper;
-import com.chenjishi.meizi.volley.Cache;
-import com.chenjishi.meizi.volley.NetworkResponse;
-import com.chenjishi.meizi.volley.Request;
-import com.chenjishi.meizi.volley.Response;
+import com.chenjishi.u148.volley.Cache;
+import com.chenjishi.u148.volley.NetworkResponse;
+import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.Response;
 
 /**
  * A synthetic request used for clearing the cache.

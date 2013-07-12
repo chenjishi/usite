@@ -20,10 +20,10 @@ import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
-import com.chenjishi.meizi.volley.Request;
-import com.chenjishi.meizi.volley.RequestQueue;
-import com.chenjishi.meizi.volley.Response;
-import com.chenjishi.meizi.volley.VolleyError;
+import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.RequestQueue;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyError;
 
 import java.util.HashMap;
 import java.util.LinkedList;

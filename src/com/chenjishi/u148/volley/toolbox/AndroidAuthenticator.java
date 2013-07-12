@@ -23,7 +23,7 @@ import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import com.chenjishi.meizi.volley.AuthFailureError;
+import com.chenjishi.u148.volley.AuthFailureError;
 
 /**
  * An Authenticator that uses {@link android.accounts.AccountManager} to get auth

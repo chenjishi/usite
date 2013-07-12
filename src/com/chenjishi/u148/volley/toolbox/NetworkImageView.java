@@ -20,7 +20,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
-import com.chenjishi.meizi.volley.VolleyError;
+import com.chenjishi.u148.volley.VolleyError;
 
 
 /**

@@ -44,6 +44,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textAppearance="?android:attr/textAppearance"
+                android:textColor="@color/black"
                 android:textStyle="bold" />
 
             <TextView

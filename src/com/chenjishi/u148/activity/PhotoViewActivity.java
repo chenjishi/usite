@@ -11,16 +11,15 @@ import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
-import com.chenjishi.meizi.R;
-import com.chenjishi.meizi.base.FileCache;
-import com.chenjishi.meizi.util.CommonUtils;
-import com.chenjishi.meizi.util.StringUtil;
-import com.chenjishi.meizi.view.TouchImageView;
-import com.chenjishi.meizi.volley.RequestQueue;
-import com.chenjishi.meizi.volley.VolleyError;
-import com.chenjishi.meizi.volley.toolbox.BitmapLruCache;
-import com.chenjishi.meizi.volley.toolbox.ImageLoader;
-import com.chenjishi.meizi.volley.toolbox.Volley;
+import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.FileCache;
+import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.view.TouchImageView;
+import com.chenjishi.u148.volley.RequestQueue;
+import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.BitmapLruCache;
+import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.chenjishi.u148.volley.toolbox.Volley;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -55,7 +54,7 @@ public class PhotoViewActivity extends Activity implements GestureDetector.OnGes
         Bundle bundle = getIntent().getExtras();
         if (null == bundle) return;
 
-        mImageList = bundle.getStringArrayList("imagelist");
+        mImageList = bundle.getStringArrayList("images");
         String currentUrl = bundle.getString("imgsrc");
 
         for (int i = 0; i < mImageList.size(); i++) {
@@ -176,12 +175,12 @@ public class PhotoViewActivity extends Activity implements GestureDetector.OnGes
                     tipResId = R.string.image_save_fail;
                 }
 
-                CommonUtils.showTips(PhotoViewActivity.this, getString(tipResId));
+                CommonUtil.showToast(PhotoViewActivity.this, getString(tipResId));
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                CommonUtils.showTips(PhotoViewActivity.this, getString(R.string.image_save_fail));
+                CommonUtil.showToast(PhotoViewActivity.this, getString(R.string.image_save_fail)) ;
             }
         });
     }

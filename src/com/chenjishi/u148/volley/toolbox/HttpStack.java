@@ -16,8 +16,8 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-import com.chenjishi.meizi.volley.AuthFailureError;
-import com.chenjishi.meizi.volley.Request;
+import com.chenjishi.u148.volley.AuthFailureError;
+import com.chenjishi.u148.volley.Request;
 import org.apache.http.HttpResponse;
 
 import java.io.IOException;

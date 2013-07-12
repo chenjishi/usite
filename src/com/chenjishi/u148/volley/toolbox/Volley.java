@@ -21,9 +21,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
-import com.chenjishi.meizi.base.FileCache;
-import com.chenjishi.meizi.volley.Network;
-import com.chenjishi.meizi.volley.RequestQueue;
+import com.chenjishi.u148.base.FileCache;
+import com.chenjishi.u148.volley.Network;
+import com.chenjishi.u148.volley.RequestQueue;
 
 import java.io.File;
 

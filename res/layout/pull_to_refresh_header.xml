@@ -9,7 +9,7 @@
             android:id="@+id/pull_to_refresh_text"
             android:text="@string/pull_to_refresh_pull_label"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#FF666666"
+            android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

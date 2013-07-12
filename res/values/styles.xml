@@ -3,6 +3,14 @@
     <!--<style name="Com.Xianguo.Book.View.PageIndicator">
          <item name="dotDrawable">@drawable/gd_page_indicator_dot</item>
      </style>-->
+    <style name="WindowActivityStyle" parent="FullHeightDialog">
+        <item name="android:windowBackground">@drawable/fill_box</item>
+        <item name="android:windowAnimationStyle">@style/PushUpAnim</item>
+    </style>
+    <style name="PushUpAnim">
+        <item name="android:windowEnterAnimation">@anim/push_up_in</item>
+        <item name="android:windowExitAnimation">@anim/push_down_out</item>
+    </style>
     <style name="FullHeightDialog" parent="@android:style/Theme.Dialog">
         <item name="android:backgroundDimAmount">0.6</item>
         <item name="android:windowBackground">@android:color/transparent</item>

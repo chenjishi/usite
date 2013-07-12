@@ -20,7 +20,7 @@ package com.chenjishi.u148.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import com.chenjishi.meizi.volley.*;
+import com.chenjishi.u148.volley.*;
 
 /**
  * A canned request for getting an image at a given URL and calling

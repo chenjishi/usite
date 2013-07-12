@@ -16,9 +16,9 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-import com.chenjishi.meizi.volley.NetworkResponse;
-import com.chenjishi.meizi.volley.Request;
-import com.chenjishi.meizi.volley.Response;
+import com.chenjishi.u148.volley.NetworkResponse;
+import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.Response;
 
 import java.io.UnsupportedEncodingException;
 
@@ -31,13 +31,13 @@ public class StringRequest extends Request<String> {
     /**
      * Creates a new request with the given method.
      *
-     * @param method the request {@link Method} to use
-     * @param url URL to fetch the string at
-     * @param listener Listener to receive the String response
+     * @param method        the request {@link Method} to use
+     * @param url           URL to fetch the string at
+     * @param listener      Listener to receive the String response
      * @param errorListener Error listener, or null to ignore errors
      */
     public StringRequest(int method, String url, Response.Listener<String> listener,
-            Response.ErrorListener errorListener) {
+                         Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         mListener = listener;
     }
@@ -45,8 +45,8 @@ public class StringRequest extends Request<String> {
     /**
      * Creates a new GET request.
      *
-     * @param url URL to fetch the string at
-     * @param listener Listener to receive the String response
+     * @param url           URL to fetch the string at
+     * @param listener      Listener to receive the String response
      * @param errorListener Error listener, or null to ignore errors
      */
     public StringRequest(String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
