@@ -1,11 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AndroidDesignerProfile">
+    <option name="fullProfile">
+      <profile>
+        <option name="device" value="2.7in QVGA" />
+        <option name="deviceConfiguration" value="Portrait" />
+        <option name="targetHashString" value="android-16" />
+        <option name="theme" value="WindowActivityStyle" />
+      </profile>
+    </option>
+    <option name="selection" value="[Full]" />
+  </component>
+  <component name="AndroidLayoutPreviewToolWindow">
+    <option name="state">
+      <GlobalState>
+        <option name="device" value="2.7in QVGA" />
+        <option name="dockMode" value="" />
+        <option name="nightMode" value="notnight" />
+        <option name="targetHashString" value="android-16" />
+        <option name="theme" value="WindowActivityStyle" />
+        <option name="visible" value="false" />
+      </GlobalState>
+    </option>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="f6381876-d0a1-47df-81b3-0aa48608aff3" name="Default" comment="" />
     <ignored path="usite.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1373659148474" ignored="false" />
-    <file path="/fragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1373658700433" ignored="false" />
+    <file path="/Dummy.txt" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379916144522" ignored="false" />
+    <file path="/fragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379844440684" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/AndroidManifest.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794187329" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/util/FileUtils.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190097380" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/util/FileUtil.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190447195" ignored="false" />
+    <file path="/FileUtil.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190348743" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/FileCache.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190431427" ignored="false" />
+    <file path="/FileCache.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190414393" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/activity/MainActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794919375" ignored="false" />
+    <file path="/MainActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190477113" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/drawable/scrollbar_vertical_track.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375940971744" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/drawable/scrollbar_vertical_thumb.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375941010278" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/layout/list_video.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375947379955" ignored="false" />
+    <file path="/list_video.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375947378330" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/values/colors.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375941104004" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/layout/cell_video.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375947626925" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/drawable/card_bg.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375941260587" ignored="false" />
+    <file path="/cell_video.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1375947439266" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/activity/VideoFragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794883278" ignored="false" />
+    <file path="/VideoFragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794267509" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/activity/HomeFragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376043670613" ignored="false" />
+    <file path="/HomeFragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376043536006" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/values/strings.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376043558236" ignored="false" />
+    <file path="/strings.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376043553683" ignored="false" />
+    <file path="/AndroidManifest.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378195498312" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/res/values/styles.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376793820827" ignored="false" />
+    <file path="$PROJECT_DIR$/../../general/WaQu/gen/com/waqu/android/R.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794274332" ignored="false" />
+    <file path="$PROJECT_DIR$/../../demo/webtest/src/com/example/webtest/MyActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378193556622" ignored="false" />
+    <file path="/MyActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378193554878" ignored="false" />
+    <file path="$PROJECT_DIR$/../../demo/webtest/assets/test.html" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378193066267" ignored="false" />
+    <file path="/test.html" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378193066267" ignored="false" />
+    <file path="$PROJECT_DIR$/../../demo/webtest/res/layout/main.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378194085114" ignored="false" />
+    <file path="/main.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378193757497" ignored="false" />
+    <file path="$PROJECT_DIR$/../../demo/webtest/AndroidManifest.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378195498312" ignored="false" />
+    <file path="$PROJECT_DIR$/../../demo/webtest/gen/com/example/webtest/R.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378195502572" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/android-zhidao/res/layout/layout_myaskactivity.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378302287487" ignored="false" />
+    <file path="/layout_myaskactivity.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378302261823" ignored="false" />
+    <file path="/MyAskActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378302309828" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/android-zhidao/src/com/baidu/iknow/user/MyAskActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378302319830" ignored="false" />
+    <file path="/HomeActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1378718797642" ignored="false" />
+    <file path="/VideoPlayerActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379862102283" ignored="false" />
+    <file path="/a.dummy" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379758857610" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/Config.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379843347457" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/message/MessageManager.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379851201830" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/home/RecommendActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379843347457" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/user/UserCardActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379843347457" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/message/MessageActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379843347457" ignored="false" />
+    <file path="/videoview.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379845047050" ignored="false" />
+    <file path="/VideoUrlParser.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379850842775" ignored="false" />
+    <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/model/URLFactory.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379851201830" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,37 +137,33 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="VideoPlayerActivity.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="VideoPlayerActivity.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/VideoPlayerActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="21" selection-start="375" selection-end="382" vertical-scroll-proportion="0.0">
-              <folding />
+            <state line="69" column="64" selection-start="2211" selection-end="2211" vertical-scroll-proportion="0.22523962">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../VitamioBundle/AndroidManifest.xml">
+      <file leaf-file-name="videoview.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/res/layout/videoview.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="92" selection-start="739" selection-end="739" vertical-scroll-proportion="0.0">
+            <state line="11" column="29" selection-start="524" selection-end="524" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AndroidManifest.xml" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="49" selection-start="1206" selection-end="1206" vertical-scroll-proportion="0.3523654">
-              <folding />
-            </state>
+          <provider editor-type-id="android-designer">
+            <state />
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="InitActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../VitamioBundle/src/io/vov/vitamio/activity/InitActivity.java">
+      <file leaf-file-name="VideoUrlParser.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/VideoUrlParser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="78" column="31" selection-start="2217" selection-end="2224" vertical-scroll-proportion="0.0">
+            <state line="94" column="71" selection-start="3005" selection-end="3005" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -120,6 +187,10 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/HomeActivity.java" />
+        <option value="$PROJECT_DIR$/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/res/layout/videoview.xml" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/util/VideoUrlParser.java" />
         <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/VideoPlayerActivity.java" />
       </list>
     </option>
@@ -143,7 +214,7 @@
     <option name="STATE" value="0" />
   </component>
   <component name="ProjectView">
-    <navigator currentView="ProjectPane" proportions="" version="1" splitterProportion="0.5">
+    <navigator proportions="" version="1" splitterProportion="0.5">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -154,117 +225,28 @@
       <autoscrollFromSource />
       <sortByType />
     </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="VitamioBundle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="VitamioBundle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="vitamio" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="widget" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="VitamioBundle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="vitamio" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="activity" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="VitamioBundle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="usite" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="project.structure.last.edited" value="Modules" />
+    <property name="OverrideImplement.combined" value="true" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.lastSelected" value="preferences.sourceCode.Java" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../VitamioBundle/libs/vitamio.jar!/" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../vitamio" />
+    <property name="AndroidLayoutSelectedEditor" value="text-editor" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="MemberChooser.showClasses" value="true" />
     <property name="FullScreen" value="false" />
+    <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="RunManager" selected="Android Application.usite">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
@@ -299,6 +281,19 @@
       <option name="PORT" value="5005" />
       <method />
     </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -324,19 +319,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -441,9 +423,12 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24959481" sideWeight="0.6712538" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24959481" sideWeight="0.6712538" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -516,69 +501,102 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/VideoPlayerActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/volley/toolbox/BitmapLruCache.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="101" column="25" selection-start="2784" selection-end="2784" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../VitamioBundle/AndroidManifest.xml">
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/volley/toolbox/ImageLoader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="92" selection-start="739" selection-end="739" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="251" column="14" selection-start="10911" selection-end="10917" vertical-scroll-proportion="0.02446982" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/HomeActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="83" column="32" selection-start="2709" selection-end="2709" vertical-scroll-proportion="0.023961661" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/android/android-sdk-macosx/sources/android-16/android/os/AsyncTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="532" column="53" selection-start="21408" selection-end="21408" vertical-scroll-proportion="0.33226836" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/pulltorefresh/PullToRefreshListView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="13" selection-start="1414" selection-end="1414" vertical-scroll-proportion="0.023961661" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/pulltorefresh/PullToRefreshBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="43" column="18" selection-start="1706" selection-end="1706" vertical-scroll-proportion="0.023961661" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/UIUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="13" selection-start="318" selection-end="318" vertical-scroll-proportion="0.23322684" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/layout/puzi.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/layout/photo_layout.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../vitamio/src/io/vov/vitamio/activity/InitActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="86" selection-start="632" selection-end="632" vertical-scroll-proportion="0.07188498" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../vitamio/src/io/vov/vitamio/LibsChecker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="32" column="19" selection-start="1014" selection-end="1014" vertical-scroll-proportion="0.35303515" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../vitamio/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="80" selection-start="177" selection-end="177" vertical-scroll-proportion="0.095846646" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="59" selection-start="873" selection-end="873" vertical-scroll-proportion="0.0">
+        <state line="32" column="98" selection-start="1737" selection-end="1737" vertical-scroll-proportion="0.5926518">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../VitamioBundle/src/io/vov/vitamio/activity/InitActivity.java">
+    <entry file="file://$PROJECT_DIR$/res/layout/videoview.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="31" selection-start="2217" selection-end="2224" vertical-scroll-proportion="0.0">
+        <state line="11" column="29" selection-start="524" selection-end="524" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/AboutActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="13" selection-start="652" selection-end="652" vertical-scroll-proportion="0.0" />
+      <provider editor-type-id="android-designer">
+        <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/ArticleListActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/VideoUrlParser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="13" selection-start="994" selection-end="994" vertical-scroll-proportion="0.26357827" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../VitamioBundle/src/io/vov/vitamio/activity/InitActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="78" column="31" selection-start="2217" selection-end="2224" vertical-scroll-proportion="0.0">
+        <state line="94" column="71" selection-start="3005" selection-end="3005" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/VideoPlayerActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="21" selection-start="375" selection-end="382" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../VitamioBundle/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="92" selection-start="739" selection-end="739" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="49" selection-start="1206" selection-end="1206" vertical-scroll-proportion="0.3523654">
-          <folding />
+        <state line="69" column="64" selection-start="2211" selection-end="2211" vertical-scroll-proportion="0.22523962">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -645,7 +663,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>usite</last-edited>
+          <last-edited>vitamio</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

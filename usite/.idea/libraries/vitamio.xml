@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="vitamio">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../VitamioBundle/libs/vitamio.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -1,5 +1,6 @@
 package com.chenjishi.u148.util;
 
+import android.text.TextUtils;
 import android.util.Log;
 import com.chenjishi.u148.network.HttpUtils;
 import org.json.JSONArray;
@@ -35,65 +36,82 @@ public class VideoUrlParser {
     public static final int TYPE_TUDOU = 4;
     public static final int TYPE_56 = 5;
 
-    public static ArrayList<String> parse56Video(String id) {
-        ArrayList<String> list = null;
-        String url = "http://vxml.56.com/json/" + id + "/?src=out";
-        String json = HttpUtils.callAPI(url);
-        if (null != json && !"".equals(json)) {
-            try {
-                list = new ArrayList<String>();
-                JSONObject obj = new JSONObject(json);
-                JSONObject dataObj = obj.getJSONObject("info");
-                JSONArray arr = dataObj.getJSONArray("rfiles");
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONObject _obj = arr.getJSONObject(i);
-                    list.add(_obj.optString("url"));
+    public static String get56VideoPath(String url) {
+        String result = null;
+        String vId = null;
+
+        Pattern pattern;
+        Matcher matcher;
+
+        String regex1 = "v_(\\w+)\\.swf";
+        String regex2 = "cpm_(\\w+)\\.swf";
+
+        pattern = Pattern.compile(regex1);
+        matcher = pattern.matcher(url);
+
+        if (matcher.find()) {
+            vId = matcher.group(1);
+        } else {
+            pattern = Pattern.compile(regex2);
+            matcher = pattern.matcher(url);
+            if (matcher.find()) vId = matcher.group(1);
+        }
+
+        if (!TextUtils.isEmpty(vId)) {
+            String[] fileUrls = null;
+            String json = HttpUtils.callAPI(String.format("http://vxml.56.com/json/%s/?src=site", vId));
+            if (!TextUtils.isEmpty(json)) {
+                try {
+                    JSONObject obj = new JSONObject(json);
+                    JSONObject dataObj = obj.getJSONObject("info");
+                    JSONArray arr = dataObj.getJSONArray("rfiles");
+                    int len = arr.length();
+                    fileUrls = new String[len];
+                    for (int i = 0; i < len; i++) {
+                        JSONObject _obj = arr.getJSONObject(i);
+                        String filePath = _obj.optString("url", "");
+                        if (filePath.length() > 0)
+                            fileUrls[i] = filePath;
+                    }
+                } catch (JSONException e) {
                 }
-            } catch (JSONException e) {
-                return null;
             }
+
+            if (null != fileUrls && fileUrls.length > 0)
+                result = fileUrls[0];
         }
 
-        return list;
+        return result;
     }
-//    public static ArrayList<String> ParserVideopath(int type,String id) throws Exception{
-//        ArrayList<String> paths = new ArrayList<String>();
-//        switch (type) {
-//            case TYPE_SINA:
-//                s = getSinaflv(id);
-//
-//            break;
-//            case TYPE_YOUKU:
-//                return ParserYoukuFlv(id);
-//
-//            break;
-//            case TYPE_QQ:
-//                return ParserQQvideof(id);
-//            break;
-//            case TYPE_TUDOU:
-//                break;
-//            case TYPE_56:
-//                break;
-//        }
-//
-//        return null;
-//    }
 
-    public static ArrayList<String> getSinaflv(String id) throws IOException {
-        ArrayList<String> paths = new ArrayList<String>();
-        String url = "http://v.iask.com/v_play.php?vid="+id;
-        Connection c = Jsoup.connect(url);
-        Document doc = c.get();
-        Elements ems = doc.getElementsByTag("url");
-        for(Element em:ems){
-            paths.add(em.text());
+    public static String getSinaUrl(String videoUrl) {
+        String result = null;
+        String videoId = null;
+        String regex = "vid=(\\d+)_\\d+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(videoUrl);
+
+        if (matcher.find()) videoId = matcher.group(1);
+
+        ArrayList<String> paths = null;
+        try {
+            paths = new ArrayList<String>();
+            String url = "http://v.iask.com/v_play.php?vid=" + videoId;
+            Connection c = Jsoup.connect(url);
+            Document doc = c.get();
+            Elements ems = doc.getElementsByTag("url");
+            for (Element em : ems) paths.add(em.text());
+
+            if (paths.size() > 0) result = paths.get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return paths;
+        return result;
     }
 
-    public static String ParserQQvideo(String vid) throws IOException{
-        String url = "http://vv.video.qq.com/geturl?ran=0.16436194255948067&otype=xml&vid="+vid+"&platform=1&format=2";
+    public static String ParserQQvideo(String vid) throws IOException {
+        String url = "http://vv.video.qq.com/geturl?ran=0.16436194255948067&otype=xml&vid=" + vid + "&platform=1&format=2";
         Connection c = Jsoup.connect(url);
         Document doc = c.get();
         Elements ems = doc.getElementsByTag("url");
@@ -101,27 +119,49 @@ public class VideoUrlParser {
         return vurls[0];
     }
 
-    public static ArrayList<String> ParserQQvideof(String vid) throws IOException{
+    public static ArrayList<String> ParserQQvideof(String vid) throws IOException {
         String url = "http://web.qqvideo.tc.qq.com/" + vid + ".flv";
         ArrayList<String> urls = new ArrayList<String>();
         urls.add(url);
         return urls;
     }
 
-    public static String ParserTudouvideo(String iid) throws IOException{
-        String url = "http://v2.tudou.com/v?st=1%2C2%2C3%2C4%2C99&it="+iid;
+    public static String ParserTudouvideo(String iid) throws IOException {
+        String url = "http://v2.tudou.com/v?st=1%2C2%2C3%2C4%2C99&it=" + iid;
         Connection c = Jsoup.connect(url);
         Document doc = c.get();
         Elements ems = doc.getElementsByTag("f");
 
-        for(Element em:ems){
+        for (Element em : ems) {
             em.attr("brt");
             String vurl[] = em.text().split("\\?");
         }
         return iid;
     }
 
-    public static ArrayList<String> ParserYoukuFlv(String id) throws Exception{
+    public static String getYoukuUrl(String url) {
+        String result = null;
+        String vId = null;
+        String regex = "sid\\/(\\w+)\\/";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+
+        if (matcher.find()) vId = matcher.group(1);
+
+        if (!TextUtils.isEmpty(vId)) {
+            try {
+                ArrayList<String> urlList = parserYoukuFlv(vId);
+
+                if (null != urlList && urlList.size() > 0) result = urlList.get(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+    public static ArrayList<String> parserYoukuFlv(String id) throws Exception {
         double seed = 0;
         String key1;
         String key2;
@@ -129,7 +169,7 @@ public class VideoUrlParser {
         String fileid = null;
         ArrayList<String> K = new ArrayList<String>();
         URL url = new URL(
-                "http://v.youku.com/player/getPlayList/VideoIDS/"+id+"/timezone/+08/version/5/source/video?n=3&ran=4656");
+                "http://v.youku.com/player/getPlayList/VideoIDS/" + id + "/timezone/+08/version/5/source/video?n=3&ran=4656");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(6 * 1000);
         if (conn.getResponseCode() != 200)
@@ -142,7 +182,7 @@ public class VideoUrlParser {
         String regexstring = "\"seed\":(\\d+),.+\"key1\":\"(\\w+)\",\"key2\":\"(\\w+)\"";
         Pattern pattern = Pattern.compile(regexstring);
         Matcher matcher = pattern.matcher(jsonstring);
-        while(matcher.find()){
+        while (matcher.find()) {
             seed = Double.parseDouble(matcher.group(1));
             key1 = matcher.group(2);
             key2 = matcher.group(3);
@@ -151,36 +191,35 @@ public class VideoUrlParser {
         Pattern patternf = Pattern.compile("\"streamfileids\":\\{(.+?)\\}");
 
         Matcher matcherf = patternf.matcher(jsonstring);
-        while(matcherf.find()){
+        while (matcherf.find()) {
             fileids = matcherf.group(1);
         }
 
         Pattern patternfid = Pattern.compile("\"flv\":\"(.+?)\"");
         Matcher matcherfid = patternfid.matcher(fileids);
-        while(matcherfid.find()){
+        while (matcherfid.find()) {
             fileid = matcherfid.group(1);
         }
 
-        String no =null;
+        String no = null;
         Pattern patternc = Pattern.compile("\"flv\":\\[(.+?)\\]");
         Matcher matcherc = patternc.matcher(jsonstring);
-        while(matcherc.find()){
+        while (matcherc.find()) {
             no = matcherc.group(0);
         }
 
         JSONArray array = new JSONArray(no.substring(6));
 
-        for(int i=0;i<array.length();i++){
+        for (int i = 0; i < array.length(); i++) {
             JSONObject job = (JSONObject) array.get(i);
-            K.add("?K=" + job.getString("k")+ ",k2:" + job.getString("k2"));
+            K.add("?K=" + job.getString("k") + ",k2:" + job.getString("k2"));
         }
 
         String sid = genSid();
         //生成fileid
         String rfileid = getFileID(fileid, seed);
         ArrayList<String> paths = new ArrayList<String>();
-        for (int i = 0; i < K.size(); i++)
-        {
+        for (int i = 0; i < K.size(); i++) {
             //得到地址
             String u = "http://f.youku.com/player/getFlvPath/sid/" + "00" + "_" + String.format("%02d", i) +
                     "/st/" + "flv" + "/fileid/" + rfileid.substring(0, 8) + String.format("%02d", i)
@@ -189,33 +228,33 @@ public class VideoUrlParser {
         }
 
         ArrayList<String> rpaths = new ArrayList<String>();
-        for(String path:paths){
+        for (String path : paths) {
             rpaths.add(getLocationJump(path, false, false));
         }
         return rpaths;
     }
 
-    public static String getLocationJump(String httpurl,String agent,boolean followRedirects){
-        String location=httpurl;
-        try{
+    public static String getLocationJump(String httpurl, String agent, boolean followRedirects) {
+        String location = httpurl;
+        try {
             URL url = new URL(httpurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            if(!followRedirects){
+            if (!followRedirects) {
                 conn.setInstanceFollowRedirects(false);
                 conn.setFollowRedirects(false);
             }
 
             conn.addRequestProperty("User-Agent", agent);
             conn.setRequestProperty("User-Agent", agent);
-            location=conn.getHeaderField("Location");
-            if(location==null){
-                location=httpurl;
+            location = conn.getHeaderField("Location");
+            if (location == null) {
+                location = httpurl;
             }
-            if(!location.equalsIgnoreCase(httpurl)){
-                location=getLocationJump(location,agent,followRedirects);
+            if (!location.equalsIgnoreCase(httpurl)) {
+                location = getLocationJump(location, agent, followRedirects);
 
             }
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
 
         } catch (IOException e) {
@@ -224,8 +263,7 @@ public class VideoUrlParser {
         return location;
     }
 
-    public static String getLocationJump(String paramString, boolean paramBoolean1, boolean paramBoolean2)
-    {
+    public static String getLocationJump(String paramString, boolean paramBoolean1, boolean paramBoolean2) {
         String str = "Lavf52.106.0";
         if (!paramBoolean1)
             str = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.151 Safari/534.16";
@@ -233,10 +271,10 @@ public class VideoUrlParser {
     }
 
 
-    public static String ParserYoukuvideo(String id) throws Exception{
+    public static String ParserYoukuvideo(String id) throws Exception {
 
         URL url = new URL(
-                "http://v.youku.com/player/getPlayList/VideoIDS/"+id+"/timezone/+08/version/5/source/video?n=3&ran=4656");
+                "http://v.youku.com/player/getPlayList/VideoIDS/" + id + "/timezone/+08/version/5/source/video?n=3&ran=4656");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(6 * 1000);
         if (conn.getResponseCode() != 200)
@@ -264,8 +302,7 @@ public class VideoUrlParser {
         int mp4no = objmp4.getInt("no");
         String mp4k = objmp4.getString("k");
 
-        for (int i = 0; i < mp4no+1; i++)
-        {
+        for (int i = 0; i < mp4no + 1; i++) {
             //得到地址
             String u = "http://f.youku.com/player/getFlvPath/sid/" + genSid() + "_" + String.format("%02d", i) +
                     "/st/" + "flv" + "/fileid/" + getFileID(flvfileid, seed).substring(0, 8) + String.format("%02d", i)
@@ -296,7 +333,7 @@ public class VideoUrlParser {
         return mixed.toString();
     }
 
-    public static String getFileID(String fileid,double seed) {
+    public static String getFileID(String fileid, double seed) {
         String mixed = getFileIDMixString(seed);
         String[] ids = fileid.split("\\*");
         StringBuilder realId = new StringBuilder();
@@ -315,11 +352,11 @@ public class VideoUrlParser {
     }
 
 
-    public static String readData(InputStream inSream, String charsetName) throws Exception{
+    public static String readData(InputStream inSream, String charsetName) throws Exception {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int len = -1;
-        while( (len = inSream.read(buffer)) != -1 ){
+        while ((len = inSream.read(buffer)) != -1) {
             outStream.write(buffer, 0, len);
         }
         byte[] data = outStream.toByteArray();
@@ -327,7 +364,6 @@ public class VideoUrlParser {
         inSream.close();
         return new String(data, charsetName);
     }
-
 
 
 }

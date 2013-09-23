@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../VitamioBundle/VitamioBundle.iml" filepath="$PROJECT_DIR$/../VitamioBundle/VitamioBundle.iml" />
       <module fileurl="file://$PROJECT_DIR$/usite.iml" filepath="$PROJECT_DIR$/usite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../vitamio/vitamio.iml" filepath="$PROJECT_DIR$/../vitamio/vitamio.iml" />
     </modules>
   </component>
 </project>
