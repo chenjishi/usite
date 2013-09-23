@@ -22,8 +22,9 @@
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
     <string name="tips">小提示:首页手指下拉可刷新当日最新内容</string>
     <string name="video_play_failed">此视频无法播放</string>
+    <string name="video_loading">视频加载中...</string>
 
-    <string name="image_save_success">下载成功!</string>
+    <string name="image_save_success">已保存至相册</string>
     <string name="image_save_fail">下载失败,请重试...</string>
     <string name="music_album_unknown">专辑:%1$s</string>
     <string name="music_artist_unknown">歌手:%1$s</string>

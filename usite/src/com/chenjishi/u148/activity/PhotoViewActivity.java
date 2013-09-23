@@ -1,18 +1,23 @@
 package com.chenjishi.u148.activity;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.RequestQueue;
@@ -21,9 +26,7 @@ import com.chenjishi.u148.volley.toolbox.BitmapLruCache;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.chenjishi.u148.volley.toolbox.Volley;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -155,34 +158,52 @@ public class PhotoViewActivity extends Activity implements GestureDetector.OnGes
         mImageLoader.get(imageUrl, new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                int tipResId;
+                String picUrl = null;
                 Bitmap bitmap = response.getBitmap();
 
                 if (null != bitmap) {
-                    String imagePath = FileCache.getSavedImageDirectory(PhotoViewActivity.this);
-                    String name = imageUrl.hashCode() + ".jpg";
+                    String name = System.currentTimeMillis() + ".jpg";
+                    ContentResolver cr = PhotoViewActivity.this.getContentResolver();
+                    picUrl = MediaStore.Images.Media.insertImage(cr, bitmap, name, "Image Saved From U148");
 
-                    try {
-                        FileOutputStream fos = new FileOutputStream(imagePath + name);
-                        BufferedOutputStream bos = new BufferedOutputStream(fos);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                        bos.close();
-                        fos.close();
-                    } catch (IOException e) {
+                    if (!TextUtils.isEmpty(picUrl)) {
+                        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        String imagePath = getFilePathByContentResolver(Uri.parse(picUrl));
+                        Uri uri = Uri.fromFile(new File(imagePath));
+                        intent.setData(uri);
+                        PhotoViewActivity.this.sendBroadcast(intent);
                     }
-                    tipResId = R.string.image_save_success;
-                } else {
-                    tipResId = R.string.image_save_fail;
                 }
 
-                CommonUtil.showToast(PhotoViewActivity.this, getString(tipResId));
+                CommonUtil.showToast(PhotoViewActivity.this, getString(TextUtils.isEmpty(picUrl) ?
+                        R.string.image_save_fail : R.string.image_save_success));
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                CommonUtil.showToast(PhotoViewActivity.this, getString(R.string.image_save_fail)) ;
+                CommonUtil.showToast(PhotoViewActivity.this, getString(R.string.image_save_fail));
             }
         });
+    }
+
+    private String getFilePathByContentResolver(Uri uri) {
+        if (null == uri) return null;
+
+        Cursor c = getContentResolver().query(uri, null, null, null, null);
+        String filePath = null;
+        if (null == c) {
+            throw new IllegalArgumentException(
+                    "Query on " + uri + " returns null result.");
+        }
+        try {
+            if ((c.getCount() != 1) || !c.moveToFirst()) {
+            } else {
+                filePath = c.getString(c.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+            }
+        } finally {
+            c.close();
+        }
+        return filePath;
     }
 
     class PhotoPagerAdapter extends PagerAdapter {

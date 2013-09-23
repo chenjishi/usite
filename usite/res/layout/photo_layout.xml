@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/gray_bg">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:background="@color/gray_bg">
     <android.support.v4.view.ViewPager
-        android:id="@+id/pager_photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+            android:id="@+id/pager_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     <RelativeLayout android:id="@+id/tool_bar"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/action_bar_height"
@@ -31,13 +31,13 @@
                    android:src="@drawable/save_normal"/>
         <TextView
                 android:layout_width="wrap_content"
-                   android:layout_height="match_parent"
-                   android:background="@drawable/highlight_bg"
-                   android:paddingLeft="16dp"
-                   android:paddingRight="16dp"
-                   android:layout_alignParentRight="true"
-                   android:visibility="gone"
-                   android:src="@drawable/save_normal"/>
+                android:layout_height="match_parent"
+                android:background="@drawable/highlight_bg"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:layout_alignParentRight="true"
+                android:visibility="gone"
+                android:src="@drawable/save_normal"/>
 
     </RelativeLayout>
-</FrameLayout>
+</merge>

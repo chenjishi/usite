@@ -17,15 +17,10 @@ public class FileCache {
     public static void init(Context context) {
         mkDirs(getImageCacheDirectory(context));
         mkDirs(getDataCacheDirectory(context));
-        mkDirs(getSavedImageDirectory(context));
     }
 
     public static String getImageCacheDirectory(Context context) {
         return getRootDirectory(context) + "cache/";
-    }
-
-    public static String getSavedImageDirectory(Context context) {
-        return getRootDirectory(context) + "images/";
     }
 
     public static String getDataCacheDirectory(Context context) {
@@ -39,10 +34,16 @@ public class FileCache {
     }
 
     public static String getRootDirectory(Context context) {
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            return Environment.getExternalStorageDirectory() + "/u148/";
+        String rootPath = null;
+        File cacheDir = context.getCacheDir();
+        if (cacheDir.exists()) {
+            rootPath = cacheDir + "/u148/";
         } else {
-            return context.getCacheDir() + "/u148/";
+            if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                rootPath = Environment.getExternalStorageDirectory() + "/u148/";
+            }
         }
+
+        return rootPath;
     }
 }

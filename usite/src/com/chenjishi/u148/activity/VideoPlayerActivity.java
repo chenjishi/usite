@@ -30,11 +30,10 @@ public class VideoPlayerActivity extends Activity {
         setContentView(R.layout.videoview);
 
         String videoUrl = getIntent().getExtras().getString("url", "");
-
         if (!TextUtils.isEmpty(videoUrl)) {
             new VideoLoadTask(this).execute(videoUrl);
         } else {
-            finish();
+            errorHandle();
         }
     }
 
@@ -45,7 +44,7 @@ public class VideoPlayerActivity extends Activity {
         public VideoLoadTask(Context context) {
             mContext = context;
             mProgressDialog = new ProgressDialog(mContext);
-            mProgressDialog.setMessage("Video Loading...");
+            mProgressDialog.setMessage(getString(R.string.video_loading));
         }
 
         @Override
@@ -85,10 +84,14 @@ public class VideoPlayerActivity extends Activity {
 
                 mVideoView.setMediaController(new MediaController(VideoPlayerActivity.this));
             } else {
-                Toast.makeText(mContext, mContext.getString(R.string.video_play_failed), Toast.LENGTH_SHORT).show();
-                VideoPlayerActivity.this.finish();
+                errorHandle();
             }
         }
+    }
+
+    private void errorHandle() {
+        Toast.makeText(this, getString(R.string.video_play_failed), Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     @Override
