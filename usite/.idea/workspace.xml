@@ -27,8 +27,8 @@
     <list default="true" id="f6381876-d0a1-47df-81b3-0aa48608aff3" name="Default" comment="" />
     <ignored path="usite.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379924405811" ignored="false" />
-    <file path="/fragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379950204168" ignored="false" />
+    <file path="/Dummy.txt" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379988208235" ignored="false" />
+    <file path="/fragment.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379951415107" ignored="false" />
     <file path="$PROJECT_DIR$/../../general/WaQu/AndroidManifest.xml" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1376794187329" ignored="false" />
     <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/util/FileUtils.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190097380" ignored="false" />
     <file path="$PROJECT_DIR$/../../general/WaQu/src/com/waqu/android/util/FileUtil.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1374190447195" ignored="false" />
@@ -100,6 +100,9 @@
     <file path="/FeedbackChoiceActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379940971706" ignored="false" />
     <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/question/QuestionListActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379944010604" ignored="false" />
     <file path="$PROJECT_DIR$/../../../baidu/iknow_1002-0-56-3_V3-1_BRANCH/android-zhidao/src/com/baidu/iknow/user/MyAskActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379944010604" ignored="false" />
+    <file path="/AppApplication.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379951399158" ignored="false" />
+    <file path="/FileUtils.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379951359396" ignored="false" />
+    <file path="/LaunchActivity.java" changelist="f6381876-d0a1-47df-81b3-0aa48608aff3" time="1379951737794" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,16 +166,57 @@
       <file leaf-file-name="AboutActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/AboutActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="129" column="28" selection-start="3933" selection-end="3933" vertical-scroll-proportion="0.0">
+            <state line="40" column="13" selection-start="1225" selection-end="1225" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FileUtils.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/FileUtils.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="111" column="25" selection-start="3045" selection-end="3045" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FileUtils.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/FileUtils.java">
+      <file leaf-file-name="PrefsUtil.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/base/PrefsUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="110" column="23" selection-start="3005" selection-end="3005" vertical-scroll-proportion="0.5686901">
+            <state line="17" column="59" selection-start="478" selection-end="478" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AppApplication.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/base/AppApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="25" column="7" selection-start="533" selection-end="533" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PhotoViewActivity.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/PhotoViewActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="230" column="89" selection-start="7794" selection-end="7794" vertical-scroll-proportion="0.38338658">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1383#1391#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="LaunchActivity.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/LaunchActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="63" column="77" selection-start="2441" selection-end="2441" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -203,8 +247,12 @@
         <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/VideoPlayerActivity.java" />
         <option value="$PROJECT_DIR$/res/layout/photo_layout.xml" />
         <option value="$PROJECT_DIR$/res/values/strings.xml" />
-        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/PhotoViewActivity.java" />
         <option value="$PROJECT_DIR$/src/com/chenjishi/u148/base/FileCache.java" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/base/PrefsUtil.java" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/base/AppApplication.java" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/LaunchActivity.java" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/util/FileUtils.java" />
+        <option value="$PROJECT_DIR$/src/com/chenjishi/u148/activity/PhotoViewActivity.java" />
       </list>
     </option>
   </component>
@@ -362,11 +410,16 @@
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="FullScreen" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
+    <property name="FullScreen" value="false" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.chenjishi.u148.base" />
+    </key>
   </component>
   <component name="RunManager" selected="Android Application.usite">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
@@ -401,19 +454,6 @@
       <option name="PORT" value="5005" />
       <method />
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <method />
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -439,6 +479,19 @@
       <envs />
       <properties />
       <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -496,8 +549,8 @@
       <option name="ACTIVITY_CLASS" value="" />
       <option name="MODE" value="default_activity" />
       <option name="DEPLOY" value="true" />
-      <option name="TARGET_SELECTION_MODE" value="EMULATOR" />
-      <option name="PREFERRED_AVD" value="emulator800" />
+      <option name="TARGET_SELECTION_MODE" value="USB_DEVICE" />
+      <option name="PREFERRED_AVD" value="" />
       <option name="USE_COMMAND_LINE" value="true" />
       <option name="COMMAND_LINE" value="" />
       <option name="WIPE_USER_DATA" value="false" />
@@ -528,30 +581,30 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1280" height="774" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24959481" sideWeight="0.6712538" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24959481" sideWeight="0.6712538" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298217" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874617" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -621,25 +674,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../vitamio/src/io/vov/vitamio/LibsChecker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="19" selection-start="1014" selection-end="1014" vertical-scroll-proportion="0.35303515" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../vitamio/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="80" selection-start="177" selection-end="177" vertical-scroll-proportion="0.095846646">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="98" selection-start="1737" selection-end="1737" vertical-scroll-proportion="0.5926518">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/res/layout/videoview.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="29" selection-start="524" selection-end="524" vertical-scroll-proportion="0.2754591" />
@@ -666,16 +700,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/res/values/ids.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="16" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="3" column="16" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/res/values/attrs.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/res/anim/page_push_left_in.xml">
@@ -692,9 +722,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/res/layout/photo_layout.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="44" selection-start="1956" selection-end="1956" vertical-scroll-proportion="0.77462435">
-          <folding />
-        </state>
+        <state line="39" column="44" selection-start="1956" selection-end="1956" vertical-scroll-proportion="0.77462435" />
       </provider>
       <provider editor-type-id="android-designer">
         <state />
@@ -702,19 +730,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="44" selection-start="1287" selection-end="1287" vertical-scroll-proportion="0.4584013">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/PhotoViewActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="233" column="26" selection-start="7902" selection-end="7902" vertical-scroll-proportion="0.40095848">
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1408#1416#0" expanded="true" />
-          </folding>
-        </state>
+        <state line="26" column="44" selection-start="1287" selection-end="1287" vertical-scroll-proportion="0.4584013" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/base/FileCache.java">
@@ -726,17 +742,50 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/AboutActivity.java">
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/FileUtils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="129" column="28" selection-start="3933" selection-end="3933" vertical-scroll-proportion="0.0">
+        <state line="111" column="25" selection-start="3045" selection-end="3045" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/util/FileUtils.java">
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/base/PrefsUtil.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="110" column="23" selection-start="3005" selection-end="3005" vertical-scroll-proportion="0.5686901">
+        <state line="17" column="59" selection-start="478" selection-end="478" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/AboutActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="40" column="13" selection-start="1225" selection-end="1225" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/LaunchActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="77" selection-start="2441" selection-end="2441" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/base/AppApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="7" selection-start="533" selection-end="533" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/chenjishi/u148/activity/PhotoViewActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="230" column="89" selection-start="7794" selection-end="7794" vertical-scroll-proportion="0.38338658">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1383#1391#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

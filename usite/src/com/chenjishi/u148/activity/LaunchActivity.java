@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
+import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.entity.FeedItem;
 import com.chenjishi.u148.parser.FeedItemParser;
 import com.chenjishi.u148.util.ApiUtils;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class LaunchActivity extends Activity {
+    private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
     private Context context;
 
     @Override
@@ -36,6 +38,16 @@ public class LaunchActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(String... strings) {
+            long lastClearCacheTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_UPDATE_TIME,
+                    System.currentTimeMillis(), context);
+            if (System.currentTimeMillis() > lastClearCacheTime) {
+                FileUtils.clearCache();
+                context.deleteDatabase("webview.db");
+                context.deleteDatabase("webviewCache.db");
+                PrefsUtil.saveLongPreference(PrefsUtil.KEY_UPDATE_TIME,
+                        System.currentTimeMillis() + TWO_DAYS, context);
+            }
+
             if (!CommonUtil.didNetworkConnected(context)) {
                 return false;
             }
