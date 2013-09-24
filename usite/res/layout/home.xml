@@ -6,8 +6,7 @@
               android:orientation="vertical"
               android:background="@color/background">
     <include layout="@layout/action_bar_layout"/>
-    <com.chenjishi.u148.pulltorefresh.PullToRefreshListView
-            xmlns:ptr="http://schemas.android.com/apk/res-auto"
+    <ListView
             android:id="@+id/feed_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -20,7 +19,6 @@
             android:fadingEdge="none"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            ptr:ptrMode="both"
             android:divider="#00000000"
             android:dividerHeight="10dp"/>
 </LinearLayout>

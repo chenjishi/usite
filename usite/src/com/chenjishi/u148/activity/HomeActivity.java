@@ -3,6 +3,7 @@ package com.chenjishi.u148.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +11,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.entity.FeedItem;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
+import com.chenjishi.u148.pulltorefresh2.PullToRefreshAttacher;
 import com.chenjishi.u148.service.FeedItemDataService;
 import com.chenjishi.u148.util.ApiUtils;
 import com.chenjishi.u148.util.FileUtils;
@@ -37,10 +37,13 @@ import java.util.Map;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener {
+public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener,
+  PullToRefreshAttacher.OnRefreshListener {
     private SlidingMenu mSlideingMenu;
-    private PullToRefreshListView mRefreshListView;
+
+    private ListView actualListView;
     private View mEmptyView;
+    private PullToRefreshAttacher mPullToRefreshAttacher;
 
     private int mCurrentPage = 1;
 
@@ -89,9 +92,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         new MenuListAdapter(this, menuListView);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
-        mRefreshListView = (PullToRefreshListView) findViewById(R.id.feed_list);
-
-        ListView actualListView = mRefreshListView.getRefreshableView();
+        actualListView = (ListView) findViewById(R.id.feed_list);
         ((ViewGroup) actualListView.getParent()).addView(mEmptyView);
         actualListView.setEmptyView(mEmptyView);
 
@@ -99,27 +100,8 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         actualListView.setAdapter(mAdapter);
         actualListView.setOnItemClickListener(this);
 
-        mRefreshListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ListView>() {
-            @Override
-            public void onPullDownToRefresh(PullToRefreshBase<ListView> refreshView) {
-                dataService.clearCaches();
-                if (new File(cacheFilePath).exists()) {
-                    FileUtils.deleteFile(cacheFilePath);
-                }
-
-                if (mFeedItems.size() > 0) {
-                    mFeedItems.clear();
-                }
-                mCurrentPage = 1;
-                loadData();
-            }
-
-            @Override
-            public void onPullUpToRefresh(PullToRefreshBase<ListView> refreshView) {
-                mCurrentPage++;
-                loadData();
-            }
-        });
+        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
+        mPullToRefreshAttacher.addRefreshableView(actualListView, this);
 
         setTitleText(categories[currentCategory]);
         dataService = new FeedItemDataService();
@@ -127,6 +109,20 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         cacheFilePath = getIntent().getExtras().getString("file_path");
 
         initData(cacheFilePath);
+    }
+
+    @Override
+    public void onRefreshStarted(View view) {
+        dataService.clearCaches();
+        if (new File(cacheFilePath).exists()) {
+            FileUtils.deleteFile(cacheFilePath);
+        }
+
+        if (mFeedItems.size() > 0) {
+            mFeedItems.clear();
+        }
+        mCurrentPage = 1;
+        loadData();
     }
 
     @Override
@@ -154,6 +150,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
             @Override
             public void run() {
                 ArrayList<FeedItem> tmpList = dataService.getFeedItemList(getUrl());
+                Log.i("test", "#### " + tmpList.size());
                 if (null != tmpList && tmpList.size() > 0) {
                     mFeedItems.addAll(tmpList);
                 }
@@ -169,7 +166,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
                     mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
                     ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("网络连接错误");
                 }
-                mRefreshListView.onRefreshComplete();
+                mPullToRefreshAttacher.setRefreshComplete();
             }
         };
 

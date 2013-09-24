@@ -33,11 +33,5 @@
     <string name="pull_to_refresh_release_label">手指松开刷新…</string>
     <string name="pull_to_refresh_refreshing_label">加载中…</string>
 
-    <!-- Just use standard Pull Down String when pulling up. These can be set for languages which require it -->
-    <string name="pull_to_refresh_from_bottom_pull_label">上拉刷新…</string>
-    <string name="pull_to_refresh_from_bottom_release_label">手指松开刷新…</string>
-    <string name="pull_to_refresh_from_bottom_refreshing_label">加载中…</string>
     <string name="connection_error">网络连接错误</string>
-
-
 </resources>
