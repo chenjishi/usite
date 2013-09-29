@@ -328,17 +328,18 @@ public class DefaultHeaderTransformer extends PullToRefreshAttacher.HeaderTransf
     }
 
     protected Drawable getActionBarBackground(Context context) {
-        int[] android_styleable_ActionBar = {android.R.attr.background};
-
-        // Now get the action bar style values...
-        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
-                android_styleable_ActionBar);
-        try {
-            // background is the first attr in the array above so it's index is 0.
-            return abStyle.getDrawable(0);
-        } finally {
-            abStyle.recycle();
-        }
+        return context.getResources().getDrawable(R.drawable.ic_bar_yellow);
+//        int[] android_styleable_ActionBar = {android.R.attr.background};
+//
+//        // Now get the action bar style values...
+//        TypedArray abStyle = obtainStyledAttrsFromThemeAttr(context, android.R.attr.actionBarStyle,
+//                android_styleable_ActionBar);
+//        try {
+//            // background is the first attr in the array above so it's index is 0.
+//            return abStyle.getDrawable(0);
+//        } finally {
+//            abStyle.recycle();
+//        }
     }
 
     protected int getActionBarSize(Context context) {

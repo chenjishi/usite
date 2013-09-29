@@ -3,7 +3,6 @@ package com.chenjishi.u148.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +37,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener,
-  PullToRefreshAttacher.OnRefreshListener {
+  PullToRefreshAttacher.OnRefreshListener, AbsListView.OnScrollListener {
     private SlidingMenu mSlideingMenu;
 
     private ListView actualListView;
@@ -46,6 +45,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     private PullToRefreshAttacher mPullToRefreshAttacher;
 
     private int mCurrentPage = 1;
+    private int lastItemIndex;
 
     private String[] categories;
 
@@ -53,6 +53,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     private int menuIndex = 0;
 
     private String cacheFilePath;
+    private View mFootView;
 
     private FeedListAdapter mAdapter;
 
@@ -91,14 +92,19 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         ListView menuListView = (ListView) findViewById(R.id.list_menu);
         new MenuListAdapter(this, menuListView);
 
+        mFootView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
+        mFootView.setVisibility(View.GONE);
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
         actualListView = (ListView) findViewById(R.id.feed_list);
+        actualListView.addFooterView(mFootView);
         ((ViewGroup) actualListView.getParent()).addView(mEmptyView);
         actualListView.setEmptyView(mEmptyView);
+
 
         mAdapter = new FeedListAdapter(this);
         actualListView.setAdapter(mAdapter);
         actualListView.setOnItemClickListener(this);
+        actualListView.setOnScrollListener(this);
 
         mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
         mPullToRefreshAttacher.addRefreshableView(actualListView, this);
@@ -131,6 +137,19 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (SCROLL_STATE_IDLE == scrollState && lastItemIndex > mFeedItems.size() - 1) {
+            mCurrentPage++;
+            loadData();
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        lastItemIndex = firstVisibleItem + visibleItemCount - 1;
+    }
+
+    @Override
     protected void backIconClicked() {
         mSlideingMenu.toggle();
     }
@@ -146,11 +165,11 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     private void loadData() {
+        mFootView.setVisibility(View.VISIBLE);
         Runnable action = new Runnable() {
             @Override
             public void run() {
                 ArrayList<FeedItem> tmpList = dataService.getFeedItemList(getUrl());
-                Log.i("test", "#### " + tmpList.size());
                 if (null != tmpList && tmpList.size() > 0) {
                     mFeedItems.addAll(tmpList);
                 }
@@ -166,6 +185,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
                     mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
                     ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("网络连接错误");
                 }
+                mFootView.setVisibility(View.GONE);
                 mPullToRefreshAttacher.setRefreshComplete();
             }
         };
@@ -183,7 +203,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FeedItem item = mFeedItems.get(position - 1);
+        FeedItem item = mFeedItems.get(position);
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", item.title);
         intent.putExtra("link", item.link);
