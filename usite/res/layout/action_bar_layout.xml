@@ -61,6 +61,8 @@
             android:paddingTop="@dimen/action_bar_icon_vertical_padding"
             android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
             android:layout_gravity="center"
+            android:onClick="onButtonClicked"
+            android:layout_alignParentRight="true"
             android:adjustViewBounds="true"
             android:visibility="gone"
             android:paddingLeft="8dp"

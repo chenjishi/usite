@@ -5,7 +5,6 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@color/background">
-    <include layout="@layout/action_bar_layout"/>
     <ListView
             android:id="@+id/list_article"
             android:layout_width="match_parent"
