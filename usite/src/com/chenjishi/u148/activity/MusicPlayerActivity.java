@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -42,6 +43,7 @@ public class MusicPlayerActivity extends BaseActivity implements View.OnClickLis
     private String mp3Url;
     private String albumName;
     private String artistName;
+    private String songName;
     private String coverImageUrl;
 
     private SeekBar mSeekBar;
@@ -95,6 +97,7 @@ public class MusicPlayerActivity extends BaseActivity implements View.OnClickLis
                     String queryString = secondUrl.getQuery();
                     if (!TextUtils.isEmpty(queryString)) {
                         String[] params = queryString.split("=");
+                        Log.i("test", "url " + params[1]);
                         Document doc = Jsoup.connect(params[1]).get();
                         Elements cover = doc.getElementsByTag("album_cover");
                         if (cover.size() > 0) {
@@ -103,6 +106,11 @@ public class MusicPlayerActivity extends BaseActivity implements View.OnClickLis
                         Elements album = doc.getElementsByTag("album_name");
                         if (album.size() > 0) {
                             albumName = album.get(0).text();
+                        }
+
+                        Elements song = doc.getElementsByTag("song_name");
+                        if (null != song && song.size() > 0) {
+                            songName = song.get(0).text();
                         }
 
                         Elements artist = doc.getElementsByTag("artist_name");
@@ -182,7 +190,7 @@ public class MusicPlayerActivity extends BaseActivity implements View.OnClickLis
             }
         });
 
-        String result1 = StringUtil.isEmpty(albumName) ? "未知" : albumName;
+        String result1 = StringUtil.isEmpty(songName) ? "未知" : songName;
         String result2 = StringUtil.isEmpty(artistName) ? "未知" : artistName;
 
         albumText.setText(String.format(getString(R.string.music_album_unknown), result1));

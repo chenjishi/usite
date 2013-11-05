@@ -20,6 +20,8 @@
     <string name="tips">小提示:首页手指下拉可刷新当日最新内容</string>
     <string name="video_play_failed">此视频无法播放</string>
     <string name="video_loading">视频加载中...</string>
+    <string name="updating_app">正在更新应用程序&#8230;</string>
+
 
     <string name="image_save_success">已保存至相册</string>
     <string name="image_save_fail">下载失败,请重试...</string>
@@ -31,4 +33,8 @@
     <string name="pull_to_refresh_refreshing_label">加载中…</string>
 
     <string name="connection_error">网络连接错误</string>
+
+    <string name="pull_to_refresh_pull_label">下拉刷新…</string>
+    <string name="pull_to_refresh_release_label">放开以刷新…</string>
+    <string name="pull_to_refresh_refreshing_label">正在载入…</string>
 </resources>

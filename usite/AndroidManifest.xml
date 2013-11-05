@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.chenjishi.u148"
-          android:versionCode="11"
-          android:versionName="2.1.0">
+          android:versionCode="12"
+          android:versionName="2.3.0">
     <uses-sdk android:minSdkVersion="8"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <supports-screens
             android:largeScreens="true"
@@ -27,16 +28,22 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activity.HomeActivity" android:launchMode="singleTop" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.DetailActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.CommentActivity" android:screenOrientation="portrait" android:theme="@style/WindowActivityStyle"/>
-        <activity android:name=".activity.AboutActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".activity.HomeActivity" android:launchMode="singleTop"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".activity.DetailActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
+        <activity android:name=".activity.CommentActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
+        <activity android:name=".activity.AboutActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.PuziActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.GroupActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.MusicPlayerActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.ArticleListActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".activity.ArticleListActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.LoginActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.PhotoViewActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".activity.PhotoViewActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.VideoPlayerActivity" android:screenOrientation="landscape"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
         <activity
@@ -45,5 +52,20 @@
                 android:launchMode="singleTop"
                 android:theme="@android:style/Theme.NoTitleBar"
                 android:windowSoftInputMode="stateAlwaysHidden"/>
+        <service android:name=".service.MusicService" android:exported="false"/>
+        <activity
+                android:name="net.youmi.android.AdBrowser"
+                android:configChanges="keyboard|keyboardHidden|orientation"
+                android:theme="@android:style/Theme.Light.NoTitleBar"/>
+        <service
+                android:name="net.youmi.android.AdService"
+                android:exported="false"/>
+        <receiver
+                android:name="net.youmi.android.AdReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest> 

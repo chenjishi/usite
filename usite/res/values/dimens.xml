@@ -13,4 +13,5 @@
     <dimen name="action_bar_icon_vertical_padding">4dp</dimen>
     <dimen name="action_bar_title_text_size">18dp</dimen>
     <dimen name="action_bar_subtitle_size">14dp</dimen>
+    <dimen name="padding_left">16dp</dimen>
 </resources>

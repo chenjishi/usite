@@ -16,11 +16,13 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
+import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.Response;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * A canned request for retrieving the response body at a given URL as a String.
@@ -56,6 +58,11 @@ public class StringRequest extends Request<String> {
     @Override
     protected void deliverResponse(String response) {
         mListener.onResponse(response);
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        return super.getHeaders();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Override

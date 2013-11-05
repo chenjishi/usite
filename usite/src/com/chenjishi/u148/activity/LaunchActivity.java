@@ -15,6 +15,7 @@ import com.chenjishi.u148.util.ApiUtils;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.FileUtils;
 import com.chenjishi.u148.util.UsiteConfig;
+import net.youmi.android.AdManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class LaunchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        AdManager.getInstance(this).init("2f6a7bf92577e738", "71b97b414505f38e", false);
 
         context = this;
 

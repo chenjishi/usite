@@ -1,28 +1,30 @@
 package com.chenjishi.u148.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Environment;
+import android.support.v4.widget.DrawerLayout;
+import android.util.TypedValue;
+import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.entity.FeedItem;
-import com.chenjishi.u148.pulltorefresh2.PullToRefreshAttacher;
+import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
+import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
+import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.FeedItemDataService;
-import com.chenjishi.u148.util.ApiUtils;
-import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.UIUtil;
-import com.chenjishi.u148.util.UsiteConfig;
-import com.chenjishi.u148.view.SlidingMenu;
-import com.chenjishi.u148.volley.RequestQueue;
+import com.chenjishi.u148.service.MusicService;
+import com.chenjishi.u148.util.*;
+import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.BitmapLruCache;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
-import com.chenjishi.u148.volley.toolbox.Volley;
 import com.flurry.android.FlurryAgent;
+import net.youmi.android.banner.AdSize;
+import net.youmi.android.banner.AdView;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,13 +38,14 @@ import java.util.Map;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener,
-  PullToRefreshAttacher.OnRefreshListener, AbsListView.OnScrollListener {
-    private SlidingMenu mSlideingMenu;
+public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener, View.OnClickListener,
+        PullToRefreshBase.OnRefreshListener, AbsListView.OnScrollListener,
+        Response.Listener<String>, Response.ErrorListener {
 
+    private DrawerLayout drawerLayout;
     private ListView actualListView;
     private View mEmptyView;
-    private PullToRefreshAttacher mPullToRefreshAttacher;
+    private PullToRefreshListView mPullToRefresh;
 
     private int mCurrentPage = 1;
     private int lastItemIndex;
@@ -50,14 +53,11 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     private String[] categories;
 
     private int currentCategory = 0;
-    private int menuIndex = 0;
 
     private String cacheFilePath;
     private View mFootView;
 
     private FeedListAdapter mAdapter;
-
-    private ImageLoader mImageLoader;
 
     private ArrayList<FeedItem> mFeedItems = new ArrayList<FeedItem>();
     private FeedItemDataService dataService;
@@ -75,39 +75,31 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSlideingMenu = new SlidingMenu(this);
-        mSlideingMenu.setMode(SlidingMenu.LEFT);
-        mSlideingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-        mSlideingMenu.setBehindOffsetRes(R.dimen.slide_menu_offset);
-        mSlideingMenu.setFadeDegree(1.0f);
-        mSlideingMenu.setBehindScrollScale(0.5f);
-        mSlideingMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
-        mSlideingMenu.setMenu(R.layout.slide_menu);
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        mImageLoader = new ImageLoader(requestQueue, new BitmapLruCache(this));
-
         categories = getResources().getStringArray(R.array.menu_category);
 
-        ListView menuListView = (ListView) findViewById(R.id.list_menu);
-        new MenuListAdapter(this, menuListView);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+
+        mPullToRefresh = (PullToRefreshListView) findViewById(R.id.lv_feeds);
+        actualListView = mPullToRefresh.getRefreshableView();
 
         mFootView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
         mFootView.setVisibility(View.GONE);
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
-        actualListView = (ListView) findViewById(R.id.feed_list);
         actualListView.addFooterView(mFootView);
         ((ViewGroup) actualListView.getParent()).addView(mEmptyView);
         actualListView.setEmptyView(mEmptyView);
 
-
-        mAdapter = new FeedListAdapter(this);
+        mAdapter = new FeedListAdapter();
         actualListView.setAdapter(mAdapter);
         actualListView.setOnItemClickListener(this);
         actualListView.setOnScrollListener(this);
 
-        mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
-        mPullToRefreshAttacher.addRefreshableView(actualListView, this);
+        mPullToRefresh.setOnRefreshListener(this);
+        initMenuList();
+
+        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
+        LinearLayout adLayout = (LinearLayout) findViewById(R.id.adLayout);
+        adLayout.addView(adView);
 
         setTitleText(categories[currentCategory]);
         dataService = new FeedItemDataService();
@@ -115,10 +107,49 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         cacheFilePath = getIntent().getExtras().getString("file_path");
 
         initData(cacheFilePath);
+
+        checkUpdate();
     }
 
     @Override
-    public void onRefreshStarted(View view) {
+    public void onErrorResponse(VolleyError error) {
+    }
+
+    @Override
+    public void onResponse(String response) {
+        try {
+            JSONObject dataObj = new JSONObject(response);
+
+            String fileUrl = "http://121.199.31.3:8086/ChangeBa/upload/usite.apk";
+            int versionCode = dataObj.optInt("version_code", 0);
+            String apkUrl = dataObj.optString("url", fileUrl);
+            if (CommonUtil.getVersionCode(this) < versionCode) {
+                String path;
+
+                if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                    path = Environment.getExternalStorageDirectory() + "/";
+                } else {
+                    path = AppApplication.getInstance().getCacheDir() + "/";
+                }
+
+                DownloadAPKThread apkThread = new DownloadAPKThread(apkUrl, path, "u148.apk");
+                apkThread.start();
+            }
+        } catch (JSONException e) {
+        }
+    }
+
+    private void checkUpdate() {
+        long lastCheckTime = PrefsUtil.getCheckVersionTime();
+        if (lastCheckTime == -1L || System.currentTimeMillis() > lastCheckTime) {
+            PrefsUtil.saveCheckVersionTime(System.currentTimeMillis());
+            String url = "http://121.199.31.3:8086/ChangeBa/upload/version.txt";
+            HttpUtils.get(url, this, this);
+        }
+    }
+
+    @Override
+    public void onRefresh(PullToRefreshBase refreshView) {
         dataService.clearCaches();
         if (new File(cacheFilePath).exists()) {
             FileUtils.deleteFile(cacheFilePath);
@@ -129,6 +160,12 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         }
         mCurrentPage = 1;
         loadData();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopService(new Intent(this, MusicService.class));
     }
 
     @Override
@@ -151,7 +188,11 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
 
     @Override
     protected void backIconClicked() {
-        mSlideingMenu.toggle();
+        if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        } else {
+            drawerLayout.openDrawer(Gravity.LEFT);
+        }
     }
 
     private void initData(String path) {
@@ -186,7 +227,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
                     ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("网络连接错误");
                 }
                 mFootView.setVisibility(View.GONE);
-                mPullToRefreshAttacher.setRefreshComplete();
+                mPullToRefresh.onRefreshComplete();
             }
         };
 
@@ -203,7 +244,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FeedItem item = mFeedItems.get(position);
+        FeedItem item = mFeedItems.get(position - 1);
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", item.title);
         intent.putExtra("link", item.link);
@@ -227,10 +268,10 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     class FeedListAdapter extends BaseAdapter {
-        LayoutInflater inflater;
+        private ImageLoader imageLoader;
 
-        public FeedListAdapter(Context context) {
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        public FeedListAdapter() {
+            imageLoader = HttpUtils.getImageLoader();
         }
 
         @Override
@@ -253,7 +294,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
             ViewHolder holder;
 
             if (null == view) {
-                view = inflater.inflate(R.layout.feed_list_item, null);
+                view = getLayoutInflater().inflate(R.layout.feed_list_item, null);
                 holder = new ViewHolder();
 
                 holder.ivImage = (ImageView) view.findViewById(R.id.feed_image);
@@ -264,9 +305,9 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
                 holder.tvContent = (TextView) view.findViewById(R.id.feed_content);
 
                 view.setTag(holder);
-            } else {
-                holder = (ViewHolder) view.getTag();
             }
+
+            holder = (ViewHolder) view.getTag();
 
             FeedItem mainList = mFeedItems.get(i);
 
@@ -277,7 +318,7 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
             holder.tvContent.setText(mainList.summary);
 
             final ImageView thumbImage = holder.ivImage;
-            mImageLoader.get(mainList.imageUrl, new ImageLoader.ImageListener() {
+            imageLoader.get(mainList.imageUrl, new ImageLoader.ImageListener() {
                 @Override
                 public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                     thumbImage.setImageBitmap(response.getBitmap());
@@ -301,84 +342,55 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         }
     }
 
-    class MenuListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
-        ListView listView;
-        LayoutInflater inflater;
+    @Override
+    public void onClick(View v) {
+        Integer index = (Integer) v.getTag();
+        if (null == index) return;
 
-        public MenuListAdapter(Context context, ListView listView) {
-            this.listView = listView;
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (index == 6) {
+            startActivity(new Intent(this, AboutActivity.class));
+        } else if (index == 7) {
+            startActivity(new Intent(this, ArticleListActivity.class));
+        } else {
+            mCurrentPage = 1;
+            currentCategory = index;
 
-            this.listView.setOnItemClickListener(this);
-            this.listView.setAdapter(this);
+            if (null != mFeedItems) mFeedItems.clear();
+
+            mAdapter.notifyDataSetChanged();
+            setTitleText(categories[index]);
+            loadData();
         }
+        drawerLayout.closeDrawer(Gravity.LEFT);
+    }
 
-        @Override
-        public int getCount() {
-            return categories.length;
+    private void initMenuList() {
+        LinearLayout menuLayout = (LinearLayout) findViewById(R.id.layout_menu);
+        for (int i = 0; i < categories.length; i++) {
+            menuLayout.addView(getMenuItemView(i));
+            ImageView divider = new ImageView(this);
+            divider.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+            divider.setBackgroundColor(0XFF6C6C6C);
+            menuLayout.addView(divider);
         }
+    }
 
-        @Override
-        public Object getItem(int i) {
-            return categories[i];
-        }
+    private TextView getMenuItemView(int position) {
+        TextView itemView = new TextView(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                (int) getResources().getDimension(R.dimen.action_bar_height));
+        itemView.setLayoutParams(layoutParams);
+        itemView.setGravity(Gravity.CENTER_VERTICAL);
+        itemView.setTag(position);
 
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
+        itemView.setBackgroundResource(R.drawable.highlight_bg);
+        itemView.setTextColor(0xFF000000);
+        itemView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
+        itemView.setPadding((int) getResources().getDimension(R.dimen.padding_left), 0, 0, 0);
 
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View itemView;
-            if (null == view) {
-                itemView = inflater.inflate(R.layout.menu_item, viewGroup, false);
-            } else {
-                itemView = view;
-            }
+        itemView.setText(categories[position]);
+        itemView.setOnClickListener(this);
 
-            TextView menuText = (TextView) itemView.findViewById(R.id.tag_menu);
-            if (i == menuIndex) {
-                itemView.setBackgroundResource(R.drawable.menu_selected);
-            } else {
-                itemView.setBackgroundResource(R.drawable.menu_highlight);
-            }
-            menuText.setText(categories[i]);
-
-            return itemView;
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            menuIndex = i;
-            notifyDataSetChanged();
-            mSlideingMenu.toggle();
-            switch (i) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                    mCurrentPage = 1;
-                    currentCategory = i;
-
-                    if (mFeedItems != null) {
-                        mFeedItems.clear();
-                    }
-                    mAdapter.notifyDataSetChanged();
-                    setTitleText(categories[i]);
-                    loadData();
-                    break;
-                case 6:
-                    Intent intent = new Intent(HomeActivity.this, AboutActivity.class);
-                    startActivity(intent);
-                    break;
-                case 7:
-                    Intent intent1 = new Intent(HomeActivity.this, ArticleListActivity.class);
-                    startActivity(intent1);
-                    break;
-            }
-        }
+        return itemView;
     }
 }

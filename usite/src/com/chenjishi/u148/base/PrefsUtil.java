@@ -11,11 +11,16 @@ import android.content.SharedPreferences;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefsUtil {
+
+    private static long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
+
     private static final String CONFIG_FILE_NAME = "waqu_prefs";
 
     private static final String KEY_NEXT_TOKEN = "next_from";
 
     public static final String KEY_UPDATE_TIME = "last_update_time";
+
+    public static final String KEY_CHECK_VERSION = "check_version";
 
     private static void saveStringPreference(String key, String value, Context context) {
         SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
@@ -53,5 +58,13 @@ public class PrefsUtil {
 
     public static int getNextToken() {
         return getIntPreference(KEY_NEXT_TOKEN, 0, AppApplication.getInstance());
+    }
+
+    public static void saveCheckVersionTime(long l) {
+        saveLongPreference(KEY_CHECK_VERSION, l + VERSION_CHECK_INTERVAL, AppApplication.getInstance());
+    }
+
+    public static long getCheckVersionTime() {
+        return getLongPreferences(KEY_CHECK_VERSION, -1L, AppApplication.getInstance());
     }
 }

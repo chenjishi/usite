@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -48,6 +49,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         super.onCreate();
         mPlayer = new MediaPlayer();
         mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     }
 
@@ -70,6 +72,12 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }
 
         return START_STICKY;
+    }
+
+    public void stopMusic() {
+        if (null != mPlayer && mPlayer.isPlaying()) {
+            mPlayer.stop();
+        }
     }
 
     public void togglePlayer() {
@@ -96,6 +104,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onDestroy() {
         super.onDestroy();
         if (null != mPlayer) {
+            mPlayer.stop();
             mPlayer.reset();
             mPlayer.release();
             mPlayer = null;

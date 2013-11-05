@@ -1,6 +1,7 @@
 package com.chenjishi.u148.base;
 
 import android.app.Application;
+import com.chenjishi.u148.util.HttpUtils;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +19,7 @@ public class AppApplication extends Application {
         mInstance = this;
 
         FileCache.init(this);
+        HttpUtils.init(this);
     }
 
     public static AppApplication getInstance() {

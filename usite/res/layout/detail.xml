@@ -1,24 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/background"
-              android:orientation="vertical">
-    <FrameLayout
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background">
+    <include layout="@layout/empty_view"/>
+    <WebView
+            android:id="@+id/webview_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        <include layout="@layout/empty_view"/>
-        <WebView
-                android:id="@+id/webview_content"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
+            android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
+            android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
+            android:scrollbarSize="4dp"
+            android:fadingEdge="none"
+            android:layout_marginBottom="@dimen/action_bar_height"
+            android:padding="8dp"/>
+    <RelativeLayout
+            android:id="@+id/panel_music"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/music_panel_bg"
+            android:layout_marginBottom="@dimen/action_bar_height"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:paddingTop="4dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone"
+            android:layout_gravity="bottom|center_horizontal">
+        <TextView
+                android:id="@+id/tv_song_title"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="8dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="@color/white"
+                android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/tv_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:textSize="12sp"
+            android:textColor="#FF9C9C9C"/>
+        <ProgressBar
+                android:id="@+id/pb_music_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/tv_song_title"
+                android:layout_centerVertical="true"
+                style="@android:style/Widget.ProgressBar.Small"
+                android:indeterminateDrawable="@drawable/progress_bar"/>
+        <ImageButton
+                android:id="@+id/btn_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/tv_song_title"
+                android:background="@null"
+                android:onClick="onButtonClicked"
+                android:layout_centerVertical="true"
+                android:contentDescription="@null"
                 android:visibility="gone"
-                android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
-                android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
-                android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
-                android:scrollbarSize="4dp"
-                android:fadingEdge="none"
-                android:padding="8dp"/>
-    </FrameLayout>
-</LinearLayout>
+                android:src="@drawable/ic_play"/>
+    </RelativeLayout>
+    <LinearLayout
+            android:id="@+id/ad_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/action_bar_height"
+            android:layout_gravity="bottom"/>
+</FrameLayout>

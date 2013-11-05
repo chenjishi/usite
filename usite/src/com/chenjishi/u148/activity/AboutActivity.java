@@ -29,7 +29,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mContext = this;
 
         findViewById(R.id.feedback).setOnClickListener(this);

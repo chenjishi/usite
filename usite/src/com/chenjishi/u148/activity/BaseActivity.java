@@ -2,7 +2,11 @@ package com.chenjishi.u148.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,7 +30,17 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayoutId());
+
+        LinearLayout rootView = new LinearLayout(this);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        rootView.setOrientation(LinearLayout.VERTICAL);
+
+        View contentView = LayoutInflater.from(this).inflate(getLayoutId(), null);
+        LayoutInflater.from(this).inflate(R.layout.action_bar_layout, rootView);
+        rootView.addView(contentView, layoutParams);
+
+        ((FrameLayout) findViewById(android.R.id.content)).addView(rootView, layoutParams);
 
         mTitleText = (TextView) findViewById(R.id.tag_actionbar_title);
         mMenuIcon = (ImageView) findViewById(R.id.icon_menu);
@@ -38,10 +52,18 @@ public abstract class BaseActivity extends Activity {
                 backIconClicked();
             }
         });
+
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
     }
 
     protected  void setMenuIconVisibility(boolean b) {
         mMenuIcon.setVisibility(b ? View.VISIBLE : View.GONE);
+    }
+
+    protected void setActionBarHide(boolean b) {
+        findViewById(R.id.view_action_bar).setVisibility(b ? View.GONE : View.VISIBLE);
     }
 
     protected void setMenuIcon2Visibility(boolean b) {

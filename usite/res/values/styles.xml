@@ -4,7 +4,6 @@
          <item name="dotDrawable">@drawable/gd_page_indicator_dot</item>
      </style>-->
     <style name="WindowActivityStyle" parent="FullHeightDialog">
-        <item name="android:windowBackground">@drawable/fill_box</item>
         <item name="android:windowAnimationStyle">@style/PushUpAnim</item>
     </style>
     <style name="PushUpAnim">

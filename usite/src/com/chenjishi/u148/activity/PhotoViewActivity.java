@@ -1,6 +1,5 @@
 package com.chenjishi.u148.activity;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +34,7 @@ import java.util.ArrayList;
  * Time: 上午11:30
  * To change this template use File | Settings | File Templates.
  */
-public class PhotoViewActivity extends Activity implements GestureDetector.OnGestureListener,
+public class PhotoViewActivity extends BaseActivity implements GestureDetector.OnGestureListener,
         View.OnClickListener, ViewPager.OnPageChangeListener {
     private ArrayList<String> mImageList = new ArrayList<String>();
 
@@ -51,7 +50,7 @@ public class PhotoViewActivity extends Activity implements GestureDetector.OnGes
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.photo_layout);
+        setActionBarHide(true);
 
         Bundle bundle = getIntent().getExtras();
         if (null == bundle) return;
@@ -76,6 +75,15 @@ public class PhotoViewActivity extends Activity implements GestureDetector.OnGes
         mViewPager = (ViewPager) findViewById(R.id.pager_photo);
         mViewPager.setAdapter(new PhotoPagerAdapter(this));
         mViewPager.setOnPageChangeListener(this);
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.photo_layout;
+    }
+
+    @Override
+    protected void backIconClicked() {
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.chenjishi.u148.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.DisplayMetrics;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * Time: 下午12:35
  * To change this template use File | Settings | File Templates.
  */
-public class CommentActivity extends Activity {
+public class CommentActivity extends BaseActivity {
     private ImageLoader mImageLoader;
     private ArrayList<Comment> mDataList = new ArrayList<Comment>();
     private CommentAdapter mAdapter;
@@ -37,16 +37,6 @@ public class CommentActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.comment);
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.gravity = Gravity.BOTTOM;
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = (int) (height * 0.7);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -68,6 +58,16 @@ public class CommentActivity extends Activity {
                 ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("无评论");
             }
         }
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.comment;
+    }
+
+    @Override
+    protected void backIconClicked() {
+        finish();
     }
 
     private class CommentAdapter extends BaseAdapter {

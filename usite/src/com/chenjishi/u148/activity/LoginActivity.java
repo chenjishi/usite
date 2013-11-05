@@ -1,12 +1,14 @@
 package com.chenjishi.u148.activity;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.View;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.volley.RequestQueue;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.StringRequest;
+import com.chenjishi.u148.volley.toolbox.Volley;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,46 +17,39 @@ import com.chenjishi.u148.R;
  * Time: 下午10:59
  * To change this template use File | Settings | File Templates.
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity implements Response.Listener<String>, Response.ErrorListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
 
-        WebView webView = (WebView) findViewById(R.id.login_webview);
-        webView.getSettings().setJavaScriptEnabled(true);
+    }
 
+    @Override
+    protected int getLayoutId() {
+        return R.layout.login;
+    }
 
-        webView.setWebViewClient(new WebViewClient() {
+    @Override
+    protected void backIconClicked() {
+    }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                Log.i("test", "shouldOverrideUrlLoading " + url);
-                return super.shouldOverrideUrlLoading(view, url);    //To change body of overridden methods use File | Settings | File Templates.
-            }
+    public void onButtonClicked(View view) {
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                Log.i("test", "onPageFinished " + url);
+        String url = "http://www.u148.net/usr/ajax_login.u?usr.uname=yak262@126.com&usr.password=331500311113&usr.exp=2592000&rand=0.21749974856052995";
 
-                super.onPageFinished(view, url);    //To change body of overridden methods use File | Settings | File Templates.
-            }
+        StringRequest request = new StringRequest(url, this, this);
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                Log.i("test", "onPageStarted " + url);
+        queue.add(request);
+    }
 
-                super.onPageStarted(view, url, favicon);    //To change body of overridden methods use File | Settings | File Templates.
-            }
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        Log.i("test", "error " + error);
+    }
 
-            @Override
-            public void onLoadResource(WebView view, String url) {
-                Log.i("test", "onLoadResource " + url);
-
-                super.onLoadResource(view, url);    //To change body of overridden methods use File | Settings | File Templates.
-            }
-        });
-
-        webView.loadUrl("http://www.zhihu.com/");
+    @Override
+    public void onResponse(String response) {
+        Log.i("test", "## response " + response);
     }
 }

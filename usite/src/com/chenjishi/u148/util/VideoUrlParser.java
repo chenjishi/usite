@@ -2,7 +2,6 @@ package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
 import android.util.Log;
-import com.chenjishi.u148.network.HttpUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +58,7 @@ public class VideoUrlParser {
 
         if (!TextUtils.isEmpty(vId)) {
             String[] fileUrls = null;
-            String json = HttpUtils.callAPI(String.format("http://vxml.56.com/json/%s/?src=site", vId));
+            String json = HttpUtils.getSync(String.format("http://vxml.56.com/json/%s/?src=site", vId));
             if (!TextUtils.isEmpty(json)) {
                 try {
                     JSONObject obj = new JSONObject(json);
