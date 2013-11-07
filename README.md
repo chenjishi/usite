@@ -13,5 +13,11 @@ it's a android client for www.u148.net
 ![image1](https://dl.dropboxusercontent.com/u/164391154/5.png)
 ![image1](https://dl.dropboxusercontent.com/u/164391154/6.png)
 
+##License
+(The MIT License)
+
+Copyright (c) 2013 chenjishi and other contributors
+
+
 
 
