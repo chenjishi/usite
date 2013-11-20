@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -132,9 +133,12 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        if (mBounded) unbindService(mConnection);
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBounded) {
+            unbindService(mConnection);
+            mBounded = false;
+        }
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

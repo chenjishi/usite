@@ -2,6 +2,7 @@ package com.chenjishi.u148.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,19 @@ public abstract class BaseActivity extends Activity {
 
         ((FrameLayout) findViewById(android.R.id.content)).addView(rootView, layoutParams);
 
+        int statusBarHeight = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.width = metrics.widthPixels;
+        lp.height = metrics.heightPixels - statusBarHeight;
+
         mTitleText = (TextView) findViewById(R.id.tag_actionbar_title);
         mMenuIcon = (ImageView) findViewById(R.id.icon_menu);
         mHomeIcon = (LinearLayout) findViewById(R.id.home_up);
@@ -52,10 +66,6 @@ public abstract class BaseActivity extends Activity {
                 backIconClicked();
             }
         });
-
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
     }
 
     protected  void setMenuIconVisibility(boolean b) {

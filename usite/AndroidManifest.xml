@@ -32,7 +32,7 @@
         </activity>
         <activity android:name=".activity.HomeActivity" android:launchMode="singleTop"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".activity.DetailActivity" android:screenOrientation="portrait"
+        <activity android:name=".activity.DetailActivity" android:configChanges="orientation|keyboardHidden"
                   android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.CommentActivity" android:screenOrientation="portrait"
                   android:theme="@style/WindowActivityStyle"/>
