@@ -1,5 +1,7 @@
 package com.chenjishi.u148.util;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import com.chenjishi.u148.base.AppApplication;
 import com.chenjishi.u148.base.FileCache;
@@ -75,6 +77,27 @@ public class FileUtils {
         }
     }
 
+    public static long getCachedVideoSize(Context context) {
+        String videoPath = FileCache.getVideoDirectory(context);
+        return getFileSize(new File(videoPath));
+    }
+
+    public static long getFileSize(File f) {
+        long size = 0;
+        File flist[] = f.listFiles();
+        if (flist == null) {
+            return 0;
+        }
+        for (int i = 0; i < flist.length; i++) {
+            if (flist[i].isDirectory()) {
+                size = size + getFileSize(flist[i]);
+            } else {
+                size = size + flist[i].length();
+            }
+        }
+        return size;
+    }
+
     public static String getCurrentCacheSize() {
         StringBuilder sb=new StringBuilder(6);
         String cachePath = FileCache.getImageCacheDirectory(AppApplication.getInstance());
@@ -91,23 +114,6 @@ public class FileUtils {
         return sb.toString();
     }
 
-    public static long getFileSize(File f)
-    {
-        long size = 0;
-        File flist[] = f.listFiles();
-        if (flist == null) {
-            return 0;
-        }
-        for (int i = 0; i < flist.length; i++) {
-            if (flist[i].isDirectory()) {
-                size = size + getFileSize(flist[i]);
-            } else {
-                size = size + flist[i].length();
-            }
-        }
-        return size;
-    }
-
     public static void clearCache() {
         String imageCachePath = FileCache.getImageCacheDirectory(AppApplication.getInstance());
 
@@ -118,5 +124,22 @@ public class FileUtils {
         for (File f : cachedFiles) {
             f.delete();
         }
+    }
+
+    public static byte[] bmpToByteArray(final Bitmap bmp, final boolean needRecycle) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
+        if (needRecycle) {
+            bmp.recycle();
+        }
+
+        byte[] result = output.toByteArray();
+        try {
+            output.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

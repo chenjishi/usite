@@ -5,7 +5,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.Toast;
+import com.chenjishi.u148.base.AppApplication;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,12 +22,12 @@ import android.widget.Toast;
  * To change this template use File | Settings | File Templates.
  */
 public class CommonUtil {
-    public static void showToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+    public static void showToast(String msg) {
+        Toast.makeText(AppApplication.getInstance(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    public static void showToast(Context context, int resId) {
-        Toast.makeText(context, context.getString(resId), Toast.LENGTH_SHORT).show();
+    public static void showToast(int resId) {
+        showToast(AppApplication.getInstance().getString(resId));
     }
 
     public static synchronized boolean didNetworkConnected(Context context) {
@@ -28,6 +35,20 @@ public class CommonUtil {
         if (null != conn) {
             NetworkInfo info = conn.getActiveNetworkInfo();
             if (null != info) return info.isConnected();
+        }
+        return false;
+    }
+
+    public static synchronized boolean isWifiConnected(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connManager != null) {
+            NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
+            if (networkInfo != null) {
+                int networkInfoType = networkInfo.getType();
+                if (networkInfoType == ConnectivityManager.TYPE_WIFI || networkInfoType == ConnectivityManager.TYPE_ETHERNET) {
+                    return networkInfo.isConnected();
+                }
+            }
         }
         return false;
     }
@@ -60,5 +81,40 @@ public class CommonUtil {
         }
 
         return versionCode;
+    }
+
+    public static void runWithoutMessage(final Runnable action, final Runnable postAction) {
+        final Handler handler = new Handler() {
+            public void handleMessage(Message message) {
+                postAction.run();
+            }
+        };
+
+        final Thread runner = new Thread(new Runnable() {
+            public void run() {
+                action.run();
+                handler.sendEmptyMessage(0);
+            }
+        });
+        runner.setPriority(Thread.MIN_PRIORITY);
+        runner.start();
+    }
+
+    public static String readFromAssets(Context context, String name) {
+        InputStream is;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            is = context.getAssets().open(name);
+            byte buf[] = new byte[1024];
+            int len;
+            while ((len = is.read(buf)) != -1) {
+                baos.write(buf, 0, len);
+            }
+            baos.close();
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return baos.toString();
     }
 }

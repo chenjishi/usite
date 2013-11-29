@@ -1,7 +1,7 @@
 package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
-import android.util.Log;
+import com.chenjishi.u148.entity.Video;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,19 +35,18 @@ public class VideoUrlParser {
     public static final int TYPE_TUDOU = 4;
     public static final int TYPE_56 = 5;
 
-    public static String get56VideoPath(String url) {
-        String result = null;
-        String vId = null;
+    private static String youkuJson;
 
-        Pattern pattern;
-        Matcher matcher;
+    public static Video get56VideoPath(String url) {
+        Video video = null;
 
         String regex1 = "v_(\\w+)\\.swf";
         String regex2 = "cpm_(\\w+)\\.swf";
 
-        pattern = Pattern.compile(regex1);
-        matcher = pattern.matcher(url);
+        Pattern pattern = Pattern.compile(regex1);
+        Matcher matcher = pattern.matcher(url);
 
+        String vId = null;
         if (matcher.find()) {
             vId = matcher.group(1);
         } else {
@@ -57,12 +56,18 @@ public class VideoUrlParser {
         }
 
         if (!TextUtils.isEmpty(vId)) {
+            video = new Video();
+            video.id = vId;
             String[] fileUrls = null;
             String json = HttpUtils.getSync(String.format("http://vxml.56.com/json/%s/?src=site", vId));
             if (!TextUtils.isEmpty(json)) {
                 try {
                     JSONObject obj = new JSONObject(json);
                     JSONObject dataObj = obj.getJSONObject("info");
+
+                    video.thumbUrl = dataObj.optString("img", "");
+                    video.title = dataObj.optString("Subject", "");
+
                     JSONArray arr = dataObj.getJSONArray("rfiles");
                     int len = arr.length();
                     fileUrls = new String[len];
@@ -76,11 +81,12 @@ public class VideoUrlParser {
                 }
             }
 
-            if (null != fileUrls && fileUrls.length > 0)
-                result = fileUrls[0];
+            if (null != fileUrls && fileUrls.length > 0) {
+                video.url = fileUrls[0];
+            }
         }
 
-        return result;
+        return video;
     }
 
     public static String getSinaUrl(String videoUrl) {
@@ -138,8 +144,8 @@ public class VideoUrlParser {
         return iid;
     }
 
-    public static String getYoukuUrl(String url) {
-        String result = null;
+    public static Video getYoukuUrl(String url) {
+        Video video = null;
         String vId = null;
         String regex = "sid\\/(\\w+)\\/";
         Pattern pattern = Pattern.compile(regex);
@@ -148,19 +154,33 @@ public class VideoUrlParser {
         if (matcher.find()) vId = matcher.group(1);
 
         if (!TextUtils.isEmpty(vId)) {
+            video = new Video();
+            video.id = vId;
             try {
-                ArrayList<String> urlList = parserYoukuFlv(vId);
-
-                if (null != urlList && urlList.size() > 0) result = urlList.get(0);
+                String fileUrl = parseYouku(vId);
+                if (null != fileUrl) video.url = fileUrl;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        return result;
+        if (null != youkuJson) {
+            try {
+                JSONObject obj = new JSONObject(youkuJson);
+                JSONArray dataArray = obj.getJSONArray("data");
+                if (null != dataArray && dataArray.length() > 0) {
+                    JSONObject dataObj = dataArray.getJSONObject(0);
+                    video.thumbUrl = dataObj.optString("logo", "");
+                    video.title = dataObj.optString("title", "");
+                }
+            } catch (JSONException e) {
+            }
+        }
+
+        return video;
     }
 
-    public static ArrayList<String> parserYoukuFlv(String id) throws Exception {
+    private static String parseYouku(String id) throws Exception {
         double seed = 0;
         String key1;
         String key2;
@@ -175,8 +195,8 @@ public class VideoUrlParser {
             throw new RuntimeException("请求url失败");
         InputStream is = conn.getInputStream();
         String jsonstring = readData(is, "UTF8");
+        youkuJson = jsonstring;
         conn.disconnect();
-
 
         String regexstring = "\"seed\":(\\d+),.+\"key1\":\"(\\w+)\",\"key2\":\"(\\w+)\"";
         Pattern pattern = Pattern.compile(regexstring);
@@ -230,6 +250,84 @@ public class VideoUrlParser {
         for (String path : paths) {
             rpaths.add(getLocationJump(path, false, false));
         }
+
+        if (rpaths.size() > 0) {
+            return rpaths.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public static ArrayList<String> parserYoukuFlv(String id) throws Exception {
+        double seed = 0;
+        String key1;
+        String key2;
+        String fileids = null;
+        String fileid = null;
+        ArrayList<String> K = new ArrayList<String>();
+        URL url = new URL(
+                "http://v.youku.com/player/getPlayList/VideoIDS/" + id + "/timezone/+08/version/5/source/video?n=3&ran=4656");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(6 * 1000);
+        if (conn.getResponseCode() != 200)
+            throw new RuntimeException("请求url失败");
+        InputStream is = conn.getInputStream();
+        String jsonstring = readData(is, "UTF8");
+        conn.disconnect();
+
+        String regexstring = "\"seed\":(\\d+),.+\"key1\":\"(\\w+)\",\"key2\":\"(\\w+)\"";
+        Pattern pattern = Pattern.compile(regexstring);
+        Matcher matcher = pattern.matcher(jsonstring);
+        while (matcher.find()) {
+            seed = Double.parseDouble(matcher.group(1));
+            key1 = matcher.group(2);
+            key2 = matcher.group(3);
+        }
+
+        Pattern patternf = Pattern.compile("\"streamfileids\":\\{(.+?)\\}");
+
+        Matcher matcherf = patternf.matcher(jsonstring);
+        while (matcherf.find()) {
+            fileids = matcherf.group(1);
+        }
+
+        Pattern patternfid = Pattern.compile("\"flv\":\"(.+?)\"");
+        Matcher matcherfid = patternfid.matcher(fileids);
+        while (matcherfid.find()) {
+            fileid = matcherfid.group(1);
+        }
+
+        String no = null;
+        Pattern patternc = Pattern.compile("\"flv\":\\[(.+?)\\]");
+        Matcher matcherc = patternc.matcher(jsonstring);
+        while (matcherc.find()) {
+            no = matcherc.group(0);
+        }
+
+        JSONArray array = new JSONArray(no.substring(6));
+
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject job = (JSONObject) array.get(i);
+            K.add("?K=" + job.getString("k") + ",k2:" + job.getString("k2"));
+        }
+
+        String sid = genSid();
+        //生成fileid
+        String rfileid = getFileID(fileid, seed);
+        ArrayList<String> paths = new ArrayList<String>();
+        for (int i = 0; i < K.size(); i++) {
+            //得到地址
+            String u = "http://f.youku.com/player/getFlvPath/sid/" + "00" + "_" + String.format("%02d", i) +
+                    "/st/" + "flv" + "/fileid/" + rfileid.substring(0, 8) + String.format("%02d", i)
+                    + rfileid.substring(10) + K.get(i);
+            paths.add(u);
+        }
+
+        ArrayList<String> rpaths = new ArrayList<String>();
+        for (String path : paths) {
+            rpaths.add(getLocationJump(path, false, false));
+        }
+
         return rpaths;
     }
 
@@ -306,7 +404,6 @@ public class VideoUrlParser {
             String u = "http://f.youku.com/player/getFlvPath/sid/" + genSid() + "_" + String.format("%02d", i) +
                     "/st/" + "flv" + "/fileid/" + getFileID(flvfileid, seed).substring(0, 8) + String.format("%02d", i)
                     + getFileID(flvfileid, seed).substring(10) + "?K=" + flvk;
-            Log.i("youku", u);
         }
         return id;
     }

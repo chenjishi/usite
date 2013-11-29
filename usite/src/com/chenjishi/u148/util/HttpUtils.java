@@ -2,9 +2,15 @@ package com.chenjishi.u148.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import com.chenjishi.u148.volley.AuthFailureError;
+import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.RequestQueue;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.toolbox.*;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,7 +33,7 @@ public class HttpUtils {
         mImageLoader = new ImageLoader(mRequestQueue, new BitmapLruCache((cacheSize)));
     }
 
-    private static RequestQueue getRequestQueue() {
+    public static RequestQueue getRequestQueue() {
         if (null != mRequestQueue) {
             return mRequestQueue;
         } else {
@@ -48,6 +54,10 @@ public class HttpUtils {
                            Response.ErrorListener errorListener) {
         RequestQueue queue = getRequestQueue();
         queue.add(new StringRequest(url, listener, errorListener));
+    }
+
+    public static void post(String url, Response.Listener<String> listener,
+                            Response.ErrorListener errorListener) {
     }
 
     public static String getSync(String url) {
