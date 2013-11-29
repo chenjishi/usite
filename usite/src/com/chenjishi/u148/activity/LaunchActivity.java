@@ -11,10 +11,10 @@ import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.entity.FeedItem;
 import com.chenjishi.u148.parser.FeedItemParser;
-import com.chenjishi.u148.util.ApiUtils;
+import com.chenjishi.u148.service.DownloadService;
+import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.UsiteConfig;
 import net.youmi.android.AdManager;
 
 import java.io.File;
@@ -32,7 +32,14 @@ public class LaunchActivity extends Activity {
 
         context = this;
 
-        new LoadFirstPageTask().execute(ApiUtils.BASE_URL + "/list/1.html");
+        new LoadFirstPageTask().execute(ConstantUtils.BASE_URL + "/list/1.html");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+//        Intent intent = new Intent(this, DownloadService.class);
+//        startService(intent);
     }
 
     class LoadFirstPageTask extends AsyncTask<String, Void, Boolean> {
@@ -40,14 +47,13 @@ public class LaunchActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(String... strings) {
-            long lastClearCacheTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_UPDATE_TIME,
-                    System.currentTimeMillis(), context);
+            long lastClearCacheTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_UPDATE_TIME);
             if (System.currentTimeMillis() > lastClearCacheTime) {
                 FileUtils.clearCache();
                 context.deleteDatabase("webview.db");
                 context.deleteDatabase("webviewCache.db");
                 PrefsUtil.saveLongPreference(PrefsUtil.KEY_UPDATE_TIME,
-                        System.currentTimeMillis() + TWO_DAYS, context);
+                        System.currentTimeMillis() + TWO_DAYS);
             }
 
             if (!CommonUtil.didNetworkConnected(context)) {
@@ -59,13 +65,13 @@ public class LaunchActivity extends Activity {
                 FileUtils.deleteFile(oldVersionCachePath);
             }
 
-            filePath = FileCache.getDataCacheDirectory(LaunchActivity.this) + ApiUtils.CACHED_FILE_NAME;
+            filePath = FileCache.getDataCacheDirectory(LaunchActivity.this) + ConstantUtils.CACHED_FILE_NAME;
             File cacheFile = new File(filePath);
             if (!cacheFile.exists()) {
                 ArrayList<FeedItem> feedItems = FeedItemParser.getMainList(strings[0]);
                 if (null != feedItems && feedItems.size() > 0) {
                     FileUtils.serializeObject(filePath, feedItems);
-                    UsiteConfig.saveUpdateTime(LaunchActivity.this, System.currentTimeMillis());
+//                    UsiteConfig.saveUpdateTime(LaunchActivity.this, System.currentTimeMillis());
                 }
             }
             return true;
@@ -80,7 +86,7 @@ public class LaunchActivity extends Activity {
                 startActivity(intent);
                 finish();
             } else {
-                CommonUtil.showToast(context, getString(R.string.net_error));
+                CommonUtil.showToast(getString(R.string.net_error));
             }
         }
     }

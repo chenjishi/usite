@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.UIUtil;
 
 /**
  * Created with IntelliJ IDEA.
@@ -98,9 +97,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.icon_back:
-                finish();
-                break;
             case R.id.feedback:
                 sendFeedback();
                 break;
@@ -136,7 +132,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
             progress.dismiss();
-            UIUtil.showMsg(AboutActivity.this, "清除缓存成功!");
+            CommonUtil.showToast("清除缓存成功!");
             mCacheText.setText("0KB");
         }
     }

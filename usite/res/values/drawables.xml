@@ -3,4 +3,5 @@
     <drawable name="light_gray2">#FF282725</drawable>
     <drawable name="black_0_transparent">#00000000</drawable>
     <drawable name="feed_back_color">#FFFFD060</drawable>
+    <drawable name="gray">#FF3B3B3B</drawable>
 </resources>

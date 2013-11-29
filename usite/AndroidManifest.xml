@@ -32,22 +32,26 @@
         </activity>
         <activity android:name=".activity.HomeActivity" android:launchMode="singleTop"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".activity.DetailActivity" android:configChanges="orientation|keyboardHidden"
+        <activity android:name=".activity.DetailActivity" android:configChanges="keyboardHidden|orientation|screenSize"
                   android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.CommentActivity" android:screenOrientation="portrait"
                   android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.AboutActivity" android:screenOrientation="portrait"
                   android:theme="@style/WindowActivityStyle"/>
-        <activity android:name=".activity.PuziActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.GroupActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.MusicPlayerActivity" android:screenOrientation="portrait"/>
         <activity android:name=".activity.ArticleListActivity" android:screenOrientation="portrait"
                   android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.LoginActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".activity.PhotoViewActivity" android:screenOrientation="portrait"
+        <activity android:name=".activity.ImageActivity" android:screenOrientation="portrait"
+                  android:theme="@style/WindowActivityStyle"/>
+        <activity android:name=".activity.VideoListActivity" android:screenOrientation="portrait"
                   android:theme="@style/WindowActivityStyle"/>
         <activity android:name=".activity.VideoPlayerActivity" android:screenOrientation="landscape"
+                  android:configChanges="keyboardHidden|orientation|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+         <activity android:name=".activity.VideoPlayActivity2" android:screenOrientation="landscape"
+                   android:configChanges="keyboardHidden|orientation|screenSize"
+                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
         <activity
                 android:name="io.vov.vitamio.activity.InitActivity"
                 android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
@@ -55,6 +59,7 @@
                 android:theme="@android:style/Theme.NoTitleBar"
                 android:windowSoftInputMode="stateAlwaysHidden"/>
         <service android:name=".service.MusicService" android:exported="false"/>
+        <service android:name=".service.DownloadService" android:exported="false"/>
         <activity
                 android:name="net.youmi.android.AdBrowser"
                 android:configChanges="keyboard|keyboardHidden|orientation"

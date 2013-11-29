@@ -1,18 +1,15 @@
 package com.chenjishi.u148.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.util.ApiUtils;
+import com.chenjishi.u148.util.ConstantUtils;
 import com.flurry.android.FlurryAgent;
 
 /**
@@ -22,9 +19,8 @@ import com.flurry.android.FlurryAgent;
  * Time: 下午10:30
  * To change this template use File | Settings | File Templates.
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends FragmentActivity {
     private TextView mTitleText;
-    private ImageView mMenuIcon;
     private ImageView mMenuIcon2;
     private LinearLayout mHomeIcon;
 
@@ -55,9 +51,10 @@ public abstract class BaseActivity extends Activity {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.width = metrics.widthPixels;
         lp.height = metrics.heightPixels - statusBarHeight;
+        lp.gravity = Gravity.BOTTOM;
+        getWindow().setAttributes(lp);
 
         mTitleText = (TextView) findViewById(R.id.tag_actionbar_title);
-        mMenuIcon = (ImageView) findViewById(R.id.icon_menu);
         mHomeIcon = (LinearLayout) findViewById(R.id.home_up);
         mMenuIcon2 = (ImageView) findViewById(R.id.icon_menu2);
         mHomeIcon.setOnClickListener(new View.OnClickListener() {
@@ -68,10 +65,6 @@ public abstract class BaseActivity extends Activity {
         });
     }
 
-    protected  void setMenuIconVisibility(boolean b) {
-        mMenuIcon.setVisibility(b ? View.VISIBLE : View.GONE);
-    }
-
     protected void setActionBarHide(boolean b) {
         findViewById(R.id.view_action_bar).setVisibility(b ? View.GONE : View.VISIBLE);
     }
@@ -80,8 +73,8 @@ public abstract class BaseActivity extends Activity {
         mMenuIcon2.setVisibility(b ? View.VISIBLE : View.GONE);
     }
 
-    protected void setMenuIcon(int resId) {
-        mMenuIcon.setImageResource(resId);
+    protected void setMenuIcon3Visibility(boolean b) {
+        findViewById(R.id.content_share).setVisibility(b ? View.VISIBLE : View.GONE);
     }
 
     protected void setTitleText(String s) {
@@ -99,7 +92,7 @@ public abstract class BaseActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, ApiUtils.CODE);
+        FlurryAgent.onStartSession(this, ConstantUtils.FLURRY_APP_ID);
     }
 
     @Override

@@ -12,11 +12,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.entity.Comment;
-import com.chenjishi.u148.volley.RequestQueue;
-import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.BitmapLruCache;
+import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
-import com.chenjishi.u148.volley.toolbox.Volley;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 
@@ -28,8 +30,7 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentActivity extends BaseActivity {
-    private ImageLoader mImageLoader;
-    private ArrayList<Comment> mDataList = new ArrayList<Comment>();
+    private ArrayList<Comment> comments = new ArrayList<Comment>();
     private CommentAdapter mAdapter;
 
     private View mEmptyView;
@@ -37,10 +38,9 @@ public class CommentActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.comment);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        mImageLoader = new ImageLoader(requestQueue, new BitmapLruCache(this));
 
         mAdapter = new CommentAdapter(this);
         ListView listView = (ListView) findViewById(R.id.list_comment);
@@ -48,15 +48,56 @@ public class CommentActivity extends BaseActivity {
         listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
 
-        Bundle bundle = getIntent().getExtras();
-        if (null != bundle) {
-            mDataList = bundle.getParcelableArrayList("comments");
-            if (mDataList.size() > 0) {
-                mAdapter.notifyDataSetChanged();
-            } else {
-                mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-                ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("无评论");
+        loadData();
+    }
+
+    private void loadData() {
+        Runnable action = new Runnable() {
+            @Override
+            public void run() {
+                parseContent();
             }
+        };
+
+        Runnable postAction = new Runnable() {
+            @Override
+            public void run() {
+                if (null != comments && comments.size() > 0) {
+                    mAdapter.notifyDataSetChanged();
+                } else {
+                    mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+                    ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText(getString(R.string.no_comment));
+                }
+            }
+        };
+
+        CommonUtil.runWithoutMessage(action, postAction);
+    }
+
+    private void parseContent() {
+        String content = getIntent().getStringExtra("floors");
+        if (null == content) finish();
+
+        Document doc = Jsoup.parse(content);
+        Elements items = doc.select("ul");
+        for (Element e : items) {
+            Comment comment = new Comment();
+            Elements el = e.select("li");
+            if (el.size() > 0) {
+                Element _el = el.get(0);
+
+                Element imgEl = _el.getElementsByClass("uhead").get(0);
+                comment.avatar = imgEl.attr("src");
+
+                Element userEl = _el.getElementsByClass("reply").get(0);
+                Element userInfo = userEl.getElementsByClass("uinfo").get(0);
+                comment.userName = userInfo.select("a").get(0).text();
+                comment.time = userInfo.select("span").get(0).text();
+
+                comment.content = userInfo.nextElementSibling().text();
+            }
+
+            comments.add(comment);
         }
     }
 
@@ -79,12 +120,12 @@ public class CommentActivity extends BaseActivity {
 
         @Override
         public int getCount() {
-            return mDataList.size();
+            return null == comments ? 0 : comments.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mDataList.get(position);
+            return null == comments ? null : comments.get(position);
         }
 
         @Override
@@ -104,29 +145,21 @@ public class CommentActivity extends BaseActivity {
                 holder.tagContent = (TextView) convertView.findViewById(R.id.tag_content);
 
                 convertView.setTag(holder);
-
-            } else {
-                holder = (ViewHolder) convertView.getTag();
             }
 
-            Comment comment = mDataList.get(position);
+            holder = (ViewHolder) convertView.getTag();
+
+            Comment comment = comments.get(position);
             int idx = comment.time.indexOf('┆');
             String dateString = "";
             if (idx != -1) {
                 dateString = comment.time.substring(0, idx);
             }
 
-            final ImageView avatarImage = holder.iconAvatar;
-            mImageLoader.get(comment.avatar, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    avatarImage.setImageBitmap(response.getBitmap());
-                }
+            ImageLoader imageLoader = HttpUtils.getImageLoader();
+            imageLoader.get(comment.avatar, ImageLoader.getImageListener(holder.iconAvatar,
+                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                }
-            });
             String formattedString = comment.userName + " " + "<font color='#999999'>" + dateString + "</font>";
             holder.tagUser.setText(Html.fromHtml(formattedString));
             holder.tagContent.setText(comment.content);

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">有意思吧</string>
+    <string name="app_name">有意思吧-糗事，美女，搞笑，视频</string>
+    <string name="app_name_simple">有意思吧</string>
+    <string name="app_home">首页</string>
+    <string name="app_video">影像</string>
+    <string name="app_image">图画</string>
+    <string name="app_audio">音频</string>
+    <string name="app_text">文字</string>
+    <string name="app_miscell">杂碎</string>
     <string name="loading">载入中&#8230;</string>
     <string name="usite">www.u148.net</string>
     <string name="developer">chenjishi313@gmail.com</string>
@@ -37,4 +44,20 @@
     <string name="pull_to_refresh_pull_label">下拉刷新…</string>
     <string name="pull_to_refresh_release_label">放开以刷新…</string>
     <string name="pull_to_refresh_refreshing_label">正在载入…</string>
+    <string name="share_weibo">新浪微博</string>
+    <string name="share_session">微信好友</string>
+    <string name="share_friend">微信朋友圈</string>
+    <string name="wechat_not_install">您还没有安装微信，无法使用微信分享</string>
+    <string name="weibo_not_install">您还没有安装新浪微博，无法使用微博分享</string>
+    <string name="wechat_not_support">您的微信版本过低，不支持该分享功能</string>
+    <string name="wechat_timeline_not_support">您的微信版本过低，不支持朋友圈分享</string>
+    <string name="share_title">有意思吧【%1$s】</string>
+    <string name="share_file_error">分享失败, 文件不存在</string>
+    <string name="share_error">分享失败</string>
+    <string name="share_success">分享成功</string>
+    <string name="share_image_tip">我在有意思吧分享了一张图片http://www.appchina.com/app/com.chenjishi.u148/</string>
+    <string name="video_share">有意思吧视频分享-%1$s%2$s</string>
+
+    <string name="comment">评论</string>
+    <string name="no_comment">暂无评论</string>
 </resources>

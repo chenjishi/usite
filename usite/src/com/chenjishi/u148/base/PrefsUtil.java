@@ -2,6 +2,7 @@ package com.chenjishi.u148.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import com.weibo.sdk.android.Oauth2AccessToken;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,10 +12,9 @@ import android.content.SharedPreferences;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefsUtil {
+    private static final long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
-    private static long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
-
-    private static final String CONFIG_FILE_NAME = "waqu_prefs";
+    private static final String CONFIG_FILE_NAME = "u148_prefs";
 
     private static final String KEY_NEXT_TOKEN = "next_from";
 
@@ -22,24 +22,49 @@ public class PrefsUtil {
 
     public static final String KEY_CHECK_VERSION = "check_version";
 
-    private static void saveStringPreference(String key, String value, Context context) {
+    public static final String KEY_VIDEO_UPDATE_TIME = "last_update_time";
+
+    private static final String KEY_ACESS_TOKEN = "access_token";
+    private static final String KEY_EXPIRE_IN = "expire_in";
+
+    public static void saveAccessToken(Oauth2AccessToken token) {
+        SharedPreferences.Editor editor = AppApplication.getInstance().getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+        editor.putString(KEY_ACESS_TOKEN, token.getToken());
+        editor.putLong(KEY_EXPIRE_IN, token.getExpiresTime());
+        editor.commit();
+    }
+
+    public static Oauth2AccessToken getAccessToken() {
+        Context context = AppApplication.getInstance();
+        Oauth2AccessToken token = new Oauth2AccessToken();
+        SharedPreferences prfs = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE);
+        token.setToken(prfs.getString(KEY_ACESS_TOKEN, ""));
+        token.setExpiresTime(prfs.getLong(KEY_EXPIRE_IN, 0L));
+        return token;
+    }
+
+    private static void saveStringPreference(String key, String value) {
+        Context context = AppApplication.getInstance();
         SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
         editor.putString(key, value);
         editor.commit();
     }
 
-    public static void saveLongPreference(String key, long value, Context context) {
+    public static void saveLongPreference(String key, long value) {
+        Context context = AppApplication.getInstance();
         SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
         editor.putLong(key, value);
         editor.commit();
     }
 
-    public static long getLongPreferences(String key, long defaultValue, Context context) {
-        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getLong(key, defaultValue);
+    public static long getLongPreferences(String key) {
+        Context context = AppApplication.getInstance();
+        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getLong(key, -1L);
     }
 
-    public static String getStringPreference(String key, String defaultValue, Context context) {
-        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getString(key, defaultValue);
+    public static String getStringPreference(String key) {
+        Context context = AppApplication.getInstance();
+        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getString(key, "");
     }
 
     private static void saveIntPreference(String key, int value, Context context) {
@@ -61,10 +86,10 @@ public class PrefsUtil {
     }
 
     public static void saveCheckVersionTime(long l) {
-        saveLongPreference(KEY_CHECK_VERSION, l + VERSION_CHECK_INTERVAL, AppApplication.getInstance());
+        saveLongPreference(KEY_CHECK_VERSION, l + VERSION_CHECK_INTERVAL);
     }
 
     public static long getCheckVersionTime() {
-        return getLongPreferences(KEY_CHECK_VERSION, -1L, AppApplication.getInstance());
+        return getLongPreferences(KEY_CHECK_VERSION);
     }
 }

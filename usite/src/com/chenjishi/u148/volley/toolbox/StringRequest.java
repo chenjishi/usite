@@ -62,14 +62,14 @@ public class StringRequest extends Request<String> {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return super.getHeaders();    //To change body of overridden methods use File | Settings | File Templates.
+        return super.getHeaders();
     }
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         String parsed;
         try {
-            parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
         } catch (UnsupportedEncodingException e) {
             parsed = new String(response.data);
         }

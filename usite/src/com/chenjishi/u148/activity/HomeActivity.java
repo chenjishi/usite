@@ -3,33 +3,32 @@ package com.chenjishi.u148.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.TypedValue;
-import android.view.*;
-import android.widget.*;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.AppApplication;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.entity.FeedItem;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.service.DownloadAPKThread;
-import com.chenjishi.u148.service.FeedItemDataService;
 import com.chenjishi.u148.service.MusicService;
-import com.chenjishi.u148.util.*;
+import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
-import com.flurry.android.FlurryAgent;
 import net.youmi.android.banner.AdSize;
 import net.youmi.android.banner.AdView;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,77 +37,107 @@ import java.util.Map;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends BaseActivity implements AdapterView.OnItemClickListener, View.OnClickListener,
-        PullToRefreshBase.OnRefreshListener, AbsListView.OnScrollListener,
-        Response.Listener<String>, Response.ErrorListener {
+public class HomeActivity extends BaseActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener,
+        Response.Listener<String>, Response.ErrorListener, ViewPager.OnPageChangeListener {
+
+    private ViewPager mViewPager;
+    private RadioGroup mRadioGroup;
 
     private DrawerLayout drawerLayout;
-    private ListView actualListView;
-    private View mEmptyView;
-    private PullToRefreshListView mPullToRefresh;
-
-    private int mCurrentPage = 1;
-    private int lastItemIndex;
 
     private String[] categories;
 
-    private int currentCategory = 0;
-
     private String cacheFilePath;
-    private View mFootView;
-
-    private FeedListAdapter mAdapter;
-
-    private ArrayList<FeedItem> mFeedItems = new ArrayList<FeedItem>();
-    private FeedItemDataService dataService;
-
-    private String[] urls = {
-            "/list/",
-            "/video/",
-            "/image/",
-            "/audio/",
-            "/text/",
-            "/mix/"
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.app_home);
+
+        ((ImageView) findViewById(R.id.actionbar_icon)).setImageResource(R.drawable.ic_drawer_home_pressed);
+
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+        mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
+        mRadioGroup.setOnCheckedChangeListener(this);
 
         categories = getResources().getStringArray(R.array.menu_category);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
-        mPullToRefresh = (PullToRefreshListView) findViewById(R.id.lv_feeds);
-        actualListView = mPullToRefresh.getRefreshableView();
-
-        mFootView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        mFootView.setVisibility(View.GONE);
-        mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
-        actualListView.addFooterView(mFootView);
-        ((ViewGroup) actualListView.getParent()).addView(mEmptyView);
-        actualListView.setEmptyView(mEmptyView);
-
-        mAdapter = new FeedListAdapter();
-        actualListView.setAdapter(mAdapter);
-        actualListView.setOnItemClickListener(this);
-        actualListView.setOnScrollListener(this);
-
-        mPullToRefresh.setOnRefreshListener(this);
         initMenuList();
 
         AdView adView = new AdView(this, AdSize.FIT_SCREEN);
         LinearLayout adLayout = (LinearLayout) findViewById(R.id.adLayout);
         adLayout.addView(adView);
 
-        setTitleText(categories[currentCategory]);
-        dataService = new FeedItemDataService();
+        mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
+        mViewPager.setOnPageChangeListener(this);
+        mViewPager.setCurrentItem(0);
 
-        cacheFilePath = getIntent().getExtras().getString("file_path");
+        mRadioGroup.check(R.id.radio_home);
 
-        initData(cacheFilePath);
+//        checkUpdate();
+    }
 
-        checkUpdate();
+    @Override
+    public void onPageScrolled(int i, float v, int i2) {
+    }
+
+    @Override
+    public void onPageSelected(int i) {
+        int id = -1;
+        switch (i) {
+            case 0:
+                id = R.id.radio_home;
+                break;
+            case 1:
+                id = R.id.radio_video;
+                break;
+            case 2:
+                id = R.id.radio_image;
+                break;
+            case 3:
+                id = R.id.radio_audio;
+                break;
+            case 4:
+                id = R.id.radio_text;
+                break;
+            case 5:
+                id = R.id.radio_miscell;
+                break;
+        }
+
+        mRadioGroup.check(id);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int i) {
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        int index = 1;
+        switch (checkedId) {
+            case R.id.radio_home:
+                index = 0;
+                break;
+            case R.id.radio_video:
+                index = 1;
+                break;
+            case R.id.radio_image:
+                index = 2;
+                break;
+            case R.id.radio_audio:
+                index = 3;
+                break;
+            case R.id.radio_text:
+                index = 4;
+                break;
+            case R.id.radio_miscell:
+                index = 5;
+                break;
+        }
+        mViewPager.setCurrentItem(index);
     }
 
     @Override
@@ -149,20 +178,6 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     @Override
-    public void onRefresh(PullToRefreshBase refreshView) {
-        dataService.clearCaches();
-        if (new File(cacheFilePath).exists()) {
-            FileUtils.deleteFile(cacheFilePath);
-        }
-
-        if (mFeedItems.size() > 0) {
-            mFeedItems.clear();
-        }
-        mCurrentPage = 1;
-        loadData();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         stopService(new Intent(this, MusicService.class));
@@ -174,19 +189,6 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
     }
 
     @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (SCROLL_STATE_IDLE == scrollState && lastItemIndex > mFeedItems.size() - 1) {
-            mCurrentPage++;
-            loadData();
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        lastItemIndex = firstVisibleItem + visibleItemCount - 1;
-    }
-
-    @Override
     protected void backIconClicked() {
         if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
             drawerLayout.closeDrawer(Gravity.LEFT);
@@ -195,173 +197,49 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         }
     }
 
-    private void initData(String path) {
-        if (null == path) return;
-
-        Object o = FileUtils.unserializeObject(path);
-        if (null != o) {
-            mFeedItems = (ArrayList<FeedItem>) o;
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private void loadData() {
-        mFootView.setVisibility(View.VISIBLE);
-        Runnable action = new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<FeedItem> tmpList = dataService.getFeedItemList(getUrl());
-                if (null != tmpList && tmpList.size() > 0) {
-                    mFeedItems.addAll(tmpList);
-                }
-            }
-        };
-
-        Runnable postAction = new Runnable() {
-            @Override
-            public void run() {
-                if (mFeedItems.size() > 0) {
-                    mAdapter.notifyDataSetChanged();
-                } else {
-                    mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-                    ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("网络连接错误");
-                }
-                mFootView.setVisibility(View.GONE);
-                mPullToRefresh.onRefreshComplete();
-            }
-        };
-
-        UIUtil.runWithoutMessage(action, postAction);
-    }
+//    private void initData(String path) {
+//        if (null == path) return;
+//
+//        Object o = FileUtils.unserializeObject(path);
+//        if (null != o) {
+//            mFeedItems = (ArrayList<FeedItem>) o;
+//            mAdapter.notifyDataSetChanged();
+//        }
+//    }
 
     //http://www.u148.net/list/2.html
     //http://www.u148.net/video/2.html
 
-    private String getUrl() {
-        return ApiUtils.BASE_URL + urls[currentCategory] + mCurrentPage + ".html";
-
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FeedItem item = mFeedItems.get(position - 1);
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("title", item.title);
-        intent.putExtra("link", item.link);
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("article_title", item.title);
-        params.put("article_author", item.author);
-        FlurryAgent.logEvent("read_article", params);
-
-        startActivity(intent);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        long t = UsiteConfig.getUpdateTime(this);
-        if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
-            FileUtils.deleteFile(cacheFilePath);
-        }
-        finish();
-        return true;
-    }
-
-    class FeedListAdapter extends BaseAdapter {
-        private ImageLoader imageLoader;
-
-        public FeedListAdapter() {
-            imageLoader = HttpUtils.getImageLoader();
-        }
-
-        @Override
-        public int getCount() {
-            return mFeedItems.size();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            return mFeedItems.get(i);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            ViewHolder holder;
-
-            if (null == view) {
-                view = getLayoutInflater().inflate(R.layout.feed_list_item, null);
-                holder = new ViewHolder();
-
-                holder.ivImage = (ImageView) view.findViewById(R.id.feed_image);
-                holder.tvCate = (TextView) view.findViewById(R.id.feed_type);
-                holder.tvTitle = (TextView) view.findViewById(R.id.feed_title);
-                holder.tvAuthor = (TextView) view.findViewById(R.id.feed_author);
-                holder.tvTime = (TextView) view.findViewById(R.id.feed_time);
-                holder.tvContent = (TextView) view.findViewById(R.id.feed_content);
-
-                view.setTag(holder);
-            }
-
-            holder = (ViewHolder) view.getTag();
-
-            FeedItem mainList = mFeedItems.get(i);
-
-            holder.tvCate.setText(mainList.category);
-            holder.tvTitle.setText(mainList.title);
-            holder.tvAuthor.setText(mainList.author);
-            holder.tvTime.setText(mainList.time);
-            holder.tvContent.setText(mainList.summary);
-
-            final ImageView thumbImage = holder.ivImage;
-            imageLoader.get(mainList.imageUrl, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    thumbImage.setImageBitmap(response.getBitmap());
-                }
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                }
-            });
-
-            return view;
-        }
-
-        class ViewHolder {
-            ImageView ivImage;
-            TextView tvCate;
-            TextView tvTitle;
-            TextView tvAuthor;
-            TextView tvTime;
-            TextView tvContent;
-        }
-    }
+//    @Override
+//    public boolean onKeyUp(int keyCode, KeyEvent event) {
+//        long t = UsiteConfig.getUpdateTime(this);
+//        if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
+//            FileUtils.deleteFile(cacheFilePath);
+//        }
+//        finish();
+//        return true;
+//    }
 
     @Override
     public void onClick(View v) {
+        drawerLayout.closeDrawer(Gravity.LEFT);
         Integer index = (Integer) v.getTag();
         if (null == index) return;
 
-        if (index == 6) {
-            startActivity(new Intent(this, AboutActivity.class));
-        } else if (index == 7) {
-            startActivity(new Intent(this, ArticleListActivity.class));
-        } else {
-            mCurrentPage = 1;
-            currentCategory = index;
-
-            if (null != mFeedItems) mFeedItems.clear();
-
-            mAdapter.notifyDataSetChanged();
-            setTitleText(categories[index]);
-            loadData();
+        Intent intent = new Intent();
+        switch (index) {
+            case 0:
+                intent.setClass(this, VideoListActivity.class);
+                break;
+            case 1:
+                intent.setClass(this, ArticleListActivity.class);
+                break;
+            case 2:
+                intent.setClass(this, AboutActivity.class);
+                break;
         }
-        drawerLayout.closeDrawer(Gravity.LEFT);
+
+        startActivity(intent);
     }
 
     private void initMenuList() {
@@ -392,5 +270,24 @@ public class HomeActivity extends BaseActivity implements AdapterView.OnItemClic
         itemView.setOnClickListener(this);
 
         return itemView;
+    }
+
+    private class TabsAdapter extends FragmentPagerAdapter {
+
+        public TabsAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            Bundle bundle = new Bundle();
+            bundle.putInt("category", i);
+            return Fragment.instantiate(HomeActivity.this, ItemFragment.class.getName(), bundle);
+        }
+
+        @Override
+        public int getCount() {
+            return 6;
+        }
     }
 }

@@ -12,8 +12,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.StringUtil;
-import com.chenjishi.u148.util.UIUtil;
 import com.chenjishi.u148.volley.RequestQueue;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.BitmapLruCache;
@@ -137,7 +137,7 @@ public class MusicPlayerActivity extends BaseActivity implements View.OnClickLis
             }
         };
 
-        UIUtil.runWithoutMessage(action, postAction);
+        CommonUtil.runWithoutMessage(action, postAction);
     }
 
     @Override

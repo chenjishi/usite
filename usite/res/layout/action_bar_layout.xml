@@ -12,52 +12,29 @@
             android:layout_alignParentLeft="true"
             android:background="@drawable/home_up_bg">
         <ImageView
+                android:id="@+id/actionbar_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|left"
+                android:layout_marginRight="4dp"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_ab_back"/>
-        <ImageView
+        <TextView
+                android:id="@+id/tag_actionbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_logo"
-                android:layout_marginTop="@dimen/action_bar_icon_vertical_padding"
-                android:layout_marginBottom="@dimen/action_bar_icon_vertical_padding"
-                android:layout_gravity="center"
-                android:paddingRight="4dp"
-                android:layout_marginLeft="-8dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"/>
+                android:textStyle="bold"
+                android:layout_gravity="center_vertical"
+                android:paddingRight="8dp"
+                android:textSize="@dimen/action_bar_subtitle_size"
+                android:textColor="@color/white"
+                android:text="@string/app_name_simple"/>
     </LinearLayout>
-    <TextView
-            android:id="@+id/tag_actionbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textStyle="bold"
-            android:textSize="@dimen/action_bar_subtitle_size"
-            android:textColor="@color/white"
-            android:text="@string/app_name"/>
-    <ImageView
-            android:id="@+id/icon_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/abs__ic_menu_moreoverflow_normal_holo_dark"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/home_up_bg"
-            android:paddingTop="@dimen/action_bar_icon_vertical_padding"
-            android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            android:visibility="gone"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:scaleType="fitCenter"/>
     <ImageView
             android:id="@+id/icon_menu2"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:src="@drawable/ic_comment"
-            android:layout_toLeftOf="@id/icon_menu"
             android:background="@drawable/home_up_bg"
             android:paddingTop="@dimen/action_bar_icon_vertical_padding"
             android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
@@ -65,9 +42,26 @@
             android:onClick="onButtonClicked"
             android:layout_alignParentRight="true"
             android:adjustViewBounds="true"
+            android:contentDescription="@null"
             android:visibility="gone"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:scaleType="fitCenter"/>
-
+    <ImageView
+            android:id="@+id/content_share"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/share_photo_normal"
+            android:layout_toLeftOf="@id/icon_menu2"
+            android:background="@drawable/home_up_bg"
+            android:paddingTop="@dimen/action_bar_icon_vertical_padding"
+            android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
+            android:layout_gravity="center"
+            android:onClick="onButtonClicked"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:visibility="gone"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:scaleType="fitCenter"/>
 </RelativeLayout>

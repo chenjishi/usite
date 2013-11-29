@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.entity.FeedItem;
-import com.chenjishi.u148.util.ApiUtils;
-import com.chenjishi.u148.util.UIUtil;
+import com.chenjishi.u148.util.CommonUtil;
 import com.flurry.android.FlurryAgent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -117,7 +114,7 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
                 }
             }
         };
-        UIUtil.runWithoutMessage(action, postAction);
+        CommonUtil.runWithoutMessage(action, postAction);
     }
 
     private class ArticleAdapter extends BaseAdapter {

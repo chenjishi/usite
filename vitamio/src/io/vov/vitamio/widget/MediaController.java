@@ -289,8 +289,9 @@ public class MediaController extends FrameLayout {
    */
   public void setFileName(String name) {
     mTitle = name;
-    if (mFileName != null)
-      mFileName.setText(mTitle);
+    if (mFileName != null) {
+        mFileName.setText(mTitle);
+    }
   }
 
   /**

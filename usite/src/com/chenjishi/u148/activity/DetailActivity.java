@@ -4,21 +4,31 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
+import android.os.Message;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.*;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.entity.Comment;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
-import com.chenjishi.u148.util.ApiUtils;
-import com.chenjishi.u148.util.StringUtil;
-import com.chenjishi.u148.util.UIUtil;
+import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.ShareUtils;
+import com.chenjishi.u148.view.ShareDialog;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.ImageRequest;
+import com.flurry.android.FlurryAgent;
+import com.weibo.sdk.android.WeiboException;
+import com.weibo.sdk.android.net.RequestListener;
 import net.youmi.android.banner.AdSize;
 import net.youmi.android.banner.AdView;
 import org.jsoup.Jsoup;
@@ -26,10 +36,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +47,9 @@ import java.util.ArrayList;
  * Time: 下午7:56
  * To change this template use File | Settings | File Templates.
  */
-public class DetailActivity extends BaseActivity implements MusicPlayListener {
+public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
+        Response.Listener<String>, Response.ErrorListener {
+    private static final int MSG_PARSE_SUCCESS = 1;
     private WebView mWebView;
     private JavascriptBridge mJsBridge;
     private String mUrl;
@@ -47,8 +58,9 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
 
     private String mTitle;
     private String mContent;
-    private ArrayList<String> mImageUrls = new ArrayList<String>();
-    private ArrayList<Comment> commentList = new ArrayList<Comment>();
+    private Document mDoc;
+
+    private ArrayList<String> imageList = new ArrayList<String>();
 
     private RelativeLayout mMusicPanel;
     private TextView mSongText;
@@ -58,16 +70,20 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
 
     private boolean mBounded = false;
 
+    private ShareDialog mShareDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.app_name_simple);
         AdView adView = new AdView(this, AdSize.FIT_SCREEN);
         LinearLayout adLayout = (LinearLayout) findViewById(R.id.ad_layout);
         adLayout.addView(adView);
         setMenuIcon2Visibility(true);
+        setMenuIcon3Visibility(true);
 
         Bundle bundle = getIntent().getExtras();
-        mUrl = ApiUtils.BASE_URL + bundle.getString("link");
+        mUrl = ConstantUtils.BASE_URL + bundle.getString("link");
         mTitle = bundle.getString("title");
 
         mSongText = (TextView) findViewById(R.id.tv_song_title);
@@ -87,10 +103,8 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
 
         //for debug javascript only
 //        mWebView.setWebChromeClient(new MyWebChromeClient());
-
-        loadData();
+        HttpUtils.get(mUrl, this, this);
     }
-
 
     private void initMusicPanel() {
         mSongText.setText("正在加载...");
@@ -161,9 +175,19 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
 
         switch (view.getId()) {
             case R.id.icon_menu2:
+                FlurryAgent.logEvent(ConstantUtils.EVENT_COMMENT_CLICK);
+                Element element = mDoc.getElementById("floors");
+                if (null == element) return;
+
                 Intent intent = new Intent(this, CommentActivity.class);
-                intent.putParcelableArrayListExtra("comments", commentList);
+                intent.putExtra("floors", element.html());
                 startActivity(intent);
+                break;
+            case R.id.content_share:
+                if (null == mShareDialog) {
+                    mShareDialog = new ShareDialog(this, this);
+                }
+                mShareDialog.show();
                 break;
             case R.id.btn_play:
                 if (mMusicService != null) {
@@ -187,77 +211,54 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
         finish();
     }
 
-    private void loadData() {
-        if (StringUtil.isEmpty(mUrl)) return;
-
-        Runnable action = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Document doc = Jsoup.connect(mUrl).get();
-                    Elements u148main = doc.getElementsByClass("u148main");
-                    if (u148main.size() > 0) {
-                        Elements content = u148main.get(0).getElementsByClass("u148content");
-                        if (content.size() > 0) {
-                            Elements mainContent = content.get(0).getElementsByClass("content");
-                            if (mainContent.size() > 0) {
-                                Element article = mainContent.get(0);
-
-                                Elements images = article.select("img");
-                                for (Element image : images) {
-                                    mImageUrls.add(image.attr("src"));
-                                }
-
-                                Elements videos = article.select("embed");
-                                for (Element video : videos) {
-                                    String videoUrl = video.attr("src");
-                                    video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
-                                }
-
-                                mContent = article.html();
-                                mJsBridge.setImageUrls(mImageUrls);
-                            }
-
-                            Element floors = content.get(0).getElementById("floors");
-                            Elements items = floors.select("ul");
-                            for (Element e : items) {
-                                Comment comment = new Comment();
-                                Elements el = e.select("li");
-                                if (el.size() > 0) {
-                                    Element _el = el.get(0);
-
-                                    Element imgEl = _el.getElementsByClass("uhead").get(0);
-                                    comment.avatar = imgEl.attr("src");
-
-                                    Element userEl = _el.getElementsByClass("reply").get(0);
-                                    Element userInfo = userEl.getElementsByClass("uinfo").get(0);
-                                    comment.userName = userInfo.select("a").get(0).text();
-                                    comment.time = userInfo.select("span").get(0).text();
-
-                                    comment.content = userInfo.nextElementSibling().text();
-                                }
-
-                                commentList.add(comment);
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                }
-            }
-        };
-
-        Runnable postAction = new Runnable() {
-            @Override
-            public void run() {
-                renderPage();
-            }
-        };
-
-        UIUtil.runWithoutMessage(action, postAction);
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        CommonUtil.showToast(R.string.connection_error);
     }
 
+    @Override
+    public void onResponse(String response) {
+        mDoc = Jsoup.parse(response);
+        if (null == mDoc) return;
+
+        new Thread() {
+            @Override
+            public void run() {
+                parseContent();
+                mHandler.sendEmptyMessage(MSG_PARSE_SUCCESS);
+            }
+        }.start();
+    }
+
+    private void parseContent() {
+        Elements content = mDoc.getElementsByClass("content");
+
+        if (null != content && content.size() > 0) {
+            Element article = content.get(0);
+
+            Elements images = article.select("img");
+            for (Element image : images) {
+                imageList.add(image.attr("src"));
+            }
+
+            Elements videos = article.select("embed");
+            for (Element video : videos) {
+                String videoUrl = video.attr("src");
+                video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
+            }
+            mContent = article.html();
+        }
+    }
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_PARSE_SUCCESS) renderPage();
+        }
+    };
+
     private void renderPage() {
-        String template = readFromAssets(DetailActivity.this, "usite.html");
+        String template = CommonUtil.readFromAssets(this, "usite.html");
 
         if (null != mTitle) {
             template = template.replace("{TITLE}", mTitle);
@@ -271,24 +272,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
         mWebView.setVisibility(View.VISIBLE);
     }
 
-    private String readFromAssets(Context context, String fileName) {
-        InputStream is;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            is = context.getAssets().open(fileName);
-            byte buf[] = new byte[1024];
-            int len;
-            while ((len = is.read(buf)) != -1) {
-                baos.write(buf, 0, len);
-            }
-            baos.close();
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return baos.toString();
-    }
-
     class MyWebChromeClient extends WebChromeClient {
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
@@ -298,22 +281,77 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener {
         }
     }
 
+    @Override
+    public void onShare(final int type) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(ConstantUtils.PARAM_TITLE, mTitle);
+        FlurryAgent.logEvent(ConstantUtils.EVENT_ARTICLE_SHARE, params);
+
+        final String title = String.format(getString(R.string.share_title), mTitle);
+
+        if (type == ShareUtils.SHARE_WEIBO) {
+            shareToWeibo(title);
+            mShareDialog.dismiss();
+            return;
+        }
+
+        if (null != imageList && imageList.size() > 0) {
+            ImageRequest request = new ImageRequest(imageList.get(0), new Response.Listener<Bitmap>() {
+                @Override
+                public void onResponse(Bitmap response) {
+
+                    if (null != response) {
+                        ShareUtils.shareWebpage(DetailActivity.this, mUrl, type, title, response);
+                    } else {
+                        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+                        ShareUtils.shareWebpage(DetailActivity.this, mUrl, type, title, icon);
+                    }
+                }
+            }, 0, 0, null, null);
+
+            HttpUtils.getRequestQueue().add(request);
+        } else {
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+            ShareUtils.shareWebpage(this, mUrl, type, title, icon);
+        }
+
+        mShareDialog.dismiss();
+    }
+
+    private void shareToWeibo(String title) {
+        String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
+        ShareUtils.shareToWeibo(this, title + mUrl, null, imageUrl, new RequestListener() {
+            @Override
+            public void onComplete(String s) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommonUtil.showToast(R.string.share_success);
+                    }
+                });
+            }
+
+            @Override
+            public void onIOException(IOException e) {
+            }
+
+            @Override
+            public void onError(WeiboException e) {
+            }
+        });
+    }
+
     private class JavascriptBridge {
         private Context mContext;
-        private ArrayList<String> mImageUrls = new ArrayList<String>();
 
         public JavascriptBridge(Context context) {
             mContext = context;
         }
 
-        public void setImageUrls(ArrayList<String> imageUrls) {
-            mImageUrls = imageUrls;
-        }
-
         public void onImageClick(String src) {
-            Intent intent = new Intent(mContext, PhotoViewActivity.class);
+            Intent intent = new Intent(mContext, ImageActivity.class);
             intent.putExtra("imgsrc", src);
-            intent.putStringArrayListExtra("images", mImageUrls);
+            intent.putStringArrayListExtra("images", imageList);
             mContext.startActivity(intent);
         }
 
