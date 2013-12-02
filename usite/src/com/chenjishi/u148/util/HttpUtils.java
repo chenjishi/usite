@@ -49,19 +49,7 @@ public class HttpUtils {
         }
     }
 
-    public static void get(String url,
-                           Response.Listener<String> listener,
-                           Response.ErrorListener errorListener) {
-        RequestQueue queue = getRequestQueue();
-        queue.add(new StringRequest(url, listener, errorListener));
-    }
-
-    public static void post(String url, Response.Listener<String> listener,
-                            Response.ErrorListener errorListener) {
-    }
-
     public static String getSync(String url) {
-
         RequestFuture<String> f = RequestFuture.newFuture();
         StringRequest req = new StringRequest(url, f, f);
         RequestQueue queue = getRequestQueue();
@@ -73,5 +61,16 @@ public class HttpUtils {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public static void get(String url,
+                           Response.Listener<String> listener,
+                           Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        queue.add(new StringRequest(url, listener, errorListener));
+    }
+
+    public static void post(String url, Response.Listener<String> listener,
+                            Response.ErrorListener errorListener) {
     }
 }

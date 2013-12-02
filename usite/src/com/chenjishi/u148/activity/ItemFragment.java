@@ -11,11 +11,14 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.adapter.FeedListAdapter;
+import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.entity.FeedItem;
+import com.chenjishi.u148.parser.FeedItemParser;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.FileUtils;
 
 import java.util.ArrayList;
 
@@ -94,12 +97,9 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     public void onRefresh(PullToRefreshBase refreshView) {
         DataCacheService.getInstance().clearCaches();
 
-//        if (new File(cacheFilePath).exists()) {
-//            FileUtils.deleteFile(cacheFilePath);
-//        }
-
         if (feedItems.size() > 0) {
             feedItems.clear();
+            listAdapter.notifyDataSetChanged();
         }
         currentPage = 1;
         loadData();
@@ -108,7 +108,30 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (!dataLoaded) loadData();
+        if (!dataLoaded) {
+            if (0 == category) {
+                loadCacheData();
+            } else {
+                loadData();
+            }
+        }
+    }
+
+    private void loadCacheData() {
+        String path = FileCache.getDataCacheDirectory(getActivity()) + ConstantUtils.CACHED_FILE_NAME;
+        final String data = FileUtils.readFromFile(path);
+        if (null != data) {
+            new Thread(){
+                @Override
+                public void run() {
+                    ArrayList<FeedItem> tmpList = FeedItemParser.parseFeedList(data);
+                    if (null != tmpList && tmpList.size() > 0) {
+                        feedItems.addAll(tmpList);
+                    }
+                    mHandler.sendEmptyMessage(MSG_LOAD_OK);
+                }
+            }.start();
+        }
     }
 
     private Handler mHandler = new Handler() {

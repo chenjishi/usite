@@ -4,13 +4,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.view.*;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.ConstantUtils;
 import com.flurry.android.FlurryAgent;
+import net.youmi.android.banner.AdSize;
+import net.youmi.android.banner.AdView;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,15 +28,21 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
 
         LinearLayout rootView = new LinearLayout(this);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
         rootView.setOrientation(LinearLayout.VERTICAL);
+        rootView.setBackgroundColor(0xFFE6E6E6);
+
+        LayoutInflater.from(this).inflate(R.layout.action_bar_layout, rootView);
 
         View contentView = LayoutInflater.from(this).inflate(getLayoutId(), null);
-        LayoutInflater.from(this).inflate(R.layout.action_bar_layout, rootView);
-        rootView.addView(contentView, layoutParams);
+        rootView.addView(contentView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                0, 1.0f));
 
-        ((FrameLayout) findViewById(android.R.id.content)).addView(rootView, layoutParams);
+        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
+        rootView.addView(adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        ((FrameLayout) findViewById(android.R.id.content)).addView(rootView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
         int statusBarHeight = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -79,6 +84,16 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected void setTitleText(String s) {
         mTitleText.setText(s);
+    }
+
+    protected void setTitleText2(String s) {
+        TextView textView = (TextView) findViewById(R.id.title);
+        textView.setText(s);
+        textView.setVisibility(View.VISIBLE);
+    }
+
+    protected void setTitleText2(int resId) {
+        setTitleText2(getString(resId));
     }
 
     protected void setTitleText(int res) {

@@ -7,20 +7,15 @@
               android:paddingTop="8dp"
               android:paddingRight="8dp"
               android:paddingBottom="8dp">
-    <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+    <ImageView
+            android:id="@+id/feed_image"
+            android:layout_width="70dp"
+            android:layout_height="76dp"
+            android:background="@drawable/pictrue_bg"
+            android:padding="4dp"
             android:layout_marginRight="8dp"
-            android:background="@drawable/pictrue_bg">
-        <ImageView
-                android:id="@+id/feed_image"
-                android:layout_width="70dp"
-                android:layout_height="76dp"
-                android:background="@drawable/pictrue_bg"
-                android:scaleType="centerCrop"
-                android:layout_margin="4dp"/>
-
-    </LinearLayout>
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"/>
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:orientation="vertical">

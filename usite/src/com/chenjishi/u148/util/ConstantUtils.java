@@ -8,11 +8,12 @@ package com.chenjishi.u148.util;
  * To change this template use File | Settings | File Templates.
  */
 public class ConstantUtils {
-    public static final String FLURRY_APP_ID = "xxxxxx";
-    public static final String WX_APP_ID = "xxxxxx";
-    public static final String WEIBO_APP_KEY = "xxxxxx";
+    public static final String FLURRY_APP_ID = "YYHS4STVXPMH6Y9GJ8WD";
+    public static final String WX_APP_ID = "wx528333d34f73c7b3";
+    public static final String WEIBO_APP_KEY = "3818409765";
     public static final String BASE_URL = "http://www.u148.net";
-    public static final String CACHED_FILE_NAME = "u148.obj";
+
+    public static final String CACHED_FILE_NAME = "u148.txt";
 
     public static final String DOWNLOAD_STATUS_ACTION = "com.waqu.android.DOWNLOAD_STATUS";
 

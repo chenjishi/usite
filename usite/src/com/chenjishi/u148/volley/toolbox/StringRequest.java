@@ -16,12 +16,14 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
+import android.util.Log;
 import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.Response;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -62,17 +64,13 @@ public class StringRequest extends Request<String> {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return super.getHeaders();
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6");
+        return headers;
     }
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        String parsed;
-        try {
-                parsed = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-        } catch (UnsupportedEncodingException e) {
-            parsed = new String(response.data);
-        }
-        return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+        return Response.success(new String(response.data), HttpHeaderParser.parseCacheHeaders(response));
     }
 }

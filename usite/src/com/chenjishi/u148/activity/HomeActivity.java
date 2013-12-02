@@ -12,21 +12,19 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.AppApplication;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
-import net.youmi.android.banner.AdSize;
-import net.youmi.android.banner.AdView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,14 +45,10 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
 
     private String[] categories;
 
-    private String cacheFilePath;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitleText(R.string.app_home);
-
-        ((ImageView) findViewById(R.id.actionbar_icon)).setImageResource(R.drawable.ic_drawer_home_pressed);
+        setActionBarHide(true);
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
@@ -66,21 +60,21 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
 
         initMenuList();
 
-        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
-        LinearLayout adLayout = (LinearLayout) findViewById(R.id.adLayout);
-        adLayout.addView(adView);
-
         mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
         mViewPager.setOnPageChangeListener(this);
         mViewPager.setCurrentItem(0);
 
         mRadioGroup.check(R.id.radio_home);
 
-//        checkUpdate();
+        checkUpdate();
     }
 
     @Override
     public void onPageScrolled(int i, float v, int i2) {
+    }
+
+    @Override
+    protected void backIconClicked() {
     }
 
     @Override
@@ -188,37 +182,13 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         return R.layout.home;
     }
 
-    @Override
-    protected void backIconClicked() {
+    public void onDrawerButtonClicked(View v) {
         if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
             drawerLayout.closeDrawer(Gravity.LEFT);
         } else {
             drawerLayout.openDrawer(Gravity.LEFT);
         }
     }
-
-//    private void initData(String path) {
-//        if (null == path) return;
-//
-//        Object o = FileUtils.unserializeObject(path);
-//        if (null != o) {
-//            mFeedItems = (ArrayList<FeedItem>) o;
-//            mAdapter.notifyDataSetChanged();
-//        }
-//    }
-
-    //http://www.u148.net/list/2.html
-    //http://www.u148.net/video/2.html
-
-//    @Override
-//    public boolean onKeyUp(int keyCode, KeyEvent event) {
-//        long t = UsiteConfig.getUpdateTime(this);
-//        if (System.currentTimeMillis() - t >= UsiteConfig.FOUR_HOURS) {
-//            FileUtils.deleteFile(cacheFilePath);
-//        }
-//        finish();
-//        return true;
-//    }
 
     @Override
     public void onClick(View v) {
@@ -246,10 +216,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.layout_menu);
         for (int i = 0; i < categories.length; i++) {
             menuLayout.addView(getMenuItemView(i));
-            ImageView divider = new ImageView(this);
-            divider.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
-            divider.setBackgroundColor(0XFF6C6C6C);
-            menuLayout.addView(divider);
         }
     }
 
@@ -262,7 +228,7 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         itemView.setTag(position);
 
         itemView.setBackgroundResource(R.drawable.highlight_bg);
-        itemView.setTextColor(0xFF000000);
+        itemView.setTextColor(0xFFDEDEDE);
         itemView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
         itemView.setPadding((int) getResources().getDimension(R.dimen.padding_left), 0, 0, 0);
 
@@ -289,5 +255,11 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         public int getCount() {
             return 6;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        DataCacheService.getInstance().clearCaches();
     }
 }

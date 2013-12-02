@@ -26,6 +26,24 @@ public class PrefsUtil {
 
     private static final String KEY_ACESS_TOKEN = "access_token";
     private static final String KEY_EXPIRE_IN = "expire_in";
+    private static final String KEY_CACHE_CLEAR_TIME = "cache_clear_time";
+    private static final String KEY_CACHE_UPDATE_TIME = "cache_update_time";
+
+    public static void setCacheUpdateTime(long t) {
+        saveLongPreference(KEY_CACHE_UPDATE_TIME, t);
+    }
+
+    public static long getCacheUpdateTime() {
+        return getLongPreferences(KEY_CACHE_UPDATE_TIME);
+    }
+
+    public static void setClearCacheTime(long t) {
+        saveLongPreference(KEY_CACHE_CLEAR_TIME, t);
+    }
+
+    public static long getClearCacheTime() {
+        return getLongPreferences(KEY_CACHE_CLEAR_TIME);
+    }
 
     public static void saveAccessToken(Oauth2AccessToken token) {
         SharedPreferences.Editor editor = AppApplication.getInstance().getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();

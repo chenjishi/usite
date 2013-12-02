@@ -7,6 +7,7 @@
     <string name="app_image">图画</string>
     <string name="app_audio">音频</string>
     <string name="app_text">文字</string>
+    <string name="app_latest">最新文章</string>
     <string name="app_miscell">杂碎</string>
     <string name="loading">载入中&#8230;</string>
     <string name="usite">www.u148.net</string>
@@ -60,4 +61,6 @@
 
     <string name="comment">评论</string>
     <string name="no_comment">暂无评论</string>
+    <string name="occupied_size">緩存視頻占用%1$s</string>
+    <string name="video">視頻</string>
 </resources>

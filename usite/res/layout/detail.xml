@@ -3,8 +3,7 @@
 <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/background">
+        android:layout_height="match_parent">
     <include layout="@layout/empty_view"/>
     <WebView
             android:id="@+id/webview_content"
@@ -16,7 +15,6 @@
             android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
             android:scrollbarSize="4dp"
             android:fadingEdge="none"
-            android:layout_marginBottom="@dimen/action_bar_height"
             android:padding="8dp"/>
     <RelativeLayout
             android:id="@+id/panel_music"
@@ -69,9 +67,4 @@
                 android:visibility="gone"
                 android:src="@drawable/ic_play"/>
     </RelativeLayout>
-    <LinearLayout
-            android:id="@+id/ad_layout"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/action_bar_height"
-            android:layout_gravity="bottom"/>
 </FrameLayout>

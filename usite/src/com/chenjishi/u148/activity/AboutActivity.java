@@ -28,6 +28,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.about);
         mContext = this;
 
         findViewById(R.id.feedback).setOnClickListener(this);
@@ -44,7 +45,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         @Override
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            String size = FileUtils.getCurrentCacheSize();
+            String size = FileUtils.getImageCacheSize();
             Message msg = Message.obtain();
             msg.obj = size;
             msg.what = 1;

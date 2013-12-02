@@ -98,10 +98,19 @@ public class FileUtils {
         return size;
     }
 
-    public static String getCurrentCacheSize() {
-        StringBuilder sb=new StringBuilder(6);
+    public static String getVideoCacheSize() {
+        String cachePath = FileCache.getVideoDirectory(AppApplication.getInstance());
+        return getCurrentCacheSize(cachePath);
+    }
+
+    public static String getImageCacheSize() {
         String cachePath = FileCache.getImageCacheDirectory(AppApplication.getInstance());
-        double size=getFileSize(new File(cachePath));
+        return getCurrentCacheSize(cachePath);
+    }
+
+    private static String getCurrentCacheSize(String path) {
+        StringBuilder sb=new StringBuilder(6);
+        double size=getFileSize(new File(path));
         DecimalFormat df = new DecimalFormat();
         df.applyPattern( "0.00");
         if(size<(1024*1024)){
@@ -141,5 +150,45 @@ public class FileUtils {
         }
 
         return result;
+    }
+
+    public static void writeToFile(String fileName, String data) {
+        BufferedWriter writer = null;
+
+        try {
+            File outFile = new File(fileName);
+
+            writer = new BufferedWriter(new FileWriter(outFile));
+            writer.write(data);
+        } catch (IOException e) {
+
+        } finally {
+            try {
+                if (null != writer) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    public static String readFromFile(String filePath) {
+        File inFile = new File(filePath);
+        if (!inFile.exists())
+            return null;
+
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(inFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+        }
+
+        return sb.toString();
     }
 }

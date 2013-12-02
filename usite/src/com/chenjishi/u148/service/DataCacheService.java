@@ -34,7 +34,7 @@ public class DataCacheService {
         if (null != caches.get(url)) {
             return caches.get(url);
         } else {
-            ArrayList<FeedItem> newItems = FeedItemParser.getMainList(url);
+            ArrayList<FeedItem> newItems = FeedItemParser.getFeedList(url);
             if (null != newItems) {
                 caches.put(url, newItems);
                 return newItems;

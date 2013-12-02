@@ -1,5 +1,6 @@
 package com.chenjishi.u148.activity;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,18 +9,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.adapter.VideoListAdapter;
 import com.chenjishi.u148.base.DatabaseHelper;
+import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.entity.Video;
 import com.chenjishi.u148.util.ConstantUtils;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.chenjishi.u148.util.FileUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -29,26 +32,45 @@ import java.util.ArrayList;
  * Time: 下午11:14
  * To change this template use File | Settings | File Templates.
  */
-public class VideoListActivity extends BaseActivity implements AdapterView.OnItemClickListener {
-    private ArrayList<Video> mVideoList = new ArrayList<Video>();
+public class VideoListActivity extends BaseActivity {
+    private static final int MSG_CLEAR_ALL = 222;
 
-    private ListView mListView;
-    private VideoAdapter mAdapter;
+    private ArrayList<Video> mVideoList = new ArrayList<Video>();
+    private VideoListAdapter mAdapter;
+
+    private DatabaseHelper mDatabase;
+
+    private View mEmptyView;
+
+    private String mDiskOccupiedSize;
+
+    private ProgressDialog mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.video);
 
-        mListView = (ListView) findViewById(R.id.list_videos);
-        mAdapter = new VideoAdapter(this);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
+        ImageView clearBtn = ((ImageView) findViewById(R.id.icon_menu2));
+        clearBtn.setImageResource(R.drawable.ic_clear);
+        clearBtn.setVisibility(View.VISIBLE);
 
-        mVideoList = DatabaseHelper.getInstance(this).loadAll(DatabaseHelper.TB_NAME_VIDEOS);
-        Log.i("test", "on create size" + mVideoList.size());
-        if (null != mVideoList && mVideoList.size() > 0) {
-            mAdapter.notifyDataSetChanged();
-        }
+        mEmptyView = getLayoutInflater().inflate(R.layout.empty_view, null);
+        ListView listView = (ListView) findViewById(R.id.list_videos);
+        ((ViewGroup) listView.getParent()).addView(mEmptyView);
+        listView.setEmptyView(mEmptyView);
+        mAdapter = new VideoListAdapter(this, listView);
+
+        mDatabase = DatabaseHelper.getInstance(this);
+
+        new Thread(){
+            @Override
+            public void run() {
+                mVideoList = mDatabase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
+                mDiskOccupiedSize = FileUtils.getVideoCacheSize();
+                mHandler.sendEmptyMessage(ConstantUtils.MSG_DOWNLOAD_SUCCESS);
+            }
+        }.start();
     }
 
     @Override
@@ -69,68 +91,54 @@ public class VideoListActivity extends BaseActivity implements AdapterView.OnIte
         return R.layout.activity_video_list;
     }
 
+    private void clearAll() {
+        String videoCachePath = FileCache.getVideoDirectory(this);
+        File[] flists = new File(videoCachePath).listFiles();
+
+        if (null == flists || flists.length == 0) return;
+
+        for (File f : flists) f.delete();
+
+        for (Video video : mVideoList) {
+            mDatabase.deleteVideo(video.id, DatabaseHelper.TB_NAME_VIDEOS);
+            mDatabase.deleteVideo(video.id, DatabaseHelper.TB_NAME_LINKS);
+        }
+        mDiskOccupiedSize = FileUtils.getVideoCacheSize();
+    }
+
     @Override
     protected void backIconClicked() {
         finish();
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, VideoPlayActivity2.class);
-        intent.putExtra("url", mVideoList.get(position).localPath);
-        startActivity(intent);
-    }
-
-    private class VideoAdapter extends BaseAdapter {
-        private Context mContext;
-        private LayoutInflater mInflater;
-
-        public VideoAdapter(Context context) {
-            mContext = context;
-            mInflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+    public void onButtonClicked(View view) {
+        if (null == mProgress) {
+            mProgress = new ProgressDialog(this);
+            mProgress.setCancelable(false);
+            mProgress.setMessage("正在清理");
         }
 
-        @Override
-        public int getCount() {
-            return mVideoList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mVideoList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View itemView;
-            if (null == convertView) {
-                convertView = mInflater.inflate(R.layout.video_list_cell, null);
+        mProgress.show();
+        new Thread(){
+            @Override
+            public void run() {
+                clearAll();
+                mHandler.sendEmptyMessage(MSG_CLEAR_ALL);
             }
-
-            itemView = convertView;
-
-            Video video = mVideoList.get(position);
-            ((TextView) itemView.findViewById(R.id.video_title)).setText(video.title);
-
-            final ImageView imageView = (ImageView) itemView.findViewById(R.id.video_thumb);
-            ImageLoader imageLoader = HttpUtils.getImageLoader();
-            imageLoader.get(video.thumbUrl, ImageLoader.getImageListener(imageView, R.drawable.icon, R.drawable.image_bg));
-
-            return itemView;
-        }
+        }.start();
     }
 
-    private int count;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     private final BroadcastReceiver mHandleDownloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             int msgCode = intent.getIntExtra(ConstantUtils.KEY_MESSAGE_TYPE, ConstantUtils.MSG_NO_UPDATE);
-            count = intent.getIntExtra(ConstantUtils.KEY_VIDEO_SIZE, 0);
+            mDiskOccupiedSize = FileUtils.getVideoCacheSize();
 
             mHandler.sendEmptyMessage(msgCode);
         }
@@ -143,10 +151,21 @@ public class VideoListActivity extends BaseActivity implements AdapterView.OnIte
                 if (null != mVideoList && mVideoList.size() > 0)
                     mVideoList.clear();
 
-                mVideoList = DatabaseHelper.getInstance(VideoListActivity.this).loadAll(DatabaseHelper.TB_NAME_VIDEOS);
-                if (null != mVideoList && mVideoList.size() > 0)
-                    mAdapter.notifyDataSetChanged();
+                mVideoList = mDatabase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
+                if (null != mVideoList && mVideoList.size() > 0) {
+                    mAdapter.dataChange(mVideoList);
+                }
+            } else if (MSG_CLEAR_ALL == msg.what){
+                if (null != mVideoList && mVideoList.size() > 0) {
+                    mVideoList.clear();
+                }
+
+                mAdapter.dataChange(mVideoList);
+                mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+                ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("清理完畢，有新視頻更新會自動下載");
+                mProgress.dismiss();
             }
+            setTitleText2(String.format(getString(R.string.occupied_size), mDiskOccupiedSize));
         }
     };
 }

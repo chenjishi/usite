@@ -57,7 +57,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_URL + " TEXT," +
                 COL_LOCAL_PATH + " TEXT, " +
                 COL_UPDATE_TIME + " INTEGER," +
-                COL_WATCHED_TIME + " INTEGER)");
+                COL_WATCHED_TIME + " INTEGER," +
+                " UNIQUE (" + COL_ID + ") ON CONFLICT REPLACE)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TB_NAME_VIDEOS + " (" +
                 COL_ID + " TEXT," +
@@ -67,10 +68,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_URL + " TEXT," +
                 COL_LOCAL_PATH + " TEXT, " +
                 COL_UPDATE_TIME + " INTEGER," +
-                COL_WATCHED_TIME + " INTEGER)");
+                COL_WATCHED_TIME + " INTEGER," +
+                " UNIQUE (" + COL_ID + ") ON CONFLICT REPLACE)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TB_NAME_HISTORY + " (" +
-                COL_ID + " TEXT)");
+                COL_ID + " TEXT, " +
+                COL_TITLE + " TEXT, UNIQUE (" + COL_ID + ") ON CONFLICT REPLACE)");
     }
 
     @Override
@@ -127,18 +130,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void insertVideoId(String id) {
-        String sql = "INSERT OR REPLACE INTO " + TB_NAME_HISTORY +
-                " VALUES (?)";
+    public void insertVideoId(String id, String title) {
+        String sql = "INSERT INTO " + TB_NAME_HISTORY +
+                " VALUES (?, ?)";
 
-        mDatabase.execSQL(sql, new String[]{id});
+        mDatabase.execSQL(sql, new String[]{id, title});
     }
 
     public void insert(Video video, String tableName) {
         if (null == video) return;
-
-        boolean isExist = isExist(video.id, tableName);
-        if (isExist) return;
 
         String sql = "INSERT OR REPLACE INTO " + tableName +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -159,12 +159,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         HashMap<String, String> idHashMap = null;
         Cursor cursor = null;
 
-        String sql = "SELECT " + COL_ID + " FROM " + TB_NAME_HISTORY;
+        String sql = "SELECT " + COL_TITLE + ", " + COL_ID + " FROM " + TB_NAME_HISTORY;
         try {
             cursor = mDatabase.rawQuery(sql, null);
             idHashMap = new HashMap<String, String>();
             while (cursor.moveToNext()) {
-                idHashMap.put(String.valueOf(cursor.getLong(0)), "value");
+                String title = cursor.getString(0);
+                String id = cursor.getString(1);
+                idHashMap.put(id, title);
             }
         } finally {
             if (null != cursor) cursor.close();

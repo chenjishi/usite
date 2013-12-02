@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import com.chenjishi.u148.base.DatabaseHelper;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
@@ -95,13 +94,13 @@ public class DownloadService extends Service {
 
     private void checkVideoUpdate() {
         videoList = dataBase.loadAll(DatabaseHelper.TB_NAME_LINKS);
-        for (Video v : videoList)
-            Log.i("test", "id " + v.id );
+
         if (null == videoList || videoList.size() == 0) {
-            videoList = YouKuParser.parseVideoList();
-            Log.i("test", "size " + videoList.size());
+            String html = HttpUtils.getSync("http://fun.youku.com/");
+            videoList = VideoParser.parseVideoList(html);
             if (null != videoList && videoList.size() > 0) {
                 HashMap<String, String> historyIds = dataBase.loadHistoryIds();
+
                 ArrayList<Video> tmpList = new ArrayList<Video>();
 
                 if (null != historyIds && historyIds.size() > 0) {
@@ -133,7 +132,6 @@ public class DownloadService extends Service {
                     for (Video video : downloadList) {
                         dataBase.deleteVideo(video.id, DatabaseHelper.TB_NAME_VIDEOS);
                         FileUtils.deleteFile(video.localPath);
-                        Log.i("test", "deleted " + video.localPath);
                     }
                 }
                 PrefsUtil.saveLongPreference(PrefsUtil.KEY_VIDEO_UPDATE_TIME, System.currentTimeMillis() + DAY);
@@ -159,7 +157,6 @@ public class DownloadService extends Service {
     }
 
     private void startDownload() {
-        Log.i("test", "startDownload");
         downloading = true;
         currentVideo = getNext();
         while (null != currentVideo && !stopFlag) {
@@ -181,7 +178,7 @@ public class DownloadService extends Service {
 
                 dataBase.insert(currentVideo, DatabaseHelper.TB_NAME_VIDEOS);
                 dataBase.deleteVideo(currentVideo.id, DatabaseHelper.TB_NAME_LINKS);
-                dataBase.insertVideoId(currentVideo.id);
+                dataBase.insertVideoId(currentVideo.id, currentVideo.title);
                 sendStatusBroadcast(ConstantUtils.MSG_DOWNLOAD_SUCCESS);
             } else {
                 dataBase.deleteVideo(currentVideo.id, DatabaseHelper.TB_NAME_LINKS);
@@ -246,7 +243,6 @@ public class DownloadService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i("test", "onDestroy");
         super.onDestroy();
         stopFlag = true;
         downloading = false;

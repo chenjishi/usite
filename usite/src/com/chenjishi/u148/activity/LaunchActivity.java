@@ -9,85 +9,76 @@ import android.view.View;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.entity.FeedItem;
-import com.chenjishi.u148.parser.FeedItemParser;
 import com.chenjishi.u148.service.DownloadService;
-import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.FileUtils;
 import net.youmi.android.AdManager;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
 
 public class LaunchActivity extends Activity {
     private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+    private static final long TWO_HOURS = 2 * 60 * 60 * 1000;
     private Context context;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        findViewById(android.R.id.content).setBackgroundColor(0xFFE3E3E3);
         AdManager.getInstance(this).init("2f6a7bf92577e738", "71b97b414505f38e", false);
 
         context = this;
-
-        new LoadFirstPageTask().execute(ConstantUtils.BASE_URL + "/list/1.html");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        Intent intent = new Intent(this, DownloadService.class);
-//        startService(intent);
+        new LoadTask().execute();
+        Intent intent = new Intent(this, DownloadService.class);
+        startService(intent);
     }
 
-    class LoadFirstPageTask extends AsyncTask<String, Void, Boolean> {
-        String filePath;
+    private class LoadTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(String... strings) {
-            long lastClearCacheTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_UPDATE_TIME);
+        protected Boolean doInBackground(Void... params) {
+            //clear cache of 2 days before
+            long lastClearCacheTime = PrefsUtil.getClearCacheTime();
             if (System.currentTimeMillis() > lastClearCacheTime) {
                 FileUtils.clearCache();
                 context.deleteDatabase("webview.db");
                 context.deleteDatabase("webviewCache.db");
-                PrefsUtil.saveLongPreference(PrefsUtil.KEY_UPDATE_TIME,
-                        System.currentTimeMillis() + TWO_DAYS);
+                PrefsUtil.setClearCacheTime(System.currentTimeMillis() + TWO_DAYS);
             }
 
-            if (!CommonUtil.didNetworkConnected(context)) {
-                return false;
-            }
-
-            String oldVersionCachePath = FileCache.getDataCacheDirectory(LaunchActivity.this) + "cache.obj";
-            if (new File(oldVersionCachePath).exists()) {
-                FileUtils.deleteFile(oldVersionCachePath);
-            }
-
-            filePath = FileCache.getDataCacheDirectory(LaunchActivity.this) + ConstantUtils.CACHED_FILE_NAME;
-            File cacheFile = new File(filePath);
-            if (!cacheFile.exists()) {
-                ArrayList<FeedItem> feedItems = FeedItemParser.getMainList(strings[0]);
-                if (null != feedItems && feedItems.size() > 0) {
-                    FileUtils.serializeObject(filePath, feedItems);
-//                    UsiteConfig.saveUpdateTime(LaunchActivity.this, System.currentTimeMillis());
+            long lastUpdateCacheTime = PrefsUtil.getCacheUpdateTime();
+            if (CommonUtil.didNetworkConnected(context) && System.currentTimeMillis() > lastUpdateCacheTime) {
+                try {
+                    Document doc = Jsoup.connect(ConstantUtils.BASE_URL + "/list/1.html").get();
+                    Elements content = doc.getElementsByClass("u148content");
+                    if (null != content && content.size() > 0) {
+                        String data = content.get(0).html();
+                        String path = FileCache.getDataCacheDirectory(context) + ConstantUtils.CACHED_FILE_NAME;
+                        FileUtils.writeToFile(path, data);
+                        PrefsUtil.setCacheUpdateTime(System.currentTimeMillis() + TWO_HOURS);
+                    }
+                } catch (IOException e) {
                 }
             }
+
             return true;
         }
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             findViewById(R.id.loading_layout).setVisibility(View.GONE);
-            if (aBoolean) {
-                Intent intent = new Intent(context, HomeActivity.class);
-                intent.putExtra("file_path", filePath);
-                startActivity(intent);
-                finish();
-            } else {
-                CommonUtil.showToast(getString(R.string.net_error));
-            }
+            startActivity(new Intent(context, HomeActivity.class));
+            finish();
         }
     }
 }

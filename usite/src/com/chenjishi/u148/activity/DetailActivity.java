@@ -29,8 +29,6 @@ import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.net.RequestListener;
-import net.youmi.android.banner.AdSize;
-import net.youmi.android.banner.AdView;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -76,9 +74,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitleText(R.string.app_name_simple);
-        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
-        LinearLayout adLayout = (LinearLayout) findViewById(R.id.ad_layout);
-        adLayout.addView(adView);
         setMenuIcon2Visibility(true);
         setMenuIcon3Visibility(true);
 

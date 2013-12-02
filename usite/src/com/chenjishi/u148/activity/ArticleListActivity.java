@@ -39,6 +39,7 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitleText(R.string.app_latest);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
         ListView listView = (ListView) findViewById(R.id.list_article);

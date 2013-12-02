@@ -5,62 +5,70 @@
         android:id="@+id/drawer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/background">
-    <LinearLayout
+        android:layout_weight="1">
+    <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-        <RadioGroup
-                android:id="@+id/radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:background="@drawable/ab_texture_tile"
-                android:weightSum="6"
-                android:orientation="horizontal">
-            <RadioButton
-                    android:id="@+id/radio_home"
-                    style="@style/TabStyle"
-                    android:text="@string/app_home"/>
-            <RadioButton
-                    android:id="@+id/radio_video"
-                    style="@style/TabStyle"
-                    android:text="@string/app_video"/>
-            <RadioButton
-                    android:id="@+id/radio_image"
-                    style="@style/TabStyle"
-                    android:text="@string/app_image"/>
-            <RadioButton
-                    android:id="@+id/radio_audio"
-                    style="@style/TabStyle"
-                    android:text="@string/app_audio"/>
-            <RadioButton
-                    android:id="@+id/radio_text"
-                    style="@style/TabStyle"
-                    android:text="@string/app_text"/>
-            <RadioButton
-                    android:id="@+id/radio_miscell"
-                    style="@style/TabStyle"
-                    android:text="@string/app_miscell"/>
-        </RadioGroup>
-        <android.support.v4.view.ViewPager
-                android:id="@+id/view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
+            android:layout_height="match_parent">
         <LinearLayout
-                android:id="@+id/adLayout"
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            <RadioGroup
+                    android:id="@+id/radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/action_bar_height"
+                    android:background="@drawable/ab_texture_tile"
+                    android:weightSum="6"
+                    android:orientation="horizontal">
+                <RadioButton
+                        android:id="@+id/radio_home"
+                        style="@style/TabStyle"
+                        android:text="@string/app_home"/>
+                <RadioButton
+                        android:id="@+id/radio_video"
+                        style="@style/TabStyle"
+                        android:text="@string/app_video"/>
+                <RadioButton
+                        android:id="@+id/radio_image"
+                        style="@style/TabStyle"
+                        android:text="@string/app_image"/>
+                <RadioButton
+                        android:id="@+id/radio_audio"
+                        style="@style/TabStyle"
+                        android:text="@string/app_audio"/>
+                <RadioButton
+                        android:id="@+id/radio_text"
+                        style="@style/TabStyle"
+                        android:text="@string/app_text"/>
+                <RadioButton
+                        android:id="@+id/radio_miscell"
+                        style="@style/TabStyle"
+                        android:text="@string/app_miscell"/>
+            </RadioGroup>
+            <android.support.v4.view.ViewPager
+                    android:id="@+id/view_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+        </LinearLayout>
+        <ImageButton
+                android:id="@+id/btn_drawer"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"/>
-    </LinearLayout>
-
+                android:layout_gravity="left|center_vertical"
+                android:layout_marginLeft="-12dp"
+                android:contentDescription="@null"
+                android:clickable="true"
+                android:onClick="onDrawerButtonClicked"
+                android:src="@drawable/ic_drawer"/>
+    </FrameLayout>
     <LinearLayout
             android:id="@+id/layout_menu"
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="left"
-            android:background="@color/background"
-            android:orientation="vertical"/>
+            android:background="#373b3e"
+            android:orientation="vertical">
+            </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
 
