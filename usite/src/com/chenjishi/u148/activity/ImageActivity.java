@@ -18,6 +18,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
+import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.HttpUtils;
@@ -27,8 +28,7 @@ import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
-import com.weibo.sdk.android.WeiboException;
-import com.weibo.sdk.android.net.RequestListener;
+import com.sina.weibo.sdk.exception.WeiboException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -172,7 +172,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
     private void shareToWeibo(String imagePath) {
         ShareUtils.shareToWeibo(this, getString(R.string.share_image_tip), imagePath, null, new RequestListener() {
             @Override
-            public void onComplete(String s) {
+            public void onComplete(String response) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -182,11 +182,18 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
             }
 
             @Override
+            public void onComplete4binary(ByteArrayOutputStream responseOS) {
+
+            }
+
+            @Override
             public void onIOException(IOException e) {
+
             }
 
             @Override
             public void onError(WeiboException e) {
+
             }
         });
     }

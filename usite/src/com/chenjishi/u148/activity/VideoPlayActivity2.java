@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.HttpUtils;
@@ -16,12 +17,12 @@ import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
-import com.weibo.sdk.android.WeiboException;
-import com.weibo.sdk.android.net.RequestListener;
+import com.sina.weibo.sdk.exception.WeiboException;
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.widget.MediaController;
 import io.vov.vitamio.widget.VideoView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -116,7 +117,7 @@ public class VideoPlayActivity2 extends Activity implements MediaController.OnHi
     private void shareToWeibo(String content, String imageUrl) {
         ShareUtils.shareToWeibo(this, content, null, imageUrl, new RequestListener() {
             @Override
-            public void onComplete(String s) {
+            public void onComplete(String response) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -126,11 +127,18 @@ public class VideoPlayActivity2 extends Activity implements MediaController.OnHi
             }
 
             @Override
+            public void onComplete4binary(ByteArrayOutputStream responseOS) {
+
+            }
+
+            @Override
             public void onIOException(IOException e) {
+
             }
 
             @Override
             public void onError(WeiboException e) {
+
             }
         });
     }

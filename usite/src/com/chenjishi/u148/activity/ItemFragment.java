@@ -1,5 +1,7 @@
 package com.chenjishi.u148.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -7,10 +9,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ListView;
+import android.widget.*;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.adapter.FeedListAdapter;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.entity.FeedItem;
 import com.chenjishi.u148.parser.FeedItemParser;
@@ -19,8 +19,13 @@ import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.FileUtils;
+import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,7 +35,7 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class ItemFragment extends Fragment implements AbsListView.OnScrollListener,
-        PullToRefreshBase.OnRefreshListener {
+        PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener {
     private static final int MSG_LOAD_OK = 1;
 
     private PullToRefreshListView pullToRefresh;
@@ -59,6 +64,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         category = bundle != null ? bundle.getInt("category") : 0;
 
         dataLoaded = false;
+        listAdapter = new FeedListAdapter(getActivity());
     }
 
     @Override
@@ -72,8 +78,9 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         footView.setVisibility(View.GONE);
         listView.addFooterView(footView);
 
-        listAdapter = new FeedListAdapter(getActivity(), feedItems, listView);
+        listView.setAdapter(listAdapter);
         listView.setOnScrollListener(this);
+        listView.setOnItemClickListener(this);
 
         pullToRefresh.setOnRefreshListener(this);
 
@@ -91,6 +98,20 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         lastItemIndex = firstVisibleItem + visibleItemCount - 1;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        FeedItem item = feedItems.get(position - 1);
+        Intent intent = new Intent(getActivity(), DetailActivity.class);
+        intent.putExtra("title", item.title);
+        intent.putExtra("link", item.link);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("title", item.title);
+        FlurryAgent.logEvent("read_article", params);
+
+        startActivity(intent);
     }
 
     @Override
@@ -173,5 +194,76 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     public void onDestroy() {
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
+    }
+
+    private class FeedListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
+        private LayoutInflater mInflater;
+
+        public FeedListAdapter(Context context) {
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public int getCount() {
+            return null == feedItems ? 0 : feedItems.size();
+        }
+
+        @Override
+        public FeedItem getItem(int position) {
+            return null == feedItems ? null : feedItems.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+
+            if (null == convertView) {
+                convertView = mInflater.inflate(R.layout.feed_list_item, null);
+                holder = new ViewHolder();
+
+                holder.thumb = (ImageView) convertView.findViewById(R.id.feed_image);
+                holder.category = (TextView) convertView.findViewById(R.id.feed_type);
+                holder.title = (TextView) convertView.findViewById(R.id.feed_title);
+                holder.author = (TextView) convertView.findViewById(R.id.feed_author);
+                holder.time = (TextView) convertView.findViewById(R.id.feed_time);
+                holder.content = (TextView) convertView.findViewById(R.id.feed_content);
+
+                convertView.setTag(holder);
+            }
+
+            holder = (ViewHolder) convertView.getTag();
+
+            FeedItem feed = getItem(position);
+
+            holder.category.setText(feed.category);
+            holder.title.setText(feed.title);
+            holder.author.setText(feed.author);
+            holder.time.setText(feed.time);
+            holder.content.setText(feed.summary);
+
+            HttpUtils.getImageLoader().get(feed.imageUrl, ImageLoader.getImageListener(holder.thumb,
+                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
+
+            return convertView;
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        }
+    }
+
+    private static class ViewHolder {
+        ImageView thumb;
+        TextView category;
+        TextView title;
+        TextView author;
+        TextView time;
+        TextView content;
     }
 }

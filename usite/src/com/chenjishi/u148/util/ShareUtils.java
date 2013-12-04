@@ -7,10 +7,13 @@ import android.widget.Toast;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.sina.RequestListener;
+import com.chenjishi.u148.sina.StatusesAPI;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
+import com.sina.weibo.sdk.auth.WeiboAuth;
+import com.sina.weibo.sdk.auth.WeiboAuthListener;
+import com.sina.weibo.sdk.exception.WeiboException;
 import com.tencent.mm.sdk.openapi.*;
-import com.weibo.sdk.android.*;
-import com.weibo.sdk.android.api.StatusesAPI;
-import com.weibo.sdk.android.net.RequestListener;
 
 import java.io.File;
 
@@ -25,15 +28,13 @@ public class ShareUtils {
     private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
     private static final int THUMB_SIZE = 100;
 
-
     public static final int SHARE_SESSION = 1;
     public static final int SHARE_FRIEND = 2;
     public static final int SHARE_WEIBO = 3;
 
-    public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";
-
     public static void shareWebpage(Context context, String url, int type, String title, Bitmap thumb) {
         IWXAPI api = WXAPIFactory.createWXAPI(context, ConstantUtils.WX_APP_ID);
+        api.registerApp(ConstantUtils.WX_APP_ID);
 
         checkStatus(api, context, type);
         WXWebpageObject webObject = new WXWebpageObject();
@@ -181,50 +182,58 @@ public class ShareUtils {
         }
     }
 
-    public static void shareToWeibo(Context context, final String content, final String filePath, final String imageUrl, final RequestListener listener) {
+    public static void shareToWeibo(Context context, String content, String filePath, String imageUrl, RequestListener listener) {
         Oauth2AccessToken token = PrefsUtil.getAccessToken();
 
         if (!token.isSessionValid()) {
-            Weibo weibo = Weibo.getInstance(ConstantUtils.WEIBO_APP_KEY, REDIRECT_URL);
-            weibo.authorize(context, new WeiboAuthListener() {
-                @Override
-                public void onComplete(Bundle bundle) {
-                    Oauth2AccessToken accessToken = new Oauth2AccessToken(bundle.getString("access_token"),
-                            bundle.getString("expires_in"));
-                    if (accessToken.isSessionValid()) {
-                        PrefsUtil.saveAccessToken(accessToken);
-                        StatusesAPI api = new StatusesAPI(accessToken);
-                        if (null != filePath) {
-                            api.upload(content, filePath, null, null, listener);
-                        }
-
-                        if (null != imageUrl) {
-                            api.uploadUrlText(content, imageUrl, null, null, listener);
-                        }
-                    }
-                }
-
-                @Override
-                public void onWeiboException(WeiboException e) {
-                }
-
-                @Override
-                public void onError(WeiboDialogError weiboDialogError) {
-                }
-
-                @Override
-                public void onCancel() {
-                }
-            });
+            authorize(context, content, filePath, imageUrl, listener);
         } else {
             StatusesAPI api = new StatusesAPI(token);
             if (null != filePath) {
+//                api.uploadPic(content, filePath, listener);
                 api.upload(content, filePath, null, null, listener);
+                return;
             }
 
             if (null != imageUrl) {
                 api.update(content, null, null, listener);
             }
         }
+    }
+
+    private static void authorize(Context context,
+                                  final String content,
+                                  final String filePath,
+                                  final String imageUrl,
+                                  final RequestListener listener) {
+        WeiboAuth weiboAuth = new WeiboAuth(context, ConstantUtils.WEIBO_APP_KEY, ConstantUtils.REDIRECT_URL, ConstantUtils.SCOPE);
+        weiboAuth.anthorize(new WeiboAuthListener() {
+            @Override
+            public void onComplete(Bundle bundle) {
+                Oauth2AccessToken accessToken = Oauth2AccessToken.parseAccessToken(bundle);
+                PrefsUtil.saveAccessToken(accessToken);
+
+                StatusesAPI api = new StatusesAPI(accessToken);
+                if (null != filePath) {
+                    api.upload(content, filePath, null, null, listener);
+                    return;
+                }
+
+                if (null != imageUrl) {
+                    api.update(content, null, null, listener);
+                }
+
+            }
+
+            @Override
+            public void onWeiboException(WeiboException e) {
+
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
     }
 }

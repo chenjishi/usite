@@ -2,7 +2,7 @@ package com.chenjishi.u148.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.weibo.sdk.android.Oauth2AccessToken;
+import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 /**
  * Created with IntelliJ IDEA.

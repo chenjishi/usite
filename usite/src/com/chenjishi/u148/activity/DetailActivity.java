@@ -18,6 +18,7 @@ import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
+import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.ConstantUtils;
 import com.chenjishi.u148.util.HttpUtils;
@@ -27,13 +28,13 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
-import com.weibo.sdk.android.WeiboException;
-import com.weibo.sdk.android.net.RequestListener;
+import com.sina.weibo.sdk.exception.WeiboException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -317,7 +318,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
         ShareUtils.shareToWeibo(this, title + mUrl, null, imageUrl, new RequestListener() {
             @Override
-            public void onComplete(String s) {
+            public void onComplete(String response) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -327,11 +328,18 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             }
 
             @Override
+            public void onComplete4binary(ByteArrayOutputStream responseOS) {
+
+            }
+
+            @Override
             public void onIOException(IOException e) {
+
             }
 
             @Override
             public void onError(WeiboException e) {
+
             }
         });
     }
