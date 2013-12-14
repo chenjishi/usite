@@ -66,7 +66,6 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String getPath(String uri) {
-		Log.i("FileUtils#getPath(%s)", uri);
 		if (TextUtils.isEmpty(uri))
 			return null;
 		if (uri.startsWith("file://") && uri.length() > 7)

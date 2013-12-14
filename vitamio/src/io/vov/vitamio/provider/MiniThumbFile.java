@@ -21,7 +21,6 @@ import android.net.Uri;
 import android.os.Environment;
 
 import io.vov.vitamio.provider.MediaStore.Video;
-import io.vov.vitamio.utils.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,8 +84,7 @@ public class MiniThumbFile {
       String path = randomAccessFilePath(MINI_THUMB_DATA_FILE_VERSION);
       File directory = new File(path).getParentFile();
       if (!directory.isDirectory()) {
-        if (!directory.mkdirs())
-          Log.e("Unable to create .thumbnails directory %s", directory.toString());
+        if (!directory.mkdirs()) {}
       }
       File f = new File(path);
       try {
@@ -130,9 +128,7 @@ public class MiniThumbFile {
             return mBuffer.getLong();
         }
       } catch (IOException ex) {
-        Log.e("Got exception checking file magic: ", ex);
       } catch (RuntimeException ex) {
-        Log.e("Got exception when reading magic, id = %d, disk full or mount read-only? %s", id, ex.getClass().toString());
       } finally {
         try {
           if (lock != null)
@@ -167,10 +163,8 @@ public class MiniThumbFile {
         mChannel.write(mBuffer, pos);
       }
     } catch (IOException ex) {
-      Log.e("couldn't save mini thumbnail data for %d; %s", id, ex.getMessage());
       throw ex;
     } catch (RuntimeException ex) {
-      Log.e("couldn't save mini thumbnail data for %d, disk full or mount read-only? %s", id, ex.getClass().toString());
     } finally {
       try {
         if (lock != null)
@@ -201,9 +195,7 @@ public class MiniThumbFile {
         }
       }
     } catch (IOException ex) {
-      Log.e("got exception when reading thumbnail id = %d, exception: %s", id, ex.getMessage());
     } catch (RuntimeException ex) {
-      Log.e("Got exception when reading thumbnail, id = %d, disk full or mount read-only? %s", id, ex.getClass().toString());
     } finally {
       try {
         if (lock != null)

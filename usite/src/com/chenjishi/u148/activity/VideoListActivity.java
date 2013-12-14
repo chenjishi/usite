@@ -18,8 +18,8 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.adapter.VideoListAdapter;
 import com.chenjishi.u148.base.DatabaseHelper;
 import com.chenjishi.u148.base.FileCache;
-import com.chenjishi.u148.entity.Video;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.model.Video;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
 
 import java.io.File;
@@ -68,7 +68,7 @@ public class VideoListActivity extends BaseActivity {
             public void run() {
                 mVideoList = mDatabase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
                 mDiskOccupiedSize = FileUtils.getVideoCacheSize();
-                mHandler.sendEmptyMessage(ConstantUtils.MSG_DOWNLOAD_SUCCESS);
+                mHandler.sendEmptyMessage(Constants.MSG_DOWNLOAD_SUCCESS);
             }
         }.start();
     }
@@ -77,7 +77,7 @@ public class VideoListActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver(mHandleDownloadReceiver,
-                new IntentFilter(ConstantUtils.DOWNLOAD_STATUS_ACTION));
+                new IntentFilter(Constants.DOWNLOAD_STATUS_ACTION));
     }
 
     @Override
@@ -106,11 +106,6 @@ public class VideoListActivity extends BaseActivity {
         mDiskOccupiedSize = FileUtils.getVideoCacheSize();
     }
 
-    @Override
-    protected void backIconClicked() {
-        finish();
-    }
-
     public void onButtonClicked(View view) {
         if (null == mProgress) {
             mProgress = new ProgressDialog(this);
@@ -137,7 +132,7 @@ public class VideoListActivity extends BaseActivity {
     private final BroadcastReceiver mHandleDownloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int msgCode = intent.getIntExtra(ConstantUtils.KEY_MESSAGE_TYPE, ConstantUtils.MSG_NO_UPDATE);
+            int msgCode = intent.getIntExtra(Constants.KEY_MESSAGE_TYPE, Constants.MSG_NO_UPDATE);
             mDiskOccupiedSize = FileUtils.getVideoCacheSize();
 
             mHandler.sendEmptyMessage(msgCode);
@@ -147,7 +142,7 @@ public class VideoListActivity extends BaseActivity {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (ConstantUtils.MSG_DOWNLOAD_SUCCESS == msg.what) {
+            if (Constants.MSG_DOWNLOAD_SUCCESS == msg.what) {
                 if (null != mVideoList && mVideoList.size() > 0)
                     mVideoList.clear();
 
@@ -165,7 +160,7 @@ public class VideoListActivity extends BaseActivity {
                 ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("清理完畢，有新視頻更新會自動下載");
                 mProgress.dismiss();
             }
-            setTitleText2(String.format(getString(R.string.occupied_size), mDiskOccupiedSize));
+            setTitleText(String.format(getString(R.string.occupied_size), mDiskOccupiedSize));
         }
     };
 }

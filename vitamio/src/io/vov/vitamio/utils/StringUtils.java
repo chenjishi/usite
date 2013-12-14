@@ -58,7 +58,6 @@ public class StringUtils {
 			try {
 				return Integer.parseInt(str.substring(s, e));
 			} catch (NumberFormatException ex) {
-				Log.e("convertToInt", ex);
 				throw new NumberFormatException();
 			}
 		} else {

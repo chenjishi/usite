@@ -1,7 +1,7 @@
 package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

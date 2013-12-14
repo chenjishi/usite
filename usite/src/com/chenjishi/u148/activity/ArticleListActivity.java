@@ -73,11 +73,6 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
         return R.layout.article_list_layout;
     }
 
-    @Override
-    protected void backIconClicked() {
-        finish();
-    }
-
     private void loadData() {
         Runnable action = new Runnable() {
             @Override

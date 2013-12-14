@@ -19,6 +19,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.RequestQueue;
@@ -31,9 +33,8 @@ import java.util.LinkedList;
 /**
  * Helper that handles loading and caching images from remote URLs.
  *
- * The simple way to use this class is to call {@link com.chenjishi.meizi.volley.toolbox.ImageLoader#get(String, com.chenjishi.meizi.volley.toolbox.ImageLoader.ImageListener)}
+ * The simple way to use this class is to call {@link}
  * and to pass in the default image listener provided by
- * {@link com.chenjishi.meizi.volley.toolbox.ImageLoader#getImageListener(android.widget.ImageView, int, int)}. Note that all function calls to
  * this class must be made from the main thead, and all responses will be delivered to the main
  * thread as well.
  */
@@ -88,7 +89,6 @@ public class ImageLoader {
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
      * it will switch to either the actual image or the error image.
-     * @param imageView The imageView that the listener is associated with.
      * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
      */
@@ -158,11 +158,10 @@ public class ImageLoader {
      * Returns an ImageContainer for the requested URL.
      *
      * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
-     * If the default was returned, the {@link com.chenjishi.meizi.volley.toolbox.ImageLoader} will be invoked when the
+     * If the default was returned, the {@link } will be invoked when the
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
-     * @param defaultImage Optional default image to return until the actual image is loaded.
      */
     public ImageContainer get(String requestUrl, final ImageListener listener) {
         return get(requestUrl, listener, 0, 0);
@@ -423,7 +422,6 @@ public class ImageLoader {
      * Starts the runnable for batched delivery of responses if it is not already started.
      * @param cacheKey The cacheKey of the response being delivered.
      * @param request The BatchedImageRequest to be delivered.
-     * @param error The volley error associated with the request (if applicable).
      */
     private void batchResponse(String cacheKey, BatchedImageRequest request) {
         mBatchedResponses.put(cacheKey, request);
@@ -471,7 +469,11 @@ public class ImageLoader {
      * @param maxHeight The max-height of the output.
      */
     private static String getCacheKey(String url, int maxWidth, int maxHeight) {
-        return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
-                .append("#H").append(maxHeight).append(url).toString();
+        if (!TextUtils.isEmpty(url)) {
+            return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
+                    .append("#H").append(maxHeight).append(url).toString();
+        } else {
+            return null;
+        }
     }
 }

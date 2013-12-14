@@ -7,7 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.chenjishi.u148.base.DatabaseHelper;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 import com.chenjishi.u148.util.*;
 
 import java.io.*;
@@ -179,7 +179,7 @@ public class DownloadService extends Service {
                 dataBase.insert(currentVideo, DatabaseHelper.TB_NAME_VIDEOS);
                 dataBase.deleteVideo(currentVideo.id, DatabaseHelper.TB_NAME_LINKS);
                 dataBase.insertVideoId(currentVideo.id, currentVideo.title);
-                sendStatusBroadcast(ConstantUtils.MSG_DOWNLOAD_SUCCESS);
+                sendStatusBroadcast(Constants.MSG_DOWNLOAD_SUCCESS);
             } else {
                 dataBase.deleteVideo(currentVideo.id, DatabaseHelper.TB_NAME_LINKS);
             }
@@ -235,9 +235,9 @@ public class DownloadService extends Service {
     }
 
     private void sendStatusBroadcast(int code) {
-        Intent intent = new Intent(ConstantUtils.DOWNLOAD_STATUS_ACTION);
-        intent.putExtra(ConstantUtils.KEY_VIDEO_SIZE, null == videoList ? 0 : videoList.size());
-        intent.putExtra(ConstantUtils.KEY_MESSAGE_TYPE, code);
+        Intent intent = new Intent(Constants.DOWNLOAD_STATUS_ACTION);
+        intent.putExtra(Constants.KEY_VIDEO_SIZE, null == videoList ? 0 : videoList.size());
+        intent.putExtra(Constants.KEY_MESSAGE_TYPE, code);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

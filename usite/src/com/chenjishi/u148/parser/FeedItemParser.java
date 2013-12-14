@@ -1,7 +1,8 @@
 package com.chenjishi.u148.parser;
 
-import com.chenjishi.u148.entity.FeedItem;
-import io.vov.vitamio.utils.Log;
+import android.util.Log;
+import com.chenjishi.u148.model.Feed;
+import com.chenjishi.u148.model.FeedItem;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,6 +10,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import static com.chenjishi.u148.util.Constants.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +26,6 @@ public class FeedItemParser {
     }
 
     public static ArrayList<FeedItem> getFeedList(String url) {
-        Log.i("test", "url " + url);
         ArrayList<FeedItem> feedItems = null;
 
         try {
@@ -66,5 +67,140 @@ public class FeedItemParser {
         }
 
         return feedItems;
+    }
+
+    public static ArrayList<Feed> parseJianDanFeed2(String html) {
+        Document doc = Jsoup.parse(html);
+        if (null == doc) return null;
+
+        ArrayList<Feed> feedList;
+
+        Element content = doc.getElementById("content");
+
+        if (null == content) return null;
+
+        feedList = new ArrayList<Feed>();
+
+        Elements posts = content.getElementsByClass("post");
+        for (Element el : posts) {
+            Feed feed = new Feed();
+
+            Element thumb = el.child(0);
+            if (null != thumb) {
+                Elements links = thumb.getElementsByTag("a");
+                if (null != links && links.size() > 0) {
+                    Element link = links.get(0);
+
+                    feed.url = link.attr("href");
+                    Elements linkImage = link.getElementsByTag("img");
+                    if (null != linkImage && linkImage.size() > 0) {
+                        feed.thumbUrl = linkImage.get(0).attr("src");
+                        feed.title = linkImage.get(0).attr("title");
+                    }
+                }
+            }
+
+            Element time = el.child(1);
+            if (null != time) {
+                Elements links = time.getElementsByTag("a");
+                if (null != links && links.size() > 1) {
+                    feed.author = links.get(0).text();
+                    feed.category = links.get(1).text();
+                    String t = links.get(0).parent().text();
+                    int idx = t.indexOf("/");
+                    if (idx != -1) {
+                        feed.time = t.substring(idx + 1);
+                    }
+                }
+            }
+
+            feedList.add(feed);
+        }
+
+        return feedList;
+    }
+
+    public static ArrayList<Feed> parseNews(String html) {
+        Document doc = Jsoup.parse(html);
+        if (null == doc) return null;
+
+        ArrayList<Feed> feedList = null;
+        Element content = doc.getElementById("news_list");
+        if (null != content) {
+            feedList = new ArrayList<Feed>();
+
+            Elements posts = content.getElementsByClass("news_block");
+            for (Element el : posts) {
+                Feed feed = new Feed();
+
+                Elements title = el.getElementsByClass("news_entry");
+                if (null != title && title.size() > 0) {
+                    Element titleLink = title.get(0).select("a").first();
+                    feed.title = titleLink.text();
+                    feed.url = BASE_NEWS_URL + titleLink.attr("href");
+                }
+
+                Elements summary = el.getElementsByClass("entry_summary");
+                if (null != summary && summary.size() > 0) {
+                    Element summaryEl = summary.get(0);
+                    feed.description = summaryEl.text();
+
+                    Elements images = summaryEl.select("img");
+                    if (null != images && images.size() > 0) {
+                        feed.thumbUrl = BASE_NEWS_URL + images.first().attr("src");
+                    }
+                }
+                feedList.add(feed);
+            }
+        }
+
+        return feedList;
+    }
+
+    public static ArrayList<Feed> parseJianDanFeed(String html) {
+        Document doc = Jsoup.parse(html);
+        if (null == doc) return null;
+        ArrayList<Feed> feedList = null;
+        Element content = doc.getElementById("content");
+
+        if (null != content) {
+            feedList = new ArrayList<Feed>();
+
+            Elements posts = content.getElementsByClass("post");
+            for (Element el : posts) {
+                Feed feed = new Feed();
+                feed.source = 101;
+
+                Element thumbEl = el.child(0);
+                if (null != thumbEl) {
+                    Element thumbLink = thumbEl.select("a").first();
+                    if (null != thumbLink) {
+                        feed.thumbUrl = thumbLink.select("img").first().attr("src");
+                    }
+                }
+
+                Element indexEl = el.child(1);
+                if (null != indexEl) {
+                    feed.description = indexEl.ownText();
+
+                    Elements links = indexEl.getElementsByTag("a");
+                    if (links.size() > 3) {
+                        feed.title = links.get(1).text();
+                        feed.url = links.get(1).attr("href");
+                        feed.author = links.get(2).text();
+                        feed.category = links.get(3).text();
+
+                        String t = links.get(2).parent().text();
+                        int idx = t.indexOf(",");
+                        if (idx != -1) {
+                            feed.time = t.substring(idx + 1);
+                        }
+                    }
+                }
+                feedList.add(feed);
+            }
+        }
+
+        return feedList;
     }
 }

@@ -21,7 +21,6 @@ import android.content.Context;
 import io.vov.vitamio.utils.CPU;
 import io.vov.vitamio.utils.ContextUtils;
 import io.vov.vitamio.utils.IOUtils;
-import io.vov.vitamio.utils.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -118,7 +117,6 @@ public class Vitamio {
         Arrays.sort(libs);
         for (String L : getRequiredLibs()) {
           if (Arrays.binarySearch(libs, L) < 0) {
-            Log.e("Native libs %s not exists!", L);
             return false;
           }
         }
@@ -128,13 +126,10 @@ public class Vitamio {
           buffer = new BufferedReader(new FileReader(lock));  
           int appVersion = ContextUtils.getVersionCode(ctx);
           int libVersion = Integer.valueOf(buffer.readLine());  
-          Log.i("isNativeLibsInited, APP VERSION: %d, Vitamio Library version: %d", appVersion, libVersion);
           if (libVersion == appVersion)
             return true;
         } catch (IOException e) {
-          Log.e("isNativeLibsInited", e);
         } catch (NumberFormatException e) {
-        	Log.e("isNativeLibsInited", e);
         } finally {
           IOUtils.closeSilently(buffer);
         }
@@ -187,12 +182,10 @@ public class Vitamio {
   private static boolean extractLibs(Context ctx, int rawID) {
     long begin = System.currentTimeMillis();
     final int version = ContextUtils.getVersionCode(ctx);
-    Log.d("loadLibs start " + version);
     File lock = new File(getLibraryPath() + LIBS_LOCK);
     if (lock.exists())
       lock.delete();
     String libPath = copyCompressedLib(ctx, rawID, "libarm.so");
-    Log.d("copyCompressedLib time: " + (System.currentTimeMillis() - begin) / 1000.0);
     boolean inited = native_initializeLibs(libPath, getLibraryPath(), String.valueOf(Vitamio.getVitamioType()));
     new File(libPath).delete();
     FileWriter fw = null;
@@ -202,10 +195,7 @@ public class Vitamio {
       fw.write(String.valueOf(version));
       return true;
     } catch (IOException e) {
-      Log.e("Error creating lock file", e);
     } finally {
-      Log.d("initializeNativeLibs: " + inited);
-      Log.d("loadLibs time: " + (System.currentTimeMillis() - begin) / 1000.0);
       IOUtils.closeSilently(fw);
     }
     return false;
@@ -233,7 +223,6 @@ public class Vitamio {
         if (!f.exists())
           f.createNewFile();
       } catch (Exception fe) {
-        Log.e("loadLib", fe);
       }
 
       is = ctx.getResources().openRawResource(rawID);
@@ -243,7 +232,6 @@ public class Vitamio {
         fos.write(buffer);
       }
     } catch (Exception e) {
-      Log.e("loadLib", e);
       return null;
     } finally {
       IOUtils.closeSilently(fos);

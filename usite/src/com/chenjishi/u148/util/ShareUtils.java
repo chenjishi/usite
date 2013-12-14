@@ -33,8 +33,8 @@ public class ShareUtils {
     public static final int SHARE_WEIBO = 3;
 
     public static void shareWebpage(Context context, String url, int type, String title, Bitmap thumb) {
-        IWXAPI api = WXAPIFactory.createWXAPI(context, ConstantUtils.WX_APP_ID);
-        api.registerApp(ConstantUtils.WX_APP_ID);
+        IWXAPI api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID);
+        api.registerApp(Constants.WX_APP_ID);
 
         checkStatus(api, context, type);
         WXWebpageObject webObject = new WXWebpageObject();
@@ -73,7 +73,7 @@ public class ShareUtils {
     }
 
     public static void shareImage(Context context, String url, int type, Bitmap thumb) {
-        IWXAPI api = WXAPIFactory.createWXAPI(context, ConstantUtils.WX_APP_ID);
+        IWXAPI api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID);
 
         checkStatus(api, context, type);
 
@@ -123,7 +123,7 @@ public class ShareUtils {
     }
 
     public static void shareVideo(Context context, String url, int type, String title, Bitmap thumb) {
-        IWXAPI api = WXAPIFactory.createWXAPI(context, ConstantUtils.WX_APP_ID);
+        IWXAPI api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID);
 
         checkStatus(api, context, type);
 
@@ -196,7 +196,8 @@ public class ShareUtils {
             }
 
             if (null != imageUrl) {
-                api.update(content, null, null, listener);
+//                api.update(content, null, null, listener);
+                api.uploadUrlText(content, imageUrl, null, null, null, listener);
             }
         }
     }
@@ -206,7 +207,7 @@ public class ShareUtils {
                                   final String filePath,
                                   final String imageUrl,
                                   final RequestListener listener) {
-        WeiboAuth weiboAuth = new WeiboAuth(context, ConstantUtils.WEIBO_APP_KEY, ConstantUtils.REDIRECT_URL, ConstantUtils.SCOPE);
+        WeiboAuth weiboAuth = new WeiboAuth(context, Constants.WEIBO_APP_KEY, Constants.REDIRECT_URL, Constants.SCOPE);
         weiboAuth.anthorize(new WeiboAuthListener() {
             @Override
             public void onComplete(Bundle bundle) {
@@ -220,7 +221,8 @@ public class ShareUtils {
                 }
 
                 if (null != imageUrl) {
-                    api.update(content, null, null, listener);
+//                    api.update(content, null, null, listener);
+                    api.uploadUrlText(content, imageUrl, null, null, null, listener);
                 }
 
             }

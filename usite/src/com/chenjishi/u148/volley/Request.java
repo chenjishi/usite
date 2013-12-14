@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -111,7 +112,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * Creates a new request with the given method (one of the values from {@link com.chenjishi.meizi.volley.Request.Method}),
      * URL, and error listener.  Note that the normal response listener is not provided here as
      * delivery of responses is provided by subclasses, who have a better idea of how to deliver
      * an already-parsed response.
@@ -126,7 +126,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * Return the method for this request.  Can be one of the values in {@link com.chenjishi.meizi.volley.Request.Method}.
      */
     public int getMethod() {
         return mMethod;
@@ -142,7 +141,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Returns this request's tag.
-     * @see com.chenjishi.meizi.volley.Request#setTag(Object)
      */
     public Object getTag() {
         return mTag;
@@ -283,7 +281,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @throws AuthFailureError In the event of auth failure
      */
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return Collections.emptyMap();
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6");
+        return headers;
     }
 
     /**
@@ -434,7 +434,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * Returns the {@link com.chenjishi.meizi.volley.Request.Priority} of this request; {@link com.chenjishi.meizi.volley.Request.Priority#NORMAL} by default.
      */
     public Priority getPriority() {
         return Priority.NORMAL;

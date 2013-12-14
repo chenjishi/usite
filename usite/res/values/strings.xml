@@ -17,6 +17,7 @@
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
     <string name="feedback">意见反馈</string>
+    <string name="jian_dan">煎蛋最新</string>
     <string name="about">关于</string>
     <string name="app_version">版本: %1$s</string>
     <string name="net_error">网络无连接，请检查网络设置</string>
@@ -41,6 +42,7 @@
     <string name="pull_to_refresh_refreshing_label">加载中…</string>
 
     <string name="connection_error">网络连接错误</string>
+    <string name="parse_error">解析错误</string>
 
     <string name="pull_to_refresh_pull_label">下拉刷新…</string>
     <string name="pull_to_refresh_release_label">放开以刷新…</string>

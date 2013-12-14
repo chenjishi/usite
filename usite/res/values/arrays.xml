@@ -1,6 +1,8 @@
 <resources>
     <string-array name="menu_category">
         <item>搞笑视频</item>
+        <item>煎蛋最新</item>
+        <item>科技新闻</item>
         <item>最新文章</item>
         <item>关于</item>
     </string-array>

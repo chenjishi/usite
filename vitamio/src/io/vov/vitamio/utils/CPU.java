@@ -63,21 +63,16 @@ public class CPU {
 					}
 				}
 			} catch (Exception e) {
-				Log.e("getCPUFeature", e);
 			} finally {
 				try {
 					if (bis != null)
 						bis.close();
 				} catch (IOException e) {
-					Log.e("getCPUFeature", e);
 				}
 			}
 		}
 
 		if (!cpuinfo.isEmpty()) {
-			for (String key : cpuinfo.keySet())
-				Log.d("%s:%s", key, cpuinfo.get(key));
-
 			boolean hasARMv6 = false;
 			boolean hasARMv7 = false;
 
@@ -85,7 +80,6 @@ public class CPU {
 			if (!TextUtils.isEmpty(val)) {
 				try {
 					int i = StringUtils.convertToInt(val);
-					Log.d("CPU architecture: %s", i);
 					if (i >= 7) {
 						hasARMv6 = true;
 						hasARMv7 = true;
@@ -94,7 +88,6 @@ public class CPU {
 						hasARMv7 = false;
 					}
 				} catch (NumberFormatException ex) {
-					Log.e("getCPUFeature", ex);
 				}
 				
 				val = cpuinfo.get("Processor");
@@ -156,7 +149,6 @@ public class CPU {
 				sb.append("MIPS ");
 			cachedFeatureString = sb.toString();
 		}
-		Log.d("GET CPU FATURE: %s", cachedFeatureString);
 		return cachedFeature;
 	}
 

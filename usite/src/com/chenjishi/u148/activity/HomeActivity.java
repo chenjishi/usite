@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -22,9 +23,12 @@ import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
+import net.youmi.android.banner.AdSize;
+import net.youmi.android.banner.AdView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +39,7 @@ import org.json.JSONObject;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends BaseActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener,
+public class HomeActivity extends FragmentActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener,
         Response.Listener<String>, Response.ErrorListener, ViewPager.OnPageChangeListener {
 
     private ViewPager mViewPager;
@@ -48,7 +52,12 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setActionBarHide(true);
+        setContentView(R.layout.home);
+
+        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        ((LinearLayout) findViewById(R.id.ad_layout)).addView(adView, layoutParams);
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
@@ -71,10 +80,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     public void onPageScrolled(int i, float v, int i2) {
-    }
-
-    @Override
-    protected void backIconClicked() {
     }
 
     @Override
@@ -177,11 +182,6 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
         stopService(new Intent(this, MusicService.class));
     }
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.home;
-    }
-
     public void onDrawerButtonClicked(View v) {
         if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
             drawerLayout.closeDrawer(Gravity.LEFT);
@@ -202,9 +202,17 @@ public class HomeActivity extends BaseActivity implements View.OnClickListener, 
                 intent.setClass(this, VideoListActivity.class);
                 break;
             case 1:
-                intent.setClass(this, ArticleListActivity.class);
+                intent.setClass(this, FunListActivity.class);
+                intent.putExtra("source", Constants.SOURCE_JIANDAN);
                 break;
             case 2:
+                intent.setClass(this, FunListActivity.class);
+                intent.putExtra("source", Constants.SOURCE_NEWS);
+                break;
+            case 3:
+                intent.setClass(this, ArticleListActivity.class);
+                break;
+            case 4:
                 intent.setClass(this, AboutActivity.class);
                 break;
         }

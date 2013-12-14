@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -20,7 +19,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
 import com.chenjishi.u148.view.ShareDialog;
@@ -91,10 +90,6 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
     }
 
     @Override
-    protected void backIconClicked() {
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         mViewPager.setCurrentItem(mCurrentIndex);
@@ -123,8 +118,8 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
         final String url = null != mImageList ? mImageList.get(mCurrentIndex) : "";
 
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(ConstantUtils.PARAM_URL, url);
-        FlurryAgent.logEvent(ConstantUtils.EVENT_IMAGE_SHARE, params);
+        params.put(Constants.PARAM_URL, url);
+        FlurryAgent.logEvent(Constants.EVENT_IMAGE_SHARE, params);
 
         if (!TextUtils.isEmpty(url)) {
             imageLoader.get(url, new ImageLoader.ImageListener() {

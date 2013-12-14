@@ -12,12 +12,12 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
-import com.chenjishi.u148.entity.FeedItem;
+import com.chenjishi.u148.model.FeedItem;
 import com.chenjishi.u148.parser.FeedItemParser;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.service.DataCacheService;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
@@ -106,6 +106,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         Intent intent = new Intent(getActivity(), DetailActivity.class);
         intent.putExtra("title", item.title);
         intent.putExtra("link", item.link);
+        intent.putExtra("source", Constants.SOURCE_U148);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("title", item.title);
@@ -139,7 +140,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     private void loadCacheData() {
-        String path = FileCache.getDataCacheDirectory(getActivity()) + ConstantUtils.CACHED_FILE_NAME;
+        String path = FileCache.getDataCacheDirectory(getActivity()) + Constants.CACHED_FILE_NAME;
         final String data = FileUtils.readFromFile(path);
         if (null != data) {
             new Thread(){
@@ -187,7 +188,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     private String getUrl() {
-        return ConstantUtils.BASE_URL + urls[category] + currentPage + ".html";
+        return Constants.BASE_URL + urls[category] + currentPage + ".html";
     }
 
     @Override
@@ -196,7 +197,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    private class FeedListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener {
+    private class FeedListAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
 
         public FeedListAdapter(Context context) {
@@ -250,11 +251,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
                     R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
             return convertView;
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
         }
     }
 

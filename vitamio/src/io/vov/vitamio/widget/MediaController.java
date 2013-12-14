@@ -42,7 +42,6 @@ import android.widget.TextView;
 import java.lang.reflect.Method;
 
 import io.vov.vitamio.R;
-import io.vov.vitamio.utils.Log;
 import io.vov.vitamio.utils.StringUtils;
 
 /**
@@ -207,7 +206,6 @@ public class MediaController extends FrameLayout {
 				Method setWindowLayoutType = PopupWindow.class.getMethod("setWindowLayoutType", new Class[] { int.class });
 				setWindowLayoutType.invoke(mWindow, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
 			} catch (Exception e) {
-				Log.e("setWindowLayoutType", e);
 			}
 		}
 	}
@@ -384,7 +382,6 @@ public class MediaController extends FrameLayout {
         else
           mWindow.dismiss();
       } catch (IllegalArgumentException ex) {
-        Log.d("MediaController already removed");
       }
       mShowing = false;
       if (mHiddenListener != null)

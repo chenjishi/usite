@@ -11,7 +11,7 @@ import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.service.DownloadService;
 import com.chenjishi.u148.util.CommonUtil;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
 import net.youmi.android.AdManager;
 import org.jsoup.Jsoup;
@@ -59,11 +59,11 @@ public class LaunchActivity extends Activity {
             long lastUpdateCacheTime = PrefsUtil.getCacheUpdateTime();
             if (CommonUtil.didNetworkConnected(context) && System.currentTimeMillis() > lastUpdateCacheTime) {
                 try {
-                    Document doc = Jsoup.connect(ConstantUtils.BASE_URL + "/list/1.html").get();
+                    Document doc = Jsoup.connect(Constants.BASE_URL + "/list/1.html").get();
                     Elements content = doc.getElementsByClass("u148content");
                     if (null != content && content.size() > 0) {
                         String data = content.get(0).html();
-                        String path = FileCache.getDataCacheDirectory(context) + ConstantUtils.CACHED_FILE_NAME;
+                        String path = FileCache.getDataCacheDirectory(context) + Constants.CACHED_FILE_NAME;
                         FileUtils.writeToFile(path, data);
                         PrefsUtil.setCacheUpdateTime(System.currentTimeMillis() + TWO_HOURS);
                     }

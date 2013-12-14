@@ -7,20 +7,20 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.*;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.model.Article;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
 import com.chenjishi.u148.view.ShareDialog;
@@ -32,12 +32,14 @@ import com.sina.weibo.sdk.exception.WeiboException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static com.chenjishi.u148.util.Constants.BASE_URL;
+import static com.chenjishi.u148.util.Constants.SOURCE_U148;
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,19 +49,14 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
-        Response.Listener<String>, Response.ErrorListener {
-    private static final int MSG_PARSE_SUCCESS = 1;
+        Response.Listener<Article>, Response.ErrorListener {
     private WebView mWebView;
     private JavascriptBridge mJsBridge;
-    private String mUrl;
 
     private MusicService mMusicService;
 
     private String mTitle;
-    private String mContent;
-    private Document mDoc;
-
-    private ArrayList<String> imageList = new ArrayList<String>();
+    private Article mArticle;
 
     private RelativeLayout mMusicPanel;
     private TextView mSongText;
@@ -79,8 +76,16 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         setMenuIcon3Visibility(true);
 
         Bundle bundle = getIntent().getExtras();
-        mUrl = ConstantUtils.BASE_URL + bundle.getString("link");
+
         mTitle = bundle.getString("title");
+        int source = bundle.getInt("source");
+        String link = bundle.getString("link");
+        String url;
+        if (SOURCE_U148 == source) {
+            url = BASE_URL + link;
+        } else {
+            url = link;
+        }
 
         mSongText = (TextView) findViewById(R.id.tv_song_title);
         mArtistText = (TextView) findViewById(R.id.tv_artist);
@@ -99,7 +104,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         //for debug javascript only
 //        mWebView.setWebChromeClient(new MyWebChromeClient());
-        HttpUtils.get(mUrl, this, this);
+        HttpUtils.get(url, source, this, this);
     }
 
     private void initMusicPanel() {
@@ -171,13 +176,17 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         switch (view.getId()) {
             case R.id.icon_menu2:
-                FlurryAgent.logEvent(ConstantUtils.EVENT_COMMENT_CLICK);
-                Element element = mDoc.getElementById("floors");
-                if (null == element) return;
+                FlurryAgent.logEvent(Constants.EVENT_COMMENT_CLICK);
+                if (mArticle.source == SOURCE_U148) {
+                    if (null == mArticle.comment) return;
 
-                Intent intent = new Intent(this, CommentActivity.class);
-                intent.putExtra("floors", element.html());
-                startActivity(intent);
+                    Intent intent = new Intent(this, CommentActivity.class);
+                    intent.putExtra("floors", mArticle.comment);
+                    startActivity(intent);
+                } else {
+                    //todo
+                }
+
                 break;
             case R.id.content_share:
                 if (null == mShareDialog) {
@@ -203,66 +212,25 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     }
 
     @Override
-    protected void backIconClicked() {
-        finish();
-    }
-
-    @Override
     public void onErrorResponse(VolleyError error) {
         CommonUtil.showToast(R.string.connection_error);
     }
 
     @Override
-    public void onResponse(String response) {
-        mDoc = Jsoup.parse(response);
-        if (null == mDoc) return;
-
-        new Thread() {
-            @Override
-            public void run() {
-                parseContent();
-                mHandler.sendEmptyMessage(MSG_PARSE_SUCCESS);
-            }
-        }.start();
-    }
-
-    private void parseContent() {
-        Elements content = mDoc.getElementsByClass("content");
-
-        if (null != content && content.size() > 0) {
-            Element article = content.get(0);
-
-            Elements images = article.select("img");
-            for (Element image : images) {
-                imageList.add(image.attr("src"));
-            }
-
-            Elements videos = article.select("embed");
-            for (Element video : videos) {
-                String videoUrl = video.attr("src");
-                video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
-            }
-            mContent = article.html();
+    public void onResponse(Article response) {
+        if (null != response && !TextUtils.isEmpty(response.content)) {
+            mArticle = response;
+            renderPage();
+        } else {
+            CommonUtil.showToast(R.string.parse_error);
+            finish();
         }
     }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_PARSE_SUCCESS) renderPage();
-        }
-    };
 
     private void renderPage() {
         String template = CommonUtil.readFromAssets(this, "usite.html");
-
-        if (null != mTitle) {
-            template = template.replace("{TITLE}", mTitle);
-        }
-
-        if (null != mContent) {
-            template = template.replace("{CONTENT}", mContent);
-        }
+        template = template.replace("{TITLE}", mTitle);
+        template = template.replace("{CONTENT}", mArticle.content);
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
         mWebView.setVisibility(View.VISIBLE);
@@ -280,8 +248,8 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     public void onShare(final int type) {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(ConstantUtils.PARAM_TITLE, mTitle);
-        FlurryAgent.logEvent(ConstantUtils.EVENT_ARTICLE_SHARE, params);
+        params.put(Constants.PARAM_TITLE, mTitle);
+        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
 
         final String title = String.format(getString(R.string.share_title), mTitle);
 
@@ -291,16 +259,18 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             return;
         }
 
+        final ArrayList<String> imageList = mArticle.imageList;
+        final String url = mArticle.url;
         if (null != imageList && imageList.size() > 0) {
             ImageRequest request = new ImageRequest(imageList.get(0), new Response.Listener<Bitmap>() {
                 @Override
                 public void onResponse(Bitmap response) {
 
                     if (null != response) {
-                        ShareUtils.shareWebpage(DetailActivity.this, mUrl, type, title, response);
+                        ShareUtils.shareWebpage(DetailActivity.this, url, type, title, response);
                     } else {
                         Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-                        ShareUtils.shareWebpage(DetailActivity.this, mUrl, type, title, icon);
+                        ShareUtils.shareWebpage(DetailActivity.this, url, type, title, icon);
                     }
                 }
             }, 0, 0, null, null);
@@ -308,15 +278,16 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             HttpUtils.getRequestQueue().add(request);
         } else {
             Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-            ShareUtils.shareWebpage(this, mUrl, type, title, icon);
+            ShareUtils.shareWebpage(this, url, type, title, icon);
         }
 
         mShareDialog.dismiss();
     }
 
     private void shareToWeibo(String title) {
+        final ArrayList<String> imageList = mArticle.imageList;
         String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
-        ShareUtils.shareToWeibo(this, title + mUrl, null, imageUrl, new RequestListener() {
+        ShareUtils.shareToWeibo(this, title + mArticle.url, null, imageUrl, new RequestListener() {
             @Override
             public void onComplete(String response) {
                 runOnUiThread(new Runnable() {
@@ -354,7 +325,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         public void onImageClick(String src) {
             Intent intent = new Intent(mContext, ImageActivity.class);
             intent.putExtra("imgsrc", src);
-            intent.putStringArrayListExtra("images", imageList);
+            intent.putStringArrayListExtra("images", mArticle.imageList);
             mContext.startActivity(intent);
         }
 

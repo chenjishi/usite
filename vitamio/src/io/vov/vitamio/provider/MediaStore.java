@@ -27,8 +27,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
-
-import io.vov.vitamio.utils.Log;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -211,11 +210,8 @@ public final class MediaStore {
         bitmap = BitmapFactory.decodeFileDescriptor(pfdInput.getFileDescriptor(), null, options);
         pfdInput.close();
       } catch (FileNotFoundException ex) {
-        Log.e("getMiniThumbFromFile", ex);
       } catch (IOException ex) {
-        Log.e("getMiniThumbFromFile", ex);
       } catch (OutOfMemoryError ex) {
-        Log.e("getMiniThumbFromFile", ex);
       }
       return bitmap;
     }
@@ -258,8 +254,6 @@ public final class MediaStore {
               sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
             if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
               bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
-              if (bitmap == null)
-                Log.d("couldn't decode byte array.");
             }
           }
           return bitmap;
@@ -293,8 +287,6 @@ public final class MediaStore {
               sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
             if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
               bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
-              if (bitmap == null)
-                Log.d("couldn't decode byte array.");
             }
           }
         } else if (kind == MINI_KIND) {
@@ -304,7 +296,6 @@ public final class MediaStore {
           throw new IllegalArgumentException("Unsupported kind: " + kind);
         }
       } catch (SQLiteException ex) {
-        Log.e("getThumbnail", ex);
       } finally {
         if (c != null)
           c.close();

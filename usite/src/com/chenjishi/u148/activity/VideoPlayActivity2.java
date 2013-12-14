@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.CommonUtil;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
 import com.chenjishi.u148.view.ShareDialog;
@@ -83,8 +83,8 @@ public class VideoPlayActivity2 extends Activity implements MediaController.OnHi
     @Override
     public void onShare(final int type) {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(ConstantUtils.PARAM_TITLE, mVideoTitle);
-        FlurryAgent.logEvent(ConstantUtils.EVENT_VIDEO_SHARE, params);
+        params.put(Constants.PARAM_TITLE, mVideoTitle);
+        FlurryAgent.logEvent(Constants.EVENT_VIDEO_SHARE, params);
 
         final String videoUrl = "http://v.youku.com/v_show/id_" + mVideoId + ".html";
 

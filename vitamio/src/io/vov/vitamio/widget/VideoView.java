@@ -48,7 +48,6 @@ import io.vov.vitamio.MediaPlayer.TrackInfo;
 import io.vov.vitamio.Metadata;
 import io.vov.vitamio.R;
 import io.vov.vitamio.Vitamio;
-import io.vov.vitamio.utils.Log;
 
 import java.io.IOException;
 import java.util.List;
@@ -81,7 +80,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   private static final int STATE_SUSPEND_UNSUPPORTED = 8;
   OnVideoSizeChangedListener mSizeChangedListener = new OnVideoSizeChangedListener() {
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-      Log.d("onVideoSizeChanged: (%dx%d)", width, height);
       mVideoWidth = mp.getVideoWidth();
       mVideoHeight = mp.getVideoHeight();
       mVideoAspectRatio = mp.getVideoAspectRatio();
@@ -91,7 +89,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   };
   OnPreparedListener mPreparedListener = new OnPreparedListener() {
     public void onPrepared(MediaPlayer mp) {
-      Log.d("onPrepared");
       mCurrentState = STATE_PREPARED;
       mTargetState = STATE_PLAYING;
       
@@ -206,7 +203,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   private Map<String, String> mHeaders;
   private OnCompletionListener mCompletionListener = new OnCompletionListener() {
     public void onCompletion(MediaPlayer mp) {
-      Log.d("onCompletion");
       mCurrentState = STATE_PLAYBACK_COMPLETED;
       mTargetState = STATE_PLAYBACK_COMPLETED;
       if (mMediaController != null)
@@ -217,7 +213,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   };
   private OnErrorListener mErrorListener = new OnErrorListener() {
     public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
-      Log.d("Error: %d, %d", framework_err, impl_err);
       mCurrentState = STATE_ERROR;
       mTargetState = STATE_ERROR;
       if (mMediaController != null)
@@ -251,7 +246,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   private OnInfoListener mInfoListener = new OnInfoListener() {
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-      Log.d("onInfo: (%d, %d)", what, extra);
       if (mOnInfoListener != null) {
         mOnInfoListener.onInfo(mp, what, extra);
       } else if (mMediaPlayer != null) {
@@ -271,7 +265,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   private OnSeekCompleteListener mSeekCompleteListener = new OnSeekCompleteListener() {
     @Override
     public void onSeekComplete(MediaPlayer mp) {
-      Log.d("onSeekComplete");
       if (mOnSeekCompleteListener != null)
         mOnSeekCompleteListener.onSeekComplete(mp);
     }
@@ -279,14 +272,12 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
   private OnTimedTextListener mTimedTextListener = new OnTimedTextListener() {
     @Override
     public void onTimedTextUpdate(byte[] pixels, int width, int height) {
-      Log.i("onSubtitleUpdate: bitmap subtitle, %dx%d", width, height);
       if (mOnTimedTextListener != null)
         mOnTimedTextListener.onTimedTextUpdate(pixels, width, height);
     }
 
     @Override
     public void onTimedText(String text) {
-      Log.i("onSubtitleUpdate: %s", text);
       if (mOnTimedTextListener != null)
         mOnTimedTextListener.onTimedText(text);
     }
@@ -346,7 +337,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
     }
     setLayoutParams(lp);
     getHolder().setFixedSize(mSurfaceWidth, mSurfaceHeight);
-    Log.d("VIDEO: %dx%dx%f, Surface: %dx%d, LP: %dx%d, Window: %dx%dx%f", mVideoWidth, mVideoHeight, mVideoAspectRatio, mSurfaceWidth, mSurfaceHeight, lp.width, lp.height, windowWidth, windowHeight, windowRatio);
     mVideoLayout = layout;
     mAspectRatio = aspectRatio;
   }
@@ -421,13 +411,11 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
       mCurrentState = STATE_PREPARING;
       attachMediaController();
     } catch (IOException ex) {
-      Log.e("Unable to open content: " + mUri, ex);
       mCurrentState = STATE_ERROR;
       mTargetState = STATE_ERROR;
       mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
       return;
     } catch (IllegalArgumentException ex) {
-      Log.e("Unable to open content: " + mUri, ex);
       mCurrentState = STATE_ERROR;
       mTargetState = STATE_ERROR;
       mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
@@ -579,7 +567,6 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
     if (isInPlaybackState()) {
       release(false);
       mCurrentState = STATE_SUSPEND_UNSUPPORTED;
-      Log.d("Unable to suspend video. Release MediaPlayer.");
     }
   }
 

@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.activity.VideoPlayActivity2;
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 

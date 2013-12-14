@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.ShareDialog;
@@ -88,8 +88,8 @@ public class VideoPlayerActivity extends Activity implements MediaController.OnH
         if (null == mVideo) return;
 
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(ConstantUtils.PARAM_TITLE, mVideo.title);
-        FlurryAgent.logEvent(ConstantUtils.EVENT_VIDEO_SHARE, params);
+        params.put(Constants.PARAM_TITLE, mVideo.title);
+        FlurryAgent.logEvent(Constants.EVENT_VIDEO_SHARE, params);
 
         final String videoUrl;
         if (mVideoUrl.contains("youku")) {

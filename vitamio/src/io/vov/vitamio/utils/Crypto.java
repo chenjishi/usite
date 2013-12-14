@@ -38,7 +38,6 @@ public class Crypto {
 			SecretKeySpec skey = new SecretKeySpec(generateKey(key), "AES");
 			setupCrypto(skey);
 		} catch (Exception e) {
-			Log.e("Crypto", e);
 		}
 	}
 
@@ -50,7 +49,6 @@ public class Crypto {
 			ecipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
 		} catch (Exception e) {
 			ecipher = null;
-			Log.e("setupCrypto", e);
 		}
 	}
 
@@ -62,7 +60,6 @@ public class Crypto {
 			byte[] ciphertext = ecipher.doFinal(plaintext.getBytes("UTF-8"));
 			return Base64.encodeToString(ciphertext, Base64.NO_WRAP);
 		} catch (Exception e) {
-			Log.e("encryp", e);
 			return "";
 		}
 	}
@@ -89,7 +86,6 @@ public class Crypto {
 			MessageDigest md = MessageDigest.getInstance("SHA256");
 			return md.digest(bytesOfMessage);
 		} catch (Exception e) {
-			Log.e("generateKey", e);
 			return null;
 		}
 	}
@@ -100,7 +96,6 @@ public class Crypto {
 			PublicKey pubKey = (PublicKey) oin.readObject();
 			return pubKey;
 		} catch (Exception e) {
-			Log.e("readKeyFromStream", e);
 			return null;
 		} finally {
 			oin.close();
@@ -123,7 +118,6 @@ public class Crypto {
 			byte[] cipherData = cipher.doFinal(data);
 			return Base64.encodeToString(cipherData, Base64.NO_WRAP);
 		} catch (Exception e) {
-			Log.e("rsaEncrypt", e);
 			return "";
 		}
 	}

@@ -29,7 +29,6 @@ public class Device {
     Locale locale = Locale.getDefault();
     if (locale != null) {
       String lo = locale.getLanguage();
-      Log.i("getLocale " + lo);
       if (lo != null) {
         return lo.toLowerCase();
       }

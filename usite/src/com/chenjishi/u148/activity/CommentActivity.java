@@ -3,15 +3,14 @@ package com.chenjishi.u148.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.DisplayMetrics;
+import android.view.*;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.entity.Comment;
+import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
@@ -39,6 +38,21 @@ public class CommentActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitleText(R.string.comment);
+
+        int statusBarHeight = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.width = metrics.widthPixels;
+        lp.height = metrics.heightPixels - statusBarHeight;
+        lp.gravity = Gravity.BOTTOM;
+        getWindow().setAttributes(lp);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
 
@@ -104,11 +118,6 @@ public class CommentActivity extends BaseActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.comment;
-    }
-
-    @Override
-    protected void backIconClicked() {
-        finish();
     }
 
     private class CommentAdapter extends BaseAdapter {

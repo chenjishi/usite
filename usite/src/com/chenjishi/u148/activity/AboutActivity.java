@@ -67,11 +67,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         return R.layout.about;
     }
 
-    @Override
-    protected void backIconClicked() {
-        finish();
-    }
-
     private void initView() {
         String versionName = CommonUtil.getVersionName(this);
         if (null != versionName) {

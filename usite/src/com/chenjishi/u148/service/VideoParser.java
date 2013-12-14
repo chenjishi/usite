@@ -1,6 +1,6 @@
 package com.chenjishi.u148.service;
 
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

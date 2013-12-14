@@ -31,7 +31,6 @@ import io.vov.vitamio.provider.MediaStore;
 import io.vov.vitamio.provider.MediaStore.Video;
 import io.vov.vitamio.utils.ContextUtils;
 import io.vov.vitamio.utils.FileUtils;
-import io.vov.vitamio.utils.Log;
 
 import java.io.File;
 import java.util.HashMap;
@@ -154,16 +153,9 @@ public class MediaScanner {
       postscan(directories);
       long end = System.currentTimeMillis();
 
-      Log.d(" prescan time: %dms", prescan - start);
-      Log.d("    scan time: %dms", scan - prescan);
-      Log.d("postscan time: %dms", end - scan);
-      Log.d("   total time: %dms", end - start);
     } catch (SQLException e) {
-      Log.e("SQLException in MediaScanner.scan()", e);
     } catch (UnsupportedOperationException e) {
-      Log.e("UnsupportedOperationException in MediaScanner.scan()", e);
     } catch (RemoteException e) {
-      Log.e("RemoteException in MediaScanner.scan()", e);
     }
   }
 
@@ -175,14 +167,12 @@ public class MediaScanner {
 
       return mClient.doScanFile(path, lastModifiedSeconds, file.length(), true);
     } catch (RemoteException e) {
-      Log.e("RemoteException in MediaScanner.scanFile()", e);
       return null;
     }
   }
 
   static {
     String LIB_ROOT = Vitamio.getLibraryPath();
-    Log.i("LIB ROOT: %s", LIB_ROOT);
     System.load(LIB_ROOT + "libstlport_shared.so");
     System.load(LIB_ROOT + "libvscanner.so");
     loadFFmpeg_native(LIB_ROOT + "libffmpeg.so");
@@ -293,7 +283,6 @@ public class MediaScanner {
     }
 
     public void scanFile(String path, long lastModified, long fileSize) {
-      Log.i("scanFile: %s", path);
       doScanFile(path, lastModified, fileSize, false);
     }
 
@@ -312,7 +301,6 @@ public class MediaScanner {
           }
         }
       } catch (RemoteException e) {
-        Log.e("RemoteException in MediaScanner.scanFile()", e);
       }
       return result;
     }
@@ -342,11 +330,8 @@ public class MediaScanner {
       try {
         value = new String(valueBytes, valueEncoding);
       } catch (Exception e) {
-        Log.e("handleStringTag", e);
         value = new String(valueBytes);
       }
-      Log.i("%s : %s", name, value);
-
       if (name.equalsIgnoreCase("title")) {
         mTitle = value;
       } else if (name.equalsIgnoreCase("artist")) {
@@ -368,7 +353,6 @@ public class MediaScanner {
     }
 
     public void setMimeType(String mimeType) {
-      Log.i("setMimeType: %s", mimeType);
       mMimeType = mimeType;
       mFileType = MediaFile.getFileTypeForMimeType(mimeType);
     }

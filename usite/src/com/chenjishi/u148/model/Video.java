@@ -1,4 +1,4 @@
-package com.chenjishi.u148.entity;
+package com.chenjishi.u148.model;
 
 /**
  * Created with IntelliJ IDEA.

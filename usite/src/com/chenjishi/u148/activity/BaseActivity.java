@@ -2,11 +2,14 @@ package com.chenjishi.u148.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.util.DisplayMetrics;
 import android.view.*;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.util.ConstantUtils;
+import com.chenjishi.u148.util.Constants;
 import com.flurry.android.FlurryAgent;
 import net.youmi.android.banner.AdSize;
 import net.youmi.android.banner.AdView;
@@ -18,32 +21,14 @@ import net.youmi.android.banner.AdView;
  * Time: 下午10:30
  * To change this template use File | Settings | File Templates.
  */
-public abstract class BaseActivity extends FragmentActivity {
-    private TextView mTitleText;
+public abstract class BaseActivity extends FragmentActivity implements SlidingPaneLayout.PanelSlideListener {
     private ImageView mMenuIcon2;
-    private LinearLayout mHomeIcon;
+    private SlidingPaneLayout slidingPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        LinearLayout rootView = new LinearLayout(this);
-        rootView.setOrientation(LinearLayout.VERTICAL);
-        rootView.setBackgroundColor(0xFFE6E6E6);
-
-        LayoutInflater.from(this).inflate(R.layout.action_bar_layout, rootView);
-
-        View contentView = LayoutInflater.from(this).inflate(getLayoutId(), null);
-        rootView.addView(contentView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                0, 1.0f));
-
-        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
-        rootView.addView(adView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        ((FrameLayout) findViewById(android.R.id.content)).addView(rootView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-
+        setContentView(R.layout.base_layout);
         int statusBarHeight = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
@@ -59,15 +44,36 @@ public abstract class BaseActivity extends FragmentActivity {
         lp.gravity = Gravity.BOTTOM;
         getWindow().setAttributes(lp);
 
-        mTitleText = (TextView) findViewById(R.id.tag_actionbar_title);
-        mHomeIcon = (LinearLayout) findViewById(R.id.home_up);
+
+        LinearLayout contentView = (LinearLayout) findViewById(R.id.content_view);
+        LayoutInflater.from(this).inflate(getLayoutId(), contentView, true);
+
+        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+                ((LinearLayout) findViewById(R.id.ad_view)).addView(adView, layoutParams);
+
+        slidingPane = (SlidingPaneLayout) findViewById(R.id.slide_panel);
+        slidingPane.setShadowResource(R.drawable.sliding_back_shadow);
+        slidingPane.setSliderFadeColor(0x00000000);
+        slidingPane.setPanelSlideListener(this);
+
         mMenuIcon2 = (ImageView) findViewById(R.id.icon_menu2);
-        mHomeIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                backIconClicked();
-            }
-        });
+    }
+
+    @Override
+    public void onPanelSlide(View view, float v) {
+        if (v >= 0.9) finish();
+    }
+
+    @Override
+    public void onPanelOpened(View view) {
+
+    }
+
+    @Override
+    public void onPanelClosed(View view) {
+
     }
 
     protected void setActionBarHide(boolean b) {
@@ -83,31 +89,21 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void setTitleText(String s) {
-        mTitleText.setText(s);
-    }
-
-    protected void setTitleText2(String s) {
         TextView textView = (TextView) findViewById(R.id.title);
         textView.setText(s);
         textView.setVisibility(View.VISIBLE);
     }
 
-    protected void setTitleText2(int resId) {
-        setTitleText2(getString(resId));
-    }
-
-    protected void setTitleText(int res) {
-        mTitleText.setText(getString(res));
+    protected void setTitleText(int resId) {
+        setTitleText(getString(resId));
     }
 
     protected abstract int getLayoutId();
 
-    protected abstract void backIconClicked();
-
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, ConstantUtils.FLURRY_APP_ID);
+        FlurryAgent.onStartSession(this, Constants.FLURRY_APP_ID);
     }
 
     @Override

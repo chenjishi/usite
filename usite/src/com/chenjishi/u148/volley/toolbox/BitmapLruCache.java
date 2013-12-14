@@ -40,7 +40,7 @@ public class BitmapLruCache implements ImageLoader.ImageCache {
 
     private Bitmap get(String key) {
         if (key == null) {
-            throw new NullPointerException("key == null");
+            return null;
         }
 
         Bitmap mapValue;

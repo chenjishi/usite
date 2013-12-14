@@ -24,7 +24,6 @@ public class ContextUtils {
 		try {
 			version = ctx.getPackageManager().getPackageInfo(ctx.getApplicationInfo().packageName, 0).versionCode;
 		} catch (Exception e) {
-			Log.e("getVersionInt", e);
 		}
 		return version;
 	}

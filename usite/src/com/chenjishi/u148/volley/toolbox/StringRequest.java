@@ -16,15 +16,9 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-import android.util.Log;
-import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.Response;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A canned request for retrieving the response body at a given URL as a String.
@@ -60,13 +54,6 @@ public class StringRequest extends Request<String> {
     @Override
     protected void deliverResponse(String response) {
         mListener.onResponse(response);
-    }
-
-    @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6");
-        return headers;
     }
 
     @Override

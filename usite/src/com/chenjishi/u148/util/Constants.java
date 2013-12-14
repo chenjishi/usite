@@ -7,15 +7,22 @@ package com.chenjishi.u148.util;
  * Time: 下午6:59
  * To change this template use File | Settings | File Templates.
  */
-public class ConstantUtils {
-    public static final String FLURRY_APP_ID = "xxxxxxxxxxxxx";
-    public static final String WX_APP_ID = "xxxxxxxxxxxxx";
-    public static final String WEIBO_APP_KEY = "xxxxxxxxxxxxx";
+public class Constants {
+    public static final int SOURCE_U148 = 100;
+    public static final int SOURCE_JIANDAN = 101;
+    public static final int SOURCE_NEWS = 102;
+
+    public static final String FLURRY_APP_ID = "YYHS4STVXPMH6Y9GJ8WD";
+    public static final String WX_APP_ID = "wxf862baa09e0df157";
+    public static final String WEIBO_APP_KEY = "1792649719";
     public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";
 
     public static final String BASE_URL = "http://www.u148.net";
+    public static final String BASE_NEWS_URL = "http://news.cnblogs.com";
 
     public static final String CACHED_FILE_NAME = "u148.txt";
+    public static final String CACHED_JIANDAN = "jiandan";
+    public static final String CACHED_NEWS = "news";
 
     public static final String DOWNLOAD_STATUS_ACTION = "com.waqu.android.DOWNLOAD_STATUS";
 

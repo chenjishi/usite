@@ -1,7 +1,7 @@
 package com.chenjishi.u148.service;
 
 import android.support.v4.util.LruCache;
-import com.chenjishi.u148.entity.FeedItem;
+import com.chenjishi.u148.model.FeedItem;
 import com.chenjishi.u148.parser.FeedItemParser;
 
 import java.util.ArrayList;

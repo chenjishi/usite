@@ -2,6 +2,8 @@ package com.chenjishi.u148.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import com.chenjishi.u148.model.Article;
+import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.RequestQueue;
@@ -9,6 +11,7 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.toolbox.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +64,21 @@ public class HttpUtils {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public static void getFeed(int source,
+                               String url,
+                               Response.Listener<ArrayList<Feed>> listener,
+                               Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        queue.add(new FeedRequest(source, url, listener, errorListener));
+    }
+
+    public static void get(String url, int source,
+                           Response.Listener<Article> listener,
+                           Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        queue.add(new ContentRequest(source, url, listener, errorListener));
     }
 
     public static void get(String url,

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.chenjishi.u148.entity.Video;
+import com.chenjishi.u148.model.Video;
 
 import java.util.ArrayList;
 import java.util.HashMap;

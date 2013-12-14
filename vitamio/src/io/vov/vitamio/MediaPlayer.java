@@ -38,7 +38,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import io.vov.vitamio.utils.FileUtils;
-import io.vov.vitamio.utils.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -222,7 +221,6 @@ public class MediaPlayer {
   static {
     String LIB_ROOT = Vitamio.getLibraryPath();
     try {
-      Log.i("LIB ROOT: %s", LIB_ROOT);
       System.load(LIB_ROOT + "libstlport_shared.so");
       System.load(LIB_ROOT + "libvplayer.so");
       loadFFmpeg_native(LIB_ROOT + "libffmpeg.so");
@@ -235,11 +233,9 @@ public class MediaPlayer {
         vvo_loaded = loadVVO_native(LIB_ROOT + "libvvo.7.so");
       if (!vvo_loaded) {
         vvo_loaded = loadVVO_native(LIB_ROOT + "libvvo.j.so");
-        Log.d("FALLBACK TO VVO JNI " + vvo_loaded);
       }
       loadVAO_native(LIB_ROOT + "libvao.0.so");
     } catch (java.lang.UnsatisfiedLinkError e) {
-      Log.e("Error loading libs", e);
     }
   }
 
@@ -409,7 +405,6 @@ public class MediaPlayer {
 
   /**
    * Set the segments source url
-   * @param segments the array path of the url e.g. Segmented video list
    * @param cacheDir e.g. getCacheDir().toString()
    */
   public void setDataSegments(String[] uris, String cacheDir) {
@@ -712,7 +707,6 @@ public class MediaPlayer {
       try {
         mFD.close();
       } catch (IOException e) {
-        Log.e("closeFD", e);
       }
       mFD = null;
     }
@@ -773,7 +767,6 @@ public class MediaPlayer {
     try {
       trackString = new String(tracks, encoding);
     } catch (Exception e) {
-      Log.e("getTrackMap exception");
       trackString = new String(tracks);
     }
     for (String s : trackString.split("!#!")) {
@@ -961,7 +954,6 @@ public class MediaPlayer {
           try {
             b.putString(MEDIA_SUBTITLE_STRING, new String(bytes, encoding.trim()));
           } catch (UnsupportedEncodingException e) {
-            Log.e("updateSub", e);
             b.putString(MEDIA_SUBTITLE_STRING, new String(bytes));
           }
         }
@@ -1121,7 +1113,6 @@ public class MediaPlayer {
       mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateInHz, channelConfig, AudioFormat.ENCODING_PCM_16BIT, mAudioTrackBufferSize, AudioTrack.MODE_STREAM);
     } catch (Exception e) {
       mAudioTrackBufferSize = 0;
-      Log.e("audioTrackInit", e);
     }
     return mAudioTrackBufferSize;
   }
@@ -1190,7 +1181,6 @@ public class MediaPlayer {
         c.drawBitmap(mBitmap, 0, 0, null);
         mLocalSurface.unlockCanvasAndPost(c);
       } catch (Exception e) {
-        Log.e("surfaceRender", e);
       }
     }
   }
@@ -1425,7 +1415,6 @@ public class MediaPlayer {
             mOnVideoSizeChangedListener.onVideoSizeChanged(mMediaPlayer, msg.arg1, msg.arg2);
           return;
         case MEDIA_ERROR:
-          Log.e("Error (%d, %d)", msg.arg1, msg.arg2);
           boolean error_was_handled = false;
           if (mOnErrorListener != null)
             error_was_handled = mOnErrorListener.onError(mMediaPlayer, msg.arg1, msg.arg2);
@@ -1434,7 +1423,6 @@ public class MediaPlayer {
           stayAwake(false);
           return;
         case MEDIA_INFO:
-          Log.i("Info (%d, %d)", msg.arg1, msg.arg2);
           if (mOnInfoListener != null)
             mOnInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
           return;
@@ -1443,11 +1431,9 @@ public class MediaPlayer {
         case MEDIA_TIMED_TEXT:
           mData = msg.getData();
           if (mData.getInt(MEDIA_SUBTITLE_TYPE) == SUBTITLE_TEXT) {
-            Log.i("Subtitle : %s", mData.getString(MEDIA_SUBTITLE_STRING));
             if (mOnTimedTextListener != null)
               mOnTimedTextListener.onTimedText(mData.getString(MEDIA_SUBTITLE_STRING));
           } else if (mData.getInt(MEDIA_SUBTITLE_TYPE) == SUBTITLE_BITMAP) {
-            Log.i("Subtitle : bitmap");
             if (mOnTimedTextListener != null)
               mOnTimedTextListener.onTimedTextUpdate(mData.getByteArray(MEDIA_SUBTITLE_BYTES), msg.arg1, msg.arg2);
           }
@@ -1471,7 +1457,6 @@ public class MediaPlayer {
         		mOnHWRenderFailedListener.onFailed();
         	return;
         default:
-          Log.e("Unknown message type " + msg.what);
           return;
       }
     }
