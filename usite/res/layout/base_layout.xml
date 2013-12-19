@@ -27,7 +27,7 @@
                     android:layout_centerVertical="true"
                     android:textSize="@dimen/action_bar_subtitle_size"
                     android:textColor="@color/white"
-                    android:text="@string/app_name_simple"/>
+                    android:text="@string/app_name"/>
             <ImageView
                     android:id="@+id/icon_menu2"
                     android:layout_width="wrap_content"

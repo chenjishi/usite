@@ -1,5 +1,6 @@
 package com.chenjishi.u148.volley.toolbox;
 
+import android.util.Log;
 import com.chenjishi.u148.model.Article;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.Request;
@@ -141,7 +142,11 @@ public class ContentRequest extends Request<Article> {
             Elements videos = element.select("embed");
             for (Element video : videos) {
                 String videoUrl = video.attr("src");
-                video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
+                if (videoUrl.contains("xiami")) {
+                    video.parent().html("<img src=\"file:///android_asset/audio.png\" title=\"" + videoUrl + "\" />");
+                } else {
+                    video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
+                }
             }
             article.content = element.html();
         }

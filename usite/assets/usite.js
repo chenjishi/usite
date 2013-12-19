@@ -22,7 +22,7 @@ function initImages() {
 				images[i].parentNode.parentNode.style.textIndent ='0em';
 			}
 		} else {
-		    if(images[i].src == 'file:///android_asset/video.png') {
+		    if(images[i].src.indexOf('android_asset') != -1) {
 		        images[i].parentNode.setAttribute('onclick','U148.onVideoClick("'+ images[i].title +'")');
 		    } else {
      			images[i].setAttribute('onclick','U148.onImageClick("'+ images[i].src +'")');

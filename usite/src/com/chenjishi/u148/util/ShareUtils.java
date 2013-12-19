@@ -90,7 +90,7 @@ public class ShareUtils {
 
         WXMediaMessage msg = new WXMediaMessage();
         msg.mediaObject = imgObj;
-        String title = context.getString(R.string.app_name_simple);
+        String title = context.getString(R.string.app_name);
         msg.title = title;
         msg.description = title;
 

@@ -15,19 +15,19 @@ import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.parser.FeedItemParser;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
-import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
-import static com.chenjishi.u148.util.Constants.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.chenjishi.u148.util.Constants.*;
 
 /**
  * Created by chenjishi on 13-12-7.
@@ -55,13 +55,11 @@ public class FunListActivity extends BaseActivity implements Response.Listener<A
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitleText(R.string.jian_dan);
-
         mSource = getIntent().getIntExtra("source", SOURCE_JIANDAN);
+        setTitleText(mSource == SOURCE_JIANDAN ? R.string.jian_dan : R.string.news);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
         mRefreshView = (PullToRefreshListView) findViewById(R.id.list_fun);
-
         ListView listView = mRefreshView.getRefreshableView();
         ((ViewGroup) listView.getParent()).addView(mEmptyView);
         listView.setEmptyView(mEmptyView);

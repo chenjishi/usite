@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Constants;
 import com.flurry.android.FlurryAgent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -59,10 +60,10 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", item.title);
         intent.putExtra("link", item.url);
+        intent.putExtra("source", Constants.SOURCE_U148);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("article_title", item.title);
-        params.put("article_author", item.author);
         FlurryAgent.logEvent("read_article", params);
 
         startActivity(intent);

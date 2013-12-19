@@ -24,6 +24,7 @@ import com.chenjishi.u148.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created with IntelliJ IDEA.
@@ -148,6 +149,7 @@ public class VideoListActivity extends BaseActivity {
 
                 mVideoList = mDatabase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
                 if (null != mVideoList && mVideoList.size() > 0) {
+                    Collections.reverse(mVideoList);
                     mAdapter.dataChange(mVideoList);
                 }
             } else if (MSG_CLEAR_ALL == msg.what){

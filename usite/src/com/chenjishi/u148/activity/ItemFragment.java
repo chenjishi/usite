@@ -224,7 +224,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
             ViewHolder holder;
 
             if (null == convertView) {
-                convertView = mInflater.inflate(R.layout.feed_list_item, null);
+                convertView = mInflater.inflate(R.layout.feed_list_item, parent, false);
                 holder = new ViewHolder();
 
                 holder.thumb = (ImageView) convertView.findViewById(R.id.feed_image);

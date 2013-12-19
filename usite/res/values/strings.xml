@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">有意思吧</string>
-    <string name="app_name_simple">有意思吧</string>
     <string name="app_home">首页</string>
     <string name="app_video">影像</string>
     <string name="app_image">图画</string>
@@ -18,12 +17,12 @@
     <string name="cancel">取消</string>
     <string name="feedback">意见反馈</string>
     <string name="jian_dan">煎蛋最新</string>
+    <string name="news">科技新闻</string>
     <string name="about">关于</string>
-    <string name="app_version">版本: %1$s</string>
     <string name="net_error">网络无连接，请检查网络设置</string>
     <string name="weibo">countryhouses</string>
-    <string name="about_tip">有意思吧android客户端是为方便使用手机浏览(www.u148.net)精品文章而开发的一款免费App。对网页进行了
-    重新排版，阅读更舒适，支持图片单独浏览、保存，支持视频播放。\n\n欢迎各位亲们提供反馈意见，你们的改进建议是我改进版本最大的动力！</string>
+    <string name="about_tip">分享生活，回味时光</string>
+    <string name="cache_clear">"清理缓存(已占用%1$s)"</string>
 
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
     <string name="tips">小提示:首页手指下拉可刷新当日最新内容</string>

@@ -3,10 +3,12 @@ package com.chenjishi.u148.activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
-import android.util.DisplayMetrics;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.Constants;
@@ -29,21 +31,6 @@ public abstract class BaseActivity extends FragmentActivity implements SlidingPa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.base_layout);
-        int statusBarHeight = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.width = metrics.widthPixels;
-        lp.height = metrics.heightPixels - statusBarHeight;
-        lp.gravity = Gravity.BOTTOM;
-        getWindow().setAttributes(lp);
-
 
         LinearLayout contentView = (LinearLayout) findViewById(R.id.content_view);
         LayoutInflater.from(this).inflate(getLayoutId(), contentView, true);
@@ -51,7 +38,7 @@ public abstract class BaseActivity extends FragmentActivity implements SlidingPa
         AdView adView = new AdView(this, AdSize.FIT_SCREEN);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-                ((LinearLayout) findViewById(R.id.ad_view)).addView(adView, layoutParams);
+        ((LinearLayout) findViewById(R.id.ad_view)).addView(adView, layoutParams);
 
         slidingPane = (SlidingPaneLayout) findViewById(R.id.slide_panel);
         slidingPane.setShadowResource(R.drawable.sliding_back_shadow);
@@ -81,7 +68,17 @@ public abstract class BaseActivity extends FragmentActivity implements SlidingPa
     }
 
     protected void setMenuIcon2Visibility(boolean b) {
-        mMenuIcon2.setVisibility(b ? View.VISIBLE : View.GONE);
+
+        if (b) {
+            mMenuIcon2.setVisibility(View.VISIBLE);
+        } else {
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            findViewById(R.id.content_share).setLayoutParams(layoutParams);
+            mMenuIcon2.setVisibility(View.GONE);
+        }
+        mMenuIcon2.setVisibility(b ? View.VISIBLE : View.INVISIBLE);
     }
 
     protected void setMenuIcon3Visibility(boolean b) {

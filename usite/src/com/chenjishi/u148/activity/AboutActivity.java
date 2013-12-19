@@ -3,16 +3,21 @@ package com.chenjishi.u148.activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.Toast;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.FileUtils;
+import com.chenjishi.u148.view.FireworksView;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,8 +27,8 @@ import com.chenjishi.u148.util.FileUtils;
  * To change this template use File | Settings | File Templates.
  */
 public class AboutActivity extends BaseActivity implements View.OnClickListener {
-    private TextView mCacheText;
     private Context mContext;
+    private MediaPlayer mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +40,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         findViewById(R.id.weibo).setOnClickListener(this);
         findViewById(R.id.btn_clear).setOnClickListener(this);
 
-        mCacheText = (TextView) findViewById(R.id.tag_cache);
-        mCacheText.setText("计算中...");
         cacheThread.start();
         initView();
     }
@@ -57,7 +60,8 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 1 && !isFinishing()) {
-                mCacheText.setText("当前缓存大小为：" + msg.obj);
+                String cache = String.format(getString(R.string.cache_clear), msg.obj);
+                ((Button) findViewById(R.id.btn_clear)).setText(cache);
             }
         }
     };
@@ -70,8 +74,8 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     private void initView() {
         String versionName = CommonUtil.getVersionName(this);
         if (null != versionName) {
-            TextView versionText = (TextView) findViewById(R.id.version_text);
-            versionText.setText(String.format(getString(R.string.app_version), versionName));
+            Button versionText = (Button) findViewById(R.id.version_text);
+            versionText.setText(versionName);
         }
     }
 
@@ -105,6 +109,35 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
+    private int count;
+    public void easterEgg(View v) {
+        count++;
+        if (count == 3) {
+            Toast.makeText(this, "再点击两次有惊喜哦~", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (count == 5) {
+            FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
+            final FireworksView fireworksView = new FireworksView(this);
+            rootView.addView(fireworksView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            count = 0;
+            mPlayer = MediaPlayer.create(this, R.raw.fireworks);
+            mPlayer.setLooping(true);
+            mPlayer.start();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (null != mPlayer) {
+            mPlayer.release();
+            mPlayer = null;
+        }
+    }
+
     private class ClearCacheTask extends AsyncTask<String, Integer, Boolean> {
         ProgressDialog progress = new ProgressDialog(AboutActivity.this);
 
@@ -129,7 +162,8 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
             super.onPostExecute(result);
             progress.dismiss();
             CommonUtil.showToast("清除缓存成功!");
-            mCacheText.setText("0KB");
+            String cache = String.format(mContext.getString(R.string.cache_clear), "0KB");
+            ((Button) findViewById(R.id.btn_clear)).setText(cache);
         }
     }
 }

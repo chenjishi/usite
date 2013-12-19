@@ -71,8 +71,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitleText(R.string.app_name_simple);
-        setMenuIcon2Visibility(true);
         setMenuIcon3Visibility(true);
 
         Bundle bundle = getIntent().getExtras();
@@ -83,8 +81,10 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         String url;
         if (SOURCE_U148 == source) {
             url = BASE_URL + link;
+            setMenuIcon2Visibility(true);
         } else {
             url = link;
+            setMenuIcon2Visibility(false);
         }
 
         mSongText = (TextView) findViewById(R.id.tv_song_title);
@@ -331,7 +331,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         public void onVideoClick(String src) {
             Intent intent = new Intent();
-            if (src.contains("www.xiami.com")) {
+            if (src.contains("xiami")) {
                 intent.setClass(mContext, MusicService.class);
                 intent.putExtra("url", src);
                 startService(intent);
