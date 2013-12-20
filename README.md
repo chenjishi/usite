@@ -9,15 +9,15 @@ https://play.google.com/store/apps/details?id=com.chenjishi.u148&feature=search_
 ##软件截图
 <p align="center">
   <img src="https://raw.github.com/chenjishi/usite/master/1_framed.png?raw=true" 
-  alt="usite" height="400" width="240"/>
+  alt="usite" height="654" width="375"/>
 </p>
 <p align="center">
   <img src="https://raw.github.com/chenjishi/usite/master/2_framed.png?raw=true" 
-  alt="usite" height="400" width="240"/>
+  alt="usite" height="654" width="375"/>
 </p>
 <p align="center">
   <img src="https://raw.github.com/chenjishi/usite/master/3_framed.png?raw=true" 
-  alt="usite" height="400" width="240"/>
+  alt="usite" height="654" width="375"/>
 </p>
 
 ##License
