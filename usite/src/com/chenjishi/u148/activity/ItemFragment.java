@@ -53,7 +53,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     };
 
     private int lastItemIndex;
-    private int currentPage = 1;
+    protected int currentPage = 1;
     private int category;
     private boolean dataLoaded;
 
@@ -109,6 +109,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         intent.putExtra("source", Constants.SOURCE_U148);
 
         Map<String, String> params = new HashMap<String, String>();
+        params.put("author", item.author);
         params.put("title", item.title);
         FlurryAgent.logEvent("read_article", params);
 
@@ -139,7 +140,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         }
     }
 
-    private void loadCacheData() {
+    protected void loadCacheData() {
         String path = FileCache.getDataCacheDirectory(getActivity()) + Constants.CACHED_FILE_NAME;
         final String data = FileUtils.readFromFile(path);
         if (null != data) {
@@ -187,7 +188,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         }.start();
     }
 
-    private String getUrl() {
+    protected String getUrl() {
         return Constants.BASE_URL + urls[category] + currentPage + ".html";
     }
 

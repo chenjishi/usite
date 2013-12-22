@@ -64,4 +64,12 @@
     <string name="no_comment">暂无评论</string>
     <string name="occupied_size">緩存視頻占用%1$s</string>
     <string name="video">視頻</string>
+
+    <string name="login">登陆</string>
+    <string name="write_comment">写评论</string>
+    <string name="email">邮箱</string>
+    <string name="comment_hint">写下你对这篇文章的感悟</string>
+    <string name="password">密码</string>
+
+
 </resources>

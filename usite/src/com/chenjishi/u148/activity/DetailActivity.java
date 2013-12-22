@@ -6,16 +6,20 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.os.IBinder;
+import android.os.*;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.*;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Article;
+import com.chenjishi.u148.model.Comment;
+import com.chenjishi.u148.model.User;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
@@ -23,6 +27,7 @@ import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
+import com.chenjishi.u148.view.CommentDialog;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -33,8 +38,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -176,17 +184,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         switch (view.getId()) {
             case R.id.icon_menu2:
-                FlurryAgent.logEvent(Constants.EVENT_COMMENT_CLICK);
-                if (mArticle.source == SOURCE_U148) {
-                    if (null == mArticle.comment) return;
-
-                    Intent intent = new Intent(this, CommentActivity.class);
-                    intent.putExtra("floors", mArticle.comment);
-                    startActivity(intent);
-                } else {
-                    //todo
-                }
-
+                showCommentDialog();
                 break;
             case R.id.content_share:
                 if (null == mShareDialog) {
@@ -204,6 +202,105 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 break;
 
         }
+    }
+
+    private void showCommentDialog() {
+        CommentDialog dialog = new CommentDialog(this, new CommentDialog.OnCommentListner() {
+            @Override
+            public void onConfirm(final String comment) {
+                User user = PrefsUtil.getUser();
+                if (null != user && !TextUtils.isEmpty(user.cookie)) {
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            String s = comment;
+                            s += "--来自有意思吧Android客户端(" + Build.MANUFACTURER + " " + Build.MODEL + ")http://www.appchina.com/app/com.chenjishi.u148/";
+                            sendComment(s);
+                        }
+                    }.start();
+                } else {
+                    Toast.makeText(DetailActivity.this, "回首页先登陆才能发评论哦~~", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCheckComment() {
+                FlurryAgent.logEvent(Constants.EVENT_COMMENT_CLICK);
+                if (null == mArticle.comment) return;
+
+                Intent intent = new Intent(DetailActivity.this, CommentActivity.class);
+                intent.putExtra("floors", mArticle.comment);
+                startActivity(intent);
+            }
+        });
+        dialog.show();
+    }
+
+    private void sendComment(String comment) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL("http://www.u148.net/article_review/save.u");
+            conn = (HttpURLConnection) url.openConnection();
+            User user = PrefsUtil.getUser();
+            conn.setConnectTimeout(5000);
+            conn.setRequestProperty("Cookie", user.cookie);
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setUseCaches(false);
+            conn.connect();
+
+            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
+            String articleUrl = mArticle.url;
+            int idx = articleUrl.lastIndexOf('/');
+            String articleId = "";
+            if (idx != -1) {
+                articleId = articleUrl.substring(idx + 1);
+                articleId = articleId.replace(".html", "");
+            }
+
+            double rand = Math.random();
+            String params = "review.id=0&review.aid=" + articleId +
+                    "&review.contents=" + URLEncoder.encode(comment, "UTF-8") +
+                    "&rand=" + rand;
+            Log.i("test", "params " + params);
+            out.writeBytes(params);
+            out.flush();
+            out.close();
+
+            inputToStream(conn.getInputStream());
+
+            Handler mainThread = new Handler(Looper.getMainLooper());
+            mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(DetailActivity.this, "评论已发送", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != conn) {
+                conn.disconnect();
+            }
+        }
+
+    }
+
+    private String inputToStream(InputStream is) throws IOException {
+        InputStreamReader in = new InputStreamReader(is);
+        BufferedReader buff = new BufferedReader(in);
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        while ((line = buff.readLine()) != null) {
+            sb.append(line);
+        }
+
+        buff.close();
+        is.close();
+
+        return sb.toString();
     }
 
     @Override
@@ -342,4 +439,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             }
         }
     }
+
+
 }

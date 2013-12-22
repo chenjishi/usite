@@ -1,6 +1,9 @@
 package com.chenjishi.u148.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -9,28 +12,42 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.TextView;
+import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.AppApplication;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.model.User;
 import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.flurry.android.FlurryAgent;
 import net.youmi.android.banner.AdSize;
 import net.youmi.android.banner.AdView;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -76,6 +93,19 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         mRadioGroup.check(R.id.radio_home);
 
         checkUpdate();
+
+        //cookie will be expired after 30days, check it and login again;
+        User user = PrefsUtil.getUser();
+        if (null != user && !TextUtils.isEmpty(user.userName)) {
+            long lastLoginTime = user.loginTime;
+            if (lastLoginTime > 0) {
+                long diff = System.currentTimeMillis() - lastLoginTime;
+                long seconds = diff / 1000;
+                if (seconds >= 30 * 24 * 60 * 60) {
+                    login(user.userName, user.password);
+                }
+            }
+        }
     }
 
     @Override
@@ -182,6 +212,16 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         stopService(new Intent(this, MusicService.class));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        TextView userText = (TextView) findViewById(R.id.user_name);
+        if (null != userText) {
+            userText.setText(getUserName());
+        }
+    }
+
     public void onDrawerButtonClicked(View v) {
         if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
             drawerLayout.closeDrawer(Gravity.LEFT);
@@ -199,30 +239,82 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         Intent intent = new Intent();
         switch (index) {
             case 0:
-                intent.setClass(this, VideoListActivity.class);
+                User user = PrefsUtil.getUser();
+                if (null != user && !TextUtils.isEmpty(user.cookie)) {
+                    startActivity(new Intent(this, UserActivity.class));
+                } else {
+                    showLoginDialog();
+                }
                 break;
             case 1:
-                intent.setClass(this, FunListActivity.class);
-                intent.putExtra("source", Constants.SOURCE_JIANDAN);
+                intent.setClass(this, VideoListActivity.class);
+                startActivity(intent);
                 break;
             case 2:
                 intent.setClass(this, FunListActivity.class);
-                intent.putExtra("source", Constants.SOURCE_NEWS);
+                intent.putExtra("source", Constants.SOURCE_JIANDAN);
+                startActivity(intent);
                 break;
             case 3:
-                intent.setClass(this, ArticleListActivity.class);
+                intent.setClass(this, FunListActivity.class);
+                intent.putExtra("source", Constants.SOURCE_NEWS);
                 break;
             case 4:
+                intent.setClass(this, ArticleListActivity.class);
+                startActivity(intent);
+                break;
+            case 5:
                 intent.setClass(this, AboutActivity.class);
+                startActivity(intent);
                 break;
         }
 
-        startActivity(intent);
+    }
+
+    private void showLoginDialog() {
+
+        LoginDialog dialog = new LoginDialog(this, new LoginDialog.OnLoginListener() {
+            @Override
+            public void onConfirm(String userName, String password) {
+                new LoginTask().execute(userName, password);
+            }
+        });
+        dialog.show();
+    }
+
+    private String getUserName() {
+        User user = PrefsUtil.getUser();
+        String text;
+        if (null != user && !TextUtils.isEmpty(user.userName)) {
+            text = !TextUtils.isEmpty(user.nickName) ? user.nickName : user.userName;
+        } else {
+            text = categories[0];
+        }
+
+        return text;
     }
 
     private void initMenuList() {
         LinearLayout menuLayout = (LinearLayout) findViewById(R.id.layout_menu);
-        for (int i = 0; i < categories.length; i++) {
+
+        View userView = LayoutInflater.from(this).inflate(R.layout.user_info, menuLayout, false);
+        final ImageView userIcon = (ImageView) userView.findViewById(R.id.user_avatar);
+        final TextView userText = (TextView) userView.findViewById(R.id.user_name);
+
+        userText.setText(getUserName());
+        User user = PrefsUtil.getUser();
+        if (null != user && !TextUtils.isEmpty(user.avatar)) {
+            ImageLoader imageLoader = HttpUtils.getImageLoader();
+            imageLoader.get(user.avatar, ImageLoader.getImageListener(userIcon,
+                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
+            userIcon.setVisibility(View.VISIBLE);
+        }
+
+        userView.setTag(0);
+        userView.setOnClickListener(this);
+        menuLayout.addView(userView);
+
+        for (int i = 1; i < categories.length; i++) {
             menuLayout.addView(getMenuItemView(i));
         }
     }
@@ -269,5 +361,116 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
     protected void onDestroy() {
         super.onDestroy();
         DataCacheService.getInstance().clearCaches();
+    }
+
+    private static final String REQUEST_URL = "http://www.u148.net/user/login.html";
+    private static final String LOGING_URL = "http://www.u148.net/usr/ajax_login.u?usr.uname=%1$s&usr.password=%2$s&usr.exp=2592000&rand=%3$s";
+
+    private class LoginTask extends AsyncTask<String, Void, Boolean> {
+
+        private ProgressDialog progess;
+
+        @Override
+        protected void onPreExecute() {
+            progess = new ProgressDialog(HomeActivity.this);
+            progess.setMessage("登录中...");
+            progess.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            String userName = params[0];
+            String email = params[1];
+
+            return login(userName, email);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            Toast.makeText(HomeActivity.this, aBoolean ? "登陆成功!" : "登录失败!", Toast.LENGTH_SHORT).show();
+            progess.dismiss();
+            if (aBoolean) {
+                User user = PrefsUtil.getUser();
+
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("userName", user.userName);
+                params.put("password", user.password);
+                FlurryAgent.logEvent("login", params);
+
+                startActivity(new Intent(HomeActivity.this, UserActivity.class));
+            }
+        }
+    }
+
+    private boolean login(String userName, String passWord) {
+        boolean result = false;
+
+        HttpURLConnection conn = null;
+        URL url = null;
+        try {
+            url = new URL(REQUEST_URL);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.connect();
+            String headerName = null;
+            String cookie = "";
+            for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
+                if (headerName.equals("Set-Cookie")) {
+                    cookie = conn.getHeaderField(i);
+                    break;
+                }
+            }
+
+            double rand = Math.random();
+            String loginUrl = String.format(LOGING_URL, userName, passWord, rand + "");
+
+            url = new URL(loginUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setRequestProperty("Cookie", cookie);
+            conn.connect();
+
+            for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
+                if (headerName.equals("Set-Cookie")) {
+                    cookie = conn.getHeaderField(i);
+                    break;
+                }
+            }
+
+            InputStreamReader in = new InputStreamReader((InputStream) conn.getContent());
+            BufferedReader buff = new BufferedReader(in);
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while ((line = buff.readLine()) != null) {
+                sb.append(line);
+            }
+            buff.close();
+
+            String json = sb.toString();
+            if (!TextUtils.isEmpty(json)) {
+                JSONObject jsonObj = new JSONObject(json);
+                int code = jsonObj.optInt("status", -1);
+                if (code == 1) {
+                    User user = new User();
+                    user.userName = userName;
+                    user.password = passWord;
+                    user.cookie = cookie;
+                    user.loginTime = System.currentTimeMillis();
+                    PrefsUtil.setUser(user);
+                    result = true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+
+        } finally {
+            if (null != conn) {
+                conn.disconnect();
+            }
+        }
+
+        return result;
     }
 }

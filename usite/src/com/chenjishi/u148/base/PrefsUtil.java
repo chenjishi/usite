@@ -2,6 +2,8 @@ package com.chenjishi.u148.base;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
+import com.chenjishi.u148.model.User;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 /**
@@ -28,6 +30,50 @@ public class PrefsUtil {
     private static final String KEY_EXPIRE_IN = "expire_in";
     private static final String KEY_CACHE_CLEAR_TIME = "cache_clear_time";
     private static final String KEY_CACHE_UPDATE_TIME = "cache_update_time";
+
+    private static final String KEY_USER_NAME = "user_name";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_AVATAR = "avatar";
+    private static final String KEY_COOKIE = "cookie";
+    private static final String KEY_LOGIN_TIME = "login_time";
+    private static final String KEY_USER_URL = "user_url";
+    private static final String KEY_NICK_NAME = "nick_name";
+    private static final String KEY_USER_ID = "uId";
+
+    public static void setUser(User user) {
+        if (null == user) return;
+
+        saveStringPreference(KEY_USER_NAME, user.userName);
+        saveStringPreference(KEY_PASSWORD, user.password);
+        saveStringPreference(KEY_AVATAR, user.avatar);
+        saveStringPreference(KEY_COOKIE, user.cookie);
+        saveLongPreference(KEY_LOGIN_TIME, user.loginTime);
+        saveStringPreference(KEY_USER_URL, user.url);
+        saveStringPreference(KEY_NICK_NAME, user.nickName);
+
+        if (!TextUtils.isEmpty(user.url)) {
+            int idx = user.url.lastIndexOf('/');
+            if (idx != -1) {
+                String id = user.url.substring(idx + 1);
+                saveStringPreference(KEY_USER_ID, id);
+            }
+        }
+    }
+
+    public static User getUser() {
+        User user = new User();
+
+        user.userName = getStringPreference(KEY_USER_NAME);
+        user.password = getStringPreference(KEY_PASSWORD);
+        user.avatar = getStringPreference(KEY_AVATAR);
+        user.cookie = getStringPreference(KEY_COOKIE);
+        user.loginTime = getLongPreferences(KEY_LOGIN_TIME);
+        user.url = getStringPreference(KEY_USER_URL);
+        user.nickName = getStringPreference(KEY_NICK_NAME);
+        user.id = getStringPreference(KEY_USER_ID);
+
+        return user;
+    }
 
     public static void setCacheUpdateTime(long t) {
         saveLongPreference(KEY_CACHE_UPDATE_TIME, t);

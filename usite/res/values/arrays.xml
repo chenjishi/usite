@@ -1,5 +1,6 @@
 <resources>
     <string-array name="menu_category">
+        <item>登陆</item>
         <item>搞笑视频</item>
         <item>煎蛋最新</item>
         <item>科技新闻</item>
