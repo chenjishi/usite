@@ -1,20 +1,18 @@
 package com.chenjishi.u148.activity;
 
-import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.Constants;
 import com.flurry.android.FlurryAgent;
-import net.youmi.android.banner.AdSize;
-import net.youmi.android.banner.AdView;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,24 +21,22 @@ import net.youmi.android.banner.AdView;
  * Time: 下午10:30
  * To change this template use File | Settings | File Templates.
  */
-public abstract class BaseActivity extends FragmentActivity implements SlidingPaneLayout.PanelSlideListener {
+public class BaseActivity extends FragmentActivity implements SlidingPaneLayout.PanelSlideListener {
     private ImageView mMenuIcon2;
-    private SlidingPaneLayout slidingPane;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.base_layout);
+    public void setContentView(int layoutResID) {
+        super.setContentView(R.layout.base_layout);
 
-        LinearLayout contentView = (LinearLayout) findViewById(R.id.content_view);
-        LayoutInflater.from(this).inflate(getLayoutId(), contentView, true);
+        FrameLayout rootView = (FrameLayout) findViewById(R.id.content_view);
+        rootView.setBackgroundColor(0xFFE6E6E6);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
+        lp.setMargins(0, (int) getResources().getDimension(R.dimen.action_bar_height), 0, 0);
+        View contentView = LayoutInflater.from(this).inflate(layoutResID, null);
+        rootView.addView(contentView, lp);
 
-        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        ((LinearLayout) findViewById(R.id.ad_view)).addView(adView, layoutParams);
-
-        slidingPane = (SlidingPaneLayout) findViewById(R.id.slide_panel);
+        SlidingPaneLayout slidingPane = (SlidingPaneLayout) findViewById(R.id.slide_panel);
         slidingPane.setShadowResource(R.drawable.sliding_back_shadow);
         slidingPane.setSliderFadeColor(0x00000000);
         slidingPane.setPanelSlideListener(this);
@@ -94,8 +90,6 @@ public abstract class BaseActivity extends FragmentActivity implements SlidingPa
     protected void setTitleText(int resId) {
         setTitleText(getString(resId));
     }
-
-    protected abstract int getLayoutId();
 
     @Override
     protected void onStart() {

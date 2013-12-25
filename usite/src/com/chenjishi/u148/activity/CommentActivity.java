@@ -37,6 +37,7 @@ public class CommentActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.comment);
         setTitleText(R.string.comment);
 
         int statusBarHeight = 0;
@@ -113,11 +114,6 @@ public class CommentActivity extends BaseActivity {
 
             comments.add(comment);
         }
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.comment;
     }
 
     private class CommentAdapter extends BaseAdapter {

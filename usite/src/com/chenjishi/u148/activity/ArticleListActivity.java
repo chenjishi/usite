@@ -40,6 +40,7 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.article_list_layout);
         setTitleText(R.string.app_latest);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
@@ -67,11 +68,6 @@ public class ArticleListActivity extends BaseActivity implements AdapterView.OnI
         FlurryAgent.logEvent("read_article", params);
 
         startActivity(intent);
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.article_list_layout;
     }
 
     private void loadData() {

@@ -7,8 +7,6 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <supports-screens
@@ -61,19 +59,5 @@
                 android:windowSoftInputMode="stateAlwaysHidden"/>
         <service android:name=".service.MusicService" android:exported="false"/>
         <service android:name=".service.DownloadService" android:exported="false"/>
-        <activity
-                android:name="net.youmi.android.AdBrowser"
-                android:configChanges="keyboard|keyboardHidden|orientation"
-                android:theme="@android:style/Theme.Light.NoTitleBar"/>
-        <service
-                android:name="net.youmi.android.AdService"
-                android:exported="false"/>
-        <receiver
-                android:name="net.youmi.android.AdReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED"/>
-                <data android:scheme="package"/>
-            </intent-filter>
-        </receiver>
     </application>
 </manifest> 

@@ -31,6 +31,7 @@ public class UserActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.user_activity);
         setTitleText("我发表的文章");
 
         User user = PrefsUtil.getUser();
@@ -39,11 +40,6 @@ public class UserActivity extends BaseActivity {
         } else {
             setupView();
         }
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.user_activity;
     }
 
     private void setupView() {

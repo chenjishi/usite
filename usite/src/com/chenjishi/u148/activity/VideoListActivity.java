@@ -50,6 +50,7 @@ public class VideoListActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_video_list);
         setTitleText(R.string.video);
 
         ImageView clearBtn = ((ImageView) findViewById(R.id.icon_menu2));
@@ -85,11 +86,6 @@ public class VideoListActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mHandleDownloadReceiver);
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_video_list;
     }
 
     private void clearAll() {

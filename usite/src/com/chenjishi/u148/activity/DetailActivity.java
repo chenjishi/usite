@@ -79,6 +79,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.detail);
         setMenuIcon3Visibility(true);
 
         Bundle bundle = getIntent().getExtras();
@@ -301,11 +302,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         is.close();
 
         return sb.toString();
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.detail;
     }
 
     @Override

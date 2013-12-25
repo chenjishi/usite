@@ -3,7 +3,6 @@ package com.chenjishi.u148.activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -13,7 +12,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,8 +33,6 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
-import net.youmi.android.banner.AdSize;
-import net.youmi.android.banner.AdView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,11 +66,6 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
-
-        AdView adView = new AdView(this, AdSize.FIT_SCREEN);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        ((LinearLayout) findViewById(R.id.ad_layout)).addView(adView, layoutParams);
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
@@ -258,6 +249,7 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
             case 3:
                 intent.setClass(this, FunListActivity.class);
                 intent.putExtra("source", Constants.SOURCE_NEWS);
+                startActivity(intent);
                 break;
             case 4:
                 intent.setClass(this, ArticleListActivity.class);

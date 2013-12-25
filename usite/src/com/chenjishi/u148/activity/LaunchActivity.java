@@ -13,7 +13,6 @@ import com.chenjishi.u148.service.DownloadService;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
-import net.youmi.android.AdManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -30,7 +29,6 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         findViewById(android.R.id.content).setBackgroundColor(0xFFE3E3E3);
-        AdManager.getInstance(this).init("2f6a7bf92577e738", "71b97b414505f38e", false);
 
         context = this;
     }

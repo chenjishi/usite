@@ -33,6 +33,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.about);
         setTitleText(R.string.about);
         mContext = this;
 
@@ -65,11 +66,6 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener 
             }
         }
     };
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.about;
-    }
 
     private void initView() {
         String versionName = CommonUtil.getVersionName(this);

@@ -55,6 +55,7 @@ public class FunListActivity extends BaseActivity implements Response.Listener<A
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.fun_list_activity);
         mSource = getIntent().getIntExtra("source", SOURCE_JIANDAN);
         setTitleText(mSource == SOURCE_JIANDAN ? R.string.jian_dan : R.string.news);
 
@@ -151,11 +152,6 @@ public class FunListActivity extends BaseActivity implements Response.Listener<A
 
         currentPage = 1;
         loadData();
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.fun_list_activity;
     }
 
     @Override
