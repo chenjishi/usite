@@ -57,7 +57,7 @@ public class VideoPlayerActivity extends Activity implements MediaController.OnH
         mVideoView = (VideoView) findViewById(R.id.surface_view);
         mVideoView.setMediaController(mMediaController);
 
-        mVideoUrl = getIntent().getExtras().getString("url", "");
+        mVideoUrl = getIntent().getStringExtra("url");
         if (!TextUtils.isEmpty(mVideoUrl)) {
             new VideoLoadTask().execute(mVideoUrl);
         } else {

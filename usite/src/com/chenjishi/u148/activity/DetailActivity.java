@@ -215,7 +215,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                         @Override
                         public void run() {
                             String s = comment;
-                            s += "--来自有意思吧Android客户端(" + Build.MANUFACTURER + " " + Build.MODEL + ")http://www.appchina.com/app/com.chenjishi.u148/";
+                            s += "(" + Build.MANUFACTURER + " " + Build.MODEL + ")";
                             sendComment(s);
                         }
                     }.start();
