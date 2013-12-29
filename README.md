@@ -1,7 +1,7 @@
 usite
 =====
 
-it's a android client for www.u148.net,support online or offline video playing(youku and 56 video links), support online music playing(xiami.com's music links), support picture browers and download, support share to SNS for video,music,text,and pictures.
+it's a android client for www.u148.net,<p>support online or offline video playing(youku and 56 video links)</p> support online music playing(xiami.com's music links), support picture browers and download, support share to SNS for video,music,text,and pictures.
 
 ##Google Play Download：
 https://play.google.com/store/apps/details?id=com.chenjishi.u148&feature=search_result#?t=W251bGwsMSwyLDEsImNvbS5jaGVuamlzaGkudTE0OCJd
