@@ -88,6 +88,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         mDatabase.execSQL(sql, new String[]{id});
     }
 
+    public void deleteVideoByTitle(String title, String tableName) {
+        String sql = "DELETE FROM " + tableName + " WHERE " + COL_TITLE + " = ?";
+        mDatabase.execSQL(sql, new String[]{title});
+    }
+
     public boolean isExist(String id, String tableName) {
         boolean result = false;
         Cursor cursor = null;

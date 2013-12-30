@@ -13,6 +13,8 @@ import com.chenjishi.u148.base.AppApplication;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created with IntelliJ IDEA.
@@ -116,5 +118,9 @@ public class CommonUtil {
             e.printStackTrace();
         }
         return baos.toString();
+    }
+
+    public static <T> Collection<T> nullSafe(Collection<T> c) {
+        return (null == c) ? Collections.<T>emptyList() : c;
     }
 }

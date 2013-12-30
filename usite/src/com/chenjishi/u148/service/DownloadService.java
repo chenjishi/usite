@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.chenjishi.u148.util.CommonUtil.nullSafe;
+
 /**
  * Created with IntelliJ IDEA.
  * User: chenjishi
@@ -66,6 +68,23 @@ public class DownloadService extends Service {
     }
 
     private void clearInvalidFile() {
+        //delete invalid links in database, sometimes video fetched no id, so delete it!
+        ArrayList<Video> links = dataBase.loadAll(DatabaseHelper.TB_NAME_LINKS);
+        for (Video link : nullSafe(links)) {
+            String id = link.id;
+            if (null == id || id.length() == 0) {
+                dataBase.deleteVideoByTitle(link.title, DatabaseHelper.TB_NAME_LINKS);
+            }
+        }
+
+        //delete invalid database video
+        ArrayList<Video> savedVideos = dataBase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
+        for (Video video : nullSafe(savedVideos)) {
+            String filePath = video.localPath;
+            File file = new File(filePath);
+            if (!file.exists()) dataBase.deleteVideo(video.id, DatabaseHelper.TB_NAME_VIDEOS);
+        }
+
         String videoCachePath = FileCache.getVideoDirectory(this);
         File[] flists = new File(videoCachePath).listFiles();
 
@@ -78,16 +97,6 @@ public class DownloadService extends Service {
                 boolean isExistInDB = DatabaseHelper.getInstance(this).isExist(name,
                         DatabaseHelper.TB_NAME_VIDEOS);
                 if (!isExistInDB) f.delete();
-            }
-        }
-
-        //delete invalid database video
-        ArrayList<Video> savedVideos = dataBase.loadAll(DatabaseHelper.TB_NAME_VIDEOS);
-        if (null != savedVideos && savedVideos.size() > 0) {
-            for (Video video : savedVideos) {
-                String filePath = video.localPath;
-                File file = new File(filePath);
-                if (!file.exists()) dataBase.deleteVideo(video.id, DatabaseHelper.TB_NAME_VIDEOS);
             }
         }
     }
