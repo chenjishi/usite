@@ -21,27 +21,51 @@ import com.flurry.android.FlurryAgent;
  * Time: 下午10:30
  * To change this template use File | Settings | File Templates.
  */
-public class BaseActivity extends FragmentActivity implements SlidingPaneLayout.PanelSlideListener {
+public class BaseActivity extends FragmentActivity implements SlidingLayout.PanelSlideListener {
     private ImageView mMenuIcon2;
+    private FrameLayout rootView;
+    private SlidingLayout slidingPane;
 
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(R.layout.base_layout);
 
-        FrameLayout rootView = (FrameLayout) findViewById(R.id.content_view);
+        rootView = (FrameLayout) findViewById(R.id.content_view);
         rootView.setBackgroundColor(0xFFE6E6E6);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
         lp.setMargins(0, (int) getResources().getDimension(R.dimen.action_bar_height), 0, 0);
         View contentView = LayoutInflater.from(this).inflate(layoutResID, null);
+        contentView.setId(R.id.content_layout);
         rootView.addView(contentView, lp);
 
-        SlidingPaneLayout slidingPane = (SlidingPaneLayout) findViewById(R.id.slide_panel);
+        slidingPane = (SlidingLayout) findViewById(R.id.slide_panel);
         slidingPane.setShadowResource(R.drawable.sliding_back_shadow);
         slidingPane.setSliderFadeColor(0x00000000);
         slidingPane.setPanelSlideListener(this);
 
         mMenuIcon2 = (ImageView) findViewById(R.id.icon_menu2);
+    }
+
+    protected void setTitleVisible(boolean b) {
+        RelativeLayout titleBar = (RelativeLayout) findViewById(R.id.view_action_bar);
+
+        if (null != titleBar) {
+            int marginTop = b ? (int) getResources().getDimension(R.dimen.action_bar_height) : 0;
+            titleBar.setVisibility(b ? View.VISIBLE : View.GONE);
+
+            View contentView = rootView.findViewById(R.id.content_layout);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
+            lp.setMargins(0, marginTop, 0, 0);
+            contentView.setLayoutParams(lp);
+        }
+
+        if (null != titleBar) titleBar.setVisibility(b ? View.VISIBLE : View.GONE);
+    }
+
+    protected void slideDisable(boolean b) {
+        slidingPane.disableSlide(b);
     }
 
     @Override
@@ -57,10 +81,6 @@ public class BaseActivity extends FragmentActivity implements SlidingPaneLayout.
     @Override
     public void onPanelClosed(View view) {
 
-    }
-
-    protected void setActionBarHide(boolean b) {
-        findViewById(R.id.view_action_bar).setVisibility(b ? View.GONE : View.VISIBLE);
     }
 
     protected void setMenuIcon2Visibility(boolean b) {

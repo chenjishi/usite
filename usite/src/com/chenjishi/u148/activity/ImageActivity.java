@@ -1,6 +1,5 @@
 package com.chenjishi.u148.activity;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +43,7 @@ import java.util.HashMap;
  * Time: 上午11:30
  * To change this template use File | Settings | File Templates.
  */
-public class ImageActivity extends Activity implements GestureDetector.OnGestureListener,
+public class ImageActivity extends BaseActivity implements GestureDetector.OnGestureListener,
         ViewPager.OnPageChangeListener, ShareDialog.OnShareListener {
     private ArrayList<String> mImageList = new ArrayList<String>();
 
@@ -62,7 +61,7 @@ public class ImageActivity extends Activity implements GestureDetector.OnGesture
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_layout);
-        findViewById(android.R.id.content).setBackgroundResource(R.color.gray_bg);
+        setTitleVisible(false);
 
         Bundle bundle = getIntent().getExtras();
         if (null == bundle) return;
