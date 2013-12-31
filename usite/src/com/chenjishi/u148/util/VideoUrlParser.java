@@ -40,19 +40,12 @@ public class VideoUrlParser {
     public static Video get56VideoPath(String url) {
         Video video = null;
 
-        String regex1 = "v_(\\w+)\\.swf";
-        String regex2 = "cpm_(\\w+)\\.swf";
-
-        Pattern pattern = Pattern.compile(regex1);
-        Matcher matcher = pattern.matcher(url);
+        Pattern p = Pattern.compile("(v_|cpm_)(\\w+)\\.html");
 
         String vId = null;
-        if (matcher.find()) {
-            vId = matcher.group(1);
-        } else {
-            pattern = Pattern.compile(regex2);
-            matcher = pattern.matcher(url);
-            if (matcher.find()) vId = matcher.group(1);
+        Matcher m = p.matcher(url);
+        while (m.find()) {
+            vId = m.group(2);
         }
 
         if (!TextUtils.isEmpty(vId)) {
