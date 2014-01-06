@@ -7,9 +7,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.*;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -18,7 +16,6 @@ import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Article;
-import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.User;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
@@ -34,13 +31,9 @@ import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
 import com.sina.weibo.sdk.exception.WeiboException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -264,7 +257,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             String params = "review.id=0&review.aid=" + articleId +
                     "&review.contents=" + URLEncoder.encode(comment, "UTF-8") +
                     "&rand=" + rand;
-            Log.i("test", "params " + params);
             out.writeBytes(params);
             out.flush();
             out.close();
@@ -429,7 +421,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 intent.putExtra("url", src);
                 startService(intent);
             } else {
-                intent.setClass(mContext, VideoPlayerActivity.class);
+                intent.setClass(mContext, VideoActivity.class);
                 intent.putExtra("url", src);
                 mContext.startActivity(intent);
             }

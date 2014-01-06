@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -53,12 +54,15 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class HomeActivity extends FragmentActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener,
-        Response.Listener<String>, Response.ErrorListener, ViewPager.OnPageChangeListener {
+        Response.Listener<String>, Response.ErrorListener, ViewPager.OnPageChangeListener, DrawerLayout.DrawerListener {
 
     private ViewPager mViewPager;
     private RadioGroup mRadioGroup;
 
     private DrawerLayout drawerLayout;
+    private TextView mDrawerIcon;
+
+    private int maxIconIndent;
 
     private String[] categories;
 
@@ -73,7 +77,12 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
 
         categories = getResources().getStringArray(R.array.menu_category);
 
+        mDrawerIcon = (TextView) findViewById(R.id.ic_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        drawerLayout.setDrawerListener(this);
+
+        //maximum 8dp for the indent of drawer icon
+        maxIconIndent = (int) (getResources().getDisplayMetrics().density * 8.0f);
 
         initMenuList();
 
@@ -97,6 +106,27 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
                 }
             }
         }
+    }
+
+    @Override
+    public void onDrawerSlide(View view, float v) {
+        int indent = (int) (v * maxIconIndent);
+        mDrawerIcon.setPadding(-indent, 0, 0, 0);
+    }
+
+    @Override
+    public void onDrawerOpened(View view) {
+
+    }
+
+    @Override
+    public void onDrawerClosed(View view) {
+
+    }
+
+    @Override
+    public void onDrawerStateChanged(int i) {
+
     }
 
     @Override
@@ -198,9 +228,16 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, "YYHS4STVXPMH6Y9GJ8WD");
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         stopService(new Intent(this, MusicService.class));
+        FlurryAgent.onEndSession(this);
     }
 
     @Override
@@ -238,24 +275,20 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
                 }
                 break;
             case 1:
-                intent.setClass(this, VideoListActivity.class);
-                startActivity(intent);
-                break;
-            case 2:
                 intent.setClass(this, FunListActivity.class);
                 intent.putExtra("source", Constants.SOURCE_JIANDAN);
                 startActivity(intent);
                 break;
-            case 3:
+            case 2:
                 intent.setClass(this, FunListActivity.class);
                 intent.putExtra("source", Constants.SOURCE_NEWS);
                 startActivity(intent);
                 break;
-            case 4:
+            case 3:
                 intent.setClass(this, ArticleListActivity.class);
                 startActivity(intent);
                 break;
-            case 5:
+            case 4:
                 intent.setClass(this, AboutActivity.class);
                 startActivity(intent);
                 break;

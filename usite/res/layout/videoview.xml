@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="match_parent">
+             android:layout_height="match_parent"
+             android:background="@color/black"
+        >
     <io.vov.vitamio.widget.VideoView
             android:id="@+id/surface_view"
             android:layout_gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
+            android:layout_height="match_parent"/>
     <RelativeLayout
-            android:id="@+id/title"
+            android:id="@+id/title_bar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/action_bar_height"
             android:layout_gravity="top"
             android:background="#AA000000">
         <TextView
-            android:id="@+id/video_title"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:layout_centerInParent="true"/>
+                android:id="@+id/video_title"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:layout_centerInParent="true"/>
         <ImageButton
                 android:id="@+id/content_share"
                 android:layout_width="wrap_content"
@@ -41,4 +41,4 @@
                 android:contentDescription="@null"
                 android:scaleType="fitCenter"/>
     </RelativeLayout>
-</merge>
+</FrameLayout>

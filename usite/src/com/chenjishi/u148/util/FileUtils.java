@@ -77,11 +77,6 @@ public class FileUtils {
         }
     }
 
-    public static long getCachedVideoSize(Context context) {
-        String videoPath = FileCache.getVideoDirectory(context);
-        return getFileSize(new File(videoPath));
-    }
-
     public static long getFileSize(File f) {
         long size = 0;
         File flist[] = f.listFiles();
@@ -96,11 +91,6 @@ public class FileUtils {
             }
         }
         return size;
-    }
-
-    public static String getVideoCacheSize() {
-        String cachePath = FileCache.getVideoDirectory(AppApplication.getInstance());
-        return getCurrentCacheSize(cachePath);
     }
 
     public static String getImageCacheSize() {

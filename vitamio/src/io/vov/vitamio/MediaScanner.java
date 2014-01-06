@@ -152,7 +152,6 @@ public class MediaScanner {
       long scan = System.currentTimeMillis();
       postscan(directories);
       long end = System.currentTimeMillis();
-
     } catch (SQLException e) {
     } catch (UnsupportedOperationException e) {
     } catch (RemoteException e) {
@@ -332,6 +331,7 @@ public class MediaScanner {
       } catch (Exception e) {
         value = new String(valueBytes);
       }
+
       if (name.equalsIgnoreCase("title")) {
         mTitle = value;
       } else if (name.equalsIgnoreCase("artist")) {

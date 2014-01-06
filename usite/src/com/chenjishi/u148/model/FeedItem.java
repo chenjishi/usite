@@ -1,7 +1,5 @@
 package com.chenjishi.u148.model;
 
-import java.io.Serializable;
-
 /**
  * Created with IntelliJ IDEA.
  * User: chenjishi
@@ -9,9 +7,7 @@ import java.io.Serializable;
  * Time: 下午6:26
  * To change this template use File | Settings | File Templates.
  */
-public class FeedItem implements Serializable {
-    private static final long serialVersionUID = 2L;
-
+public class FeedItem {
     public String imageUrl;
     public String title;
     public String summary;
@@ -23,4 +19,7 @@ public class FeedItem implements Serializable {
     public String comment;
 
     public boolean isRead;
+
+    public String commentCount;
+    public String readCount;
 }

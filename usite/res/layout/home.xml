@@ -1,14 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<android.support.v4.widget.DrawerLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/drawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:background="@color/background">
-    <FrameLayout
+    <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="@dimen/action_bar_height"
+            android:background="#ff9900">
+        <TextView
+                android:id="@+id/ic_drawer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:drawableLeft="@drawable/ic_navigation_drawer"
+                android:paddingRight="8dp"
+                android:clickable="true"
+                android:onClick="onDrawerButtonClicked"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:text="@string/app_home"
+                android:background="@drawable/home_up_bg"
+                android:textSize="@dimen/action_bar_subtitle_size"/>
+        <ImageButton
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/home_up_bg"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_social_person"
+                android:clickable="true"
+                android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+    <android.support.v4.widget.DrawerLayout
+            android:id="@+id/drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background">
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -16,8 +44,8 @@
             <RadioGroup
                     android:id="@+id/radio_group"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/action_bar_height"
-                    android:background="@drawable/ab_texture_tile"
+                    android:layout_height="36dp"
+                    android:background="#E5E5E5"
                     android:weightSum="6"
                     android:orientation="horizontal">
                 <RadioButton
@@ -51,24 +79,16 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"/>
         </LinearLayout>
-        <ImageButton
-                android:id="@+id/btn_drawer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left|center_vertical"
-                android:layout_marginLeft="-12dp"
-                android:contentDescription="@null"
-                android:clickable="true"
-                android:onClick="onDrawerButtonClicked"
-                android:src="@drawable/ic_drawer"/>
-    </FrameLayout>
-    <LinearLayout
-            android:id="@+id/layout_menu"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
-            android:background="#373b3e"
-            android:orientation="vertical">
-            </LinearLayout>
-</android.support.v4.widget.DrawerLayout>
+        <LinearLayout
+                android:id="@+id/layout_menu"
+                android:layout_width="240dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
+                android:background="#373b3e"
+                android:orientation="vertical"/>
+    </android.support.v4.widget.DrawerLayout>
+</LinearLayout>
+
+
+
 

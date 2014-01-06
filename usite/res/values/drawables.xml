@@ -2,6 +2,7 @@
     <drawable name="black_15_transparent">#1d000000</drawable>
     <drawable name="light_gray2">#FF282725</drawable>
     <drawable name="black_0_transparent">#00000000</drawable>
-    <drawable name="feed_back_color">#FFFFD060</drawable>
+    <drawable name="feed_back_color">#4DD68101</drawable>
     <drawable name="gray">#FF3B3B3B</drawable>
+    <drawable name="black_40_transparent">#2D3B3B3B</drawable>
 </resources>

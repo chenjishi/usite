@@ -27,7 +27,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

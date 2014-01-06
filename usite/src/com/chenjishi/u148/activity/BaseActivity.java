@@ -114,12 +114,12 @@ public class BaseActivity extends FragmentActivity implements SlidingLayout.Pane
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, Constants.FLURRY_APP_ID);
+        FlurryAgent.onStartSession(this, "YYHS4STVXPMH6Y9GJ8WD");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         FlurryAgent.onEndSession(this);
     }
 }

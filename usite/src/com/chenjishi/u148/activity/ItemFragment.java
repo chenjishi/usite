@@ -231,8 +231,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
                 holder.thumb = (ImageView) convertView.findViewById(R.id.feed_image);
                 holder.category = (TextView) convertView.findViewById(R.id.feed_type);
                 holder.title = (TextView) convertView.findViewById(R.id.feed_title);
-                holder.author = (TextView) convertView.findViewById(R.id.feed_author);
-                holder.time = (TextView) convertView.findViewById(R.id.feed_time);
+                holder.viewsText = (TextView) convertView.findViewById(R.id.tv_views);
+                holder.commentText = (TextView) convertView.findViewById(R.id.tv_comment);
                 holder.content = (TextView) convertView.findViewById(R.id.feed_content);
 
                 convertView.setTag(holder);
@@ -244,8 +244,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
 
             holder.category.setText(feed.category);
             holder.title.setText(feed.title);
-            holder.author.setText(feed.author);
-            holder.time.setText(feed.time);
+            holder.viewsText.setText(String.format(getString(R.string.views), feed.readCount));
+            holder.commentText.setText(feed.commentCount);
             holder.content.setText(feed.summary);
 
             HttpUtils.getImageLoader().get(feed.imageUrl, ImageLoader.getImageListener(holder.thumb,
@@ -259,8 +259,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         ImageView thumb;
         TextView category;
         TextView title;
-        TextView author;
-        TextView time;
+        TextView viewsText;
+        TextView commentText;
         TextView content;
     }
 }

@@ -1,6 +1,7 @@
 package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 import com.chenjishi.u148.model.Video;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,24 +30,16 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class VideoUrlParser {
-    public static final int TYPE_SINA = 1;
-    public static final int TYPE_YOUKU = 2;
-    public static final int TYPE_QQ = 3;
-    public static final int TYPE_TUDOU = 4;
-    public static final int TYPE_56 = 5;
-
     private static String youkuJson;
 
     public static Video get56VideoPath(String url) {
         Video video = null;
 
-        Pattern p = Pattern.compile("(v_|cpm_)(\\w+)\\.html");
+        Pattern p = Pattern.compile("(v_|cpm_)(\\w+)\\.swf");
 
         String vId = null;
         Matcher m = p.matcher(url);
-        while (m.find()) {
-            vId = m.group(2);
-        }
+        while (m.find()) vId = m.group(2);
 
         if (!TextUtils.isEmpty(vId)) {
             video = new Video();

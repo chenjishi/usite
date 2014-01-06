@@ -15,7 +15,6 @@ import java.io.File;
 public class FileCache {
 
     public static void init(Context context) {
-        mkDirs(getVideoDirectory(context));
         mkDirs(getImageCacheDirectory(context));
         mkDirs(getDataCacheDirectory(context));
         mkDirs(getTempDirectory(context));
@@ -37,10 +36,6 @@ public class FileCache {
         File file = new File(dirPath);
         if (!file.exists())
             file.mkdirs();
-    }
-
-    public static String getVideoDirectory(Context context) {
-        return getSDCardDirectory(context) + "video/";
     }
 
     public static String getSDCardDirectory(Context context) {

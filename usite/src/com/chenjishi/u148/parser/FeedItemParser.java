@@ -57,11 +57,19 @@ public class FeedItemParser {
 
             item.time = el.getElementsByTag("span").get(0).ownText();
 
-            Element _el = el.getElementsByClass("summary").get(0);
+            Elements summary = el.select("div.summary");
+            if (null != summary && summary.size() > 0) {
+                Element sum = summary.get(0);
 
-            Element _link = _el.getElementsByTag("a").get(0);
-            item.author = _link.ownText();
-            item.summary = _el.ownText();
+                item.summary = sum.ownText();
+                item.author = sum.select("a").get(0).text();
+                item.commentCount = sum.select("a").get(1).text();
+            }
+
+            Elements views = el.select("div.viewnum");
+            if (null != views && views.size() > 0) {
+                item.readCount = views.get(0).text();
+            }
 
             feedItems.add(item);
         }

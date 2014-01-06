@@ -5,6 +5,6 @@
     <item android:state_checked="true" android:color="@color/action_bar_bg"/>
     <item android:state_focused="true" android:color="@color/action_bar_bg"/>
     <item android:state_pressed="true" android:color="@color/action_bar_bg"/>
-    <item android:color="@color/white"/>
+    <item android:color="@color/text_color_regular"/>
 
 </selector>

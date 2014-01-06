@@ -12,7 +12,6 @@ public class Constants {
     public static final int SOURCE_JIANDAN = 101;
     public static final int SOURCE_NEWS = 102;
 
-    public static final String FLURRY_APP_ID = "YYHS4STVXPMH6Y9GJ8WD";
     public static final String WX_APP_ID = "wxf862baa09e0df157";
     public static final String WEIBO_APP_KEY = "1792649719";
     public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";

@@ -9,7 +9,6 @@ import android.view.View;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.service.DownloadService;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
@@ -37,8 +36,6 @@ public class LaunchActivity extends Activity {
     protected void onStart() {
         super.onStart();
         new LoadTask().execute();
-        Intent intent = new Intent(this, DownloadService.class);
-        startService(intent);
     }
 
     private class LoadTask extends AsyncTask<Void, Void, Boolean> {
