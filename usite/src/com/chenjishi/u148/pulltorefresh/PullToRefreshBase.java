@@ -530,9 +530,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 
 	final void setState(State state, final boolean... params) {
 		mState = state;
-		if (DEBUG) {
-			Log.d(LOG_TAG, "State: " + mState.name());
-		}
 
 		switch (mState) {
 			case RESET:
@@ -722,7 +719,7 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 		}
 		if (mMode.showFooterLoadingLayout()) {
 			mFooterLayout.refreshing();
-		}
+        }
 
 		if (doScroll) {
 			if (mShowViewWhileRefreshing) {

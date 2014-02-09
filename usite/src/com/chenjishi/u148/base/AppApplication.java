@@ -20,7 +20,6 @@ public class AppApplication extends Application {
 
         FileCache.init(this);
         HttpUtils.init(this);
-        DatabaseHelper.getInstance(this);
     }
 
     public static AppApplication getInstance() {

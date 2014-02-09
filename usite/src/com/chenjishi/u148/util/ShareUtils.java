@@ -77,8 +77,7 @@ public class ShareUtils {
 
         checkStatus(api, context, type);
 
-        String path = FileCache.getTempDirectory(context) + "temp";
-
+        String path = FileCache.getTempCacheDir() + "temp";
         File file = new File(path);
         if (!file.exists()) {
             CommonUtil.showToast(R.string.share_file_error);

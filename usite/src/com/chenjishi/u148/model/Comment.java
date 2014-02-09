@@ -11,20 +11,26 @@ import android.os.Parcelable;
  * To change this template use File | Settings | File Templates.
  */
 public class Comment implements Parcelable {
-    public String avatar;
-    public String userName;
-    public String time;
+    public String id;
     public String content;
+    public String articleId;
+    public long time;
+    public int floor;
+
+    public User user;
 
     public Comment() {
 
     }
 
     public Comment(Parcel in) {
-        avatar = in.readString();
-        userName = in.readString();
-        time = in.readString();
+        id = in.readString();
         content = in.readString();
+        articleId = in.readString();
+        time = in.readLong();
+        floor = in.readInt();
+
+        user = in.readParcelable(User.class.getClassLoader());
     }
 
     @Override
@@ -34,10 +40,12 @@ public class Comment implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(avatar);
-        dest.writeString(userName);
-        dest.writeString(time);
+        dest.writeString(id);
         dest.writeString(content);
+        dest.writeString(articleId);
+        dest.writeLong(time);
+
+        dest.writeParcelable(user, flags);
     }
 
     public static final Creator<Comment> CREATOR = new Creator<Comment>() {

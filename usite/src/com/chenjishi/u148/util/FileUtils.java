@@ -1,6 +1,5 @@
 package com.chenjishi.u148.util;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import com.chenjishi.u148.base.AppApplication;
@@ -94,7 +93,7 @@ public class FileUtils {
     }
 
     public static String getImageCacheSize() {
-        String cachePath = FileCache.getImageCacheDirectory(AppApplication.getInstance());
+        String cachePath = FileCache.getInternalCacheDir(AppApplication.getInstance());
         return getCurrentCacheSize(cachePath);
     }
 
@@ -114,12 +113,13 @@ public class FileUtils {
     }
 
     public static void clearCache() {
-        String imageCachePath = FileCache.getImageCacheDirectory(AppApplication.getInstance());
+        //clear images
+        HttpUtils.getRequestQueue().getCache().clear();
 
-        File[] cachedFiles = new File(imageCachePath).listFiles();
-        if (cachedFiles == null) {
-            return;
-        }
+        //clear data
+        String dataCacheDir = FileCache.getDataCacheDir(AppApplication.getInstance());
+        File[] cachedFiles = new File(dataCacheDir).listFiles();
+        if (cachedFiles == null) return;
         for (File f : cachedFiles) {
             f.delete();
         }
@@ -180,5 +180,17 @@ public class FileUtils {
         }
 
         return sb.toString();
+    }
+
+    //delete all files include directory
+    public static boolean delete(File dir){
+        if(dir.isDirectory()){
+            File[] listFiles = dir.listFiles();
+            int i = 0;
+            while(i < listFiles.length && delete(listFiles[i])){
+                i++;
+            }
+        }
+        return dir.delete();
     }
 }

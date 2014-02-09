@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.*;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -16,7 +19,7 @@ import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Article;
-import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
@@ -24,23 +27,26 @@ import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
-import com.chenjishi.u148.view.CommentDialog;
+import com.chenjishi.u148.view.ArticleWebView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.InterstitialAd;
 import com.sina.weibo.sdk.exception.WeiboException;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-
-import static com.chenjishi.u148.util.Constants.BASE_URL;
-import static com.chenjishi.u148.util.Constants.SOURCE_U148;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -50,14 +56,16 @@ import static com.chenjishi.u148.util.Constants.SOURCE_U148;
  * To change this template use File | Settings | File Templates.
  */
 public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
-        Response.Listener<Article>, Response.ErrorListener {
-    private WebView mWebView;
+        Response.Listener<Article>, Response.ErrorListener, AdListener {
+    private final static String REQUEST_URL = "http://www.u148.net/json/article/%1$s";
+    private ArticleWebView mWebView;
     private JavascriptBridge mJsBridge;
 
     private MusicService mMusicService;
 
-    private String mTitle;
     private Article mArticle;
+
+    private Feed mFeed;
 
     private RelativeLayout mMusicPanel;
     private TextView mSongText;
@@ -72,22 +80,26 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.detail);
-        setMenuIcon3Visibility(true);
+        setContentView(R.layout.detail, R.layout.article_title_layout);
 
         Bundle bundle = getIntent().getExtras();
 
-        mTitle = bundle.getString("title");
-        int source = bundle.getInt("source");
-        String link = bundle.getString("link");
-        String url;
-        if (SOURCE_U148 == source) {
-            url = BASE_URL + link;
-            setMenuIcon2Visibility(true);
+        if (null != bundle) {
+            mFeed = bundle.getParcelable("feed");
         } else {
-            url = link;
-            setMenuIcon2Visibility(false);
+            finish();
         }
+
+        Map<String, String> categoryMap;
+        categoryMap = new HashMap<String, String>();
+        int[] ids = getResources().getIntArray(R.array.category_id);
+        String[] names = getResources().getStringArray(R.array.category_name);
+        for (int i = 0; i < ids.length; i++) {
+            categoryMap.put(String.valueOf(ids[i]), names[i]);
+        }
+
+        String title = categoryMap.get(String.valueOf(mFeed.category));
+        setTitle(title);
 
         mSongText = (TextView) findViewById(R.id.tv_song_title);
         mArtistText = (TextView) findViewById(R.id.tv_artist);
@@ -95,18 +107,50 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         mPlayBtn = (ImageButton) findViewById(R.id.btn_play);
         mMusicPanel = (RelativeLayout) findViewById(R.id.panel_music);
 
-        mWebView = (WebView) findViewById(R.id.webview_content);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.setHorizontalScrollBarEnabled(false);
-        mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        mWebView = (ArticleWebView) findViewById(R.id.webview_content);
 
         mJsBridge = new JavascriptBridge(this);
-
         mWebView.addJavascriptInterface(mJsBridge, "U148");
+
+        renderPage(getString(R.string.content_loading));
 
         //for debug javascript only
 //        mWebView.setWebChromeClient(new MyWebChromeClient());
-        HttpUtils.get(url, source, this, this);
+        HttpUtils.ArticleRequest(String.format(REQUEST_URL, mFeed.id), this, this);
+    }
+
+    private InterstitialAd interstitialAd;
+    private void initAd() {
+        interstitialAd = new InterstitialAd(this, "a152d3545a2e658");
+        interstitialAd.setAdListener(this);
+
+        interstitialAd.loadAd(new AdRequest());
+    }
+
+    @Override
+    public void onReceiveAd(Ad ad) {
+        interstitialAd.show();
+        PrefsUtil.setAdShowed(true);
+    }
+
+    @Override
+    public void onFailedToReceiveAd(Ad ad, AdRequest.ErrorCode errorCode) {
+
+    }
+
+    @Override
+    public void onPresentScreen(Ad ad) {
+
+    }
+
+    @Override
+    public void onDismissScreen(Ad ad) {
+
+    }
+
+    @Override
+    public void onLeaveApplication(Ad ad) {
+
     }
 
     private void initMusicPanel() {
@@ -129,6 +173,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         mArtistText.setVisibility(View.VISIBLE);
 
         mMusicProgress.setVisibility(View.GONE);
+        mPlayBtn.setImageResource(R.drawable.ic_pause);
         mPlayBtn.setVisibility(View.VISIBLE);
     }
 
@@ -174,17 +219,18 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         }
     };
 
-    public void onButtonClicked(View view) {
-
-        switch (view.getId()) {
-            case R.id.icon_menu2:
-                showCommentDialog();
-                break;
-            case R.id.content_share:
+    public void onButtonClicked(View v) {
+        switch (v.getId()) {
+            case R.id.ic_share:
                 if (null == mShareDialog) {
                     mShareDialog = new ShareDialog(this, this);
                 }
                 mShareDialog.show();
+                break;
+            case R.id.ic_comment:
+                Intent intent = new Intent(this, CommentActivity.class);
+                intent.putExtra("article_id", mFeed.id);
+                startActivity(intent);
                 break;
             case R.id.btn_play:
                 if (mMusicService != null) {
@@ -192,108 +238,8 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                             ? R.drawable.ic_play : R.drawable.ic_pause);
                     mMusicService.togglePlayer();
                 }
-
                 break;
-
         }
-    }
-
-    private void showCommentDialog() {
-        CommentDialog dialog = new CommentDialog(this, new CommentDialog.OnCommentListner() {
-            @Override
-            public void onConfirm(final String comment) {
-                User user = PrefsUtil.getUser();
-                if (null != user && !TextUtils.isEmpty(user.cookie)) {
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            String s = comment;
-                            s += "(" + Build.MANUFACTURER + " " + Build.MODEL + ")";
-                            sendComment(s);
-                        }
-                    }.start();
-                } else {
-                    Toast.makeText(DetailActivity.this, "回首页先登陆才能发评论哦~~", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCheckComment() {
-                FlurryAgent.logEvent(Constants.EVENT_COMMENT_CLICK);
-                if (null == mArticle.comment) return;
-
-                Intent intent = new Intent(DetailActivity.this, CommentActivity.class);
-                intent.putExtra("floors", mArticle.comment);
-                startActivity(intent);
-            }
-        });
-        dialog.show();
-    }
-
-    private void sendComment(String comment) {
-        HttpURLConnection conn = null;
-        try {
-            URL url = new URL("http://www.u148.net/article_review/save.u");
-            conn = (HttpURLConnection) url.openConnection();
-            User user = PrefsUtil.getUser();
-            conn.setConnectTimeout(5000);
-            conn.setRequestProperty("Cookie", user.cookie);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setRequestMethod("POST");
-            conn.setUseCaches(false);
-            conn.connect();
-
-            DataOutputStream out = new DataOutputStream(conn.getOutputStream());
-            String articleUrl = mArticle.url;
-            int idx = articleUrl.lastIndexOf('/');
-            String articleId = "";
-            if (idx != -1) {
-                articleId = articleUrl.substring(idx + 1);
-                articleId = articleId.replace(".html", "");
-            }
-
-            double rand = Math.random();
-            String params = "review.id=0&review.aid=" + articleId +
-                    "&review.contents=" + URLEncoder.encode(comment, "UTF-8") +
-                    "&rand=" + rand;
-            out.writeBytes(params);
-            out.flush();
-            out.close();
-
-            inputToStream(conn.getInputStream());
-
-            Handler mainThread = new Handler(Looper.getMainLooper());
-            mainThread.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(DetailActivity.this, "评论已发送", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (null != conn) {
-                conn.disconnect();
-            }
-        }
-
-    }
-
-    private String inputToStream(InputStream is) throws IOException {
-        InputStreamReader in = new InputStreamReader(is);
-        BufferedReader buff = new BufferedReader(in);
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        while ((line = buff.readLine()) != null) {
-            sb.append(line);
-        }
-
-        buff.close();
-        is.close();
-
-        return sb.toString();
     }
 
     @Override
@@ -305,20 +251,32 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     public void onResponse(Article response) {
         if (null != response && !TextUtils.isEmpty(response.content)) {
             mArticle = response;
-            renderPage();
+            renderPage(mArticle.content);
+            boolean adShowed = PrefsUtil.isAdShowed();
+            if (!adShowed) initAd();
         } else {
             CommonUtil.showToast(R.string.parse_error);
             finish();
         }
     }
 
-    private void renderPage() {
+    private void renderPage(String content) {
         String template = CommonUtil.readFromAssets(this, "usite.html");
-        template = template.replace("{TITLE}", mTitle);
-        template = template.replace("{CONTENT}", mArticle.content);
+        template = template.replace("{TITLE}", mFeed.title);
+
+        long t = mFeed.createTime * 1000L;
+        Date date = new Date(t);
+        Format format = new SimpleDateFormat("yyyy-MM-dd");
+
+        String pubTime = String.format(getString(R.string.pub_time),
+                mFeed.user.nickname, format.format(date));
+        template = template.replace("{U_AUTHOR}", pubTime);
+        String reviews = String.format(getString(R.string.pub_reviews), mFeed.countBrowse, mFeed.countReview);
+        template = template.replace("{U_COMMENT}", reviews);
+
+        template = template.replace("{CONTENT}", content);
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
-        mWebView.setVisibility(View.VISIBLE);
     }
 
     class MyWebChromeClient extends WebChromeClient {
@@ -333,10 +291,10 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     public void onShare(final int type) {
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(Constants.PARAM_TITLE, mTitle);
+        params.put(Constants.PARAM_TITLE, mFeed.title);
         FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
 
-        final String title = String.format(getString(R.string.share_title), mTitle);
+        final String title = String.format(getString(R.string.share_title), mFeed.title);
 
         if (type == ShareUtils.SHARE_WEIBO) {
             shareToWeibo(title);
@@ -345,7 +303,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         }
 
         final ArrayList<String> imageList = mArticle.imageList;
-        final String url = mArticle.url;
+        final String url = "http://www.u148.net/article/" + mFeed.id + ".html";
         if (null != imageList && imageList.size() > 0) {
             ImageRequest request = new ImageRequest(imageList.get(0), new Response.Listener<Bitmap>() {
                 @Override
@@ -372,7 +330,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     private void shareToWeibo(String title) {
         final ArrayList<String> imageList = mArticle.imageList;
         String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
-        ShareUtils.shareToWeibo(this, title + mArticle.url, null, imageUrl, new RequestListener() {
+        ShareUtils.shareToWeibo(this, title + "http://www.u148.net/article/" + mFeed.id + ".html", null, imageUrl, new RequestListener() {
             @Override
             public void onComplete(String response) {
                 runOnUiThread(new Runnable() {
@@ -407,6 +365,17 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             mContext = context;
         }
 
+        @JavascriptInterface
+        public void initTheme() {
+            int mode = PrefsUtil.getThemeMode();
+            if (mode == Constants.MODE_NIGHT) {
+                mWebView.loadUrl("javascript:setScreenMode('night')");
+            } else {
+                mWebView.loadUrl("javascript:setScreenMode('day')");
+            }
+        }
+
+        @JavascriptInterface
         public void onImageClick(String src) {
             Intent intent = new Intent(mContext, ImageActivity.class);
             intent.putExtra("imgsrc", src);
@@ -414,6 +383,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             mContext.startActivity(intent);
         }
 
+        @JavascriptInterface
         public void onVideoClick(String src) {
             Intent intent = new Intent();
             if (src.contains("xiami")) {
@@ -426,7 +396,33 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 mContext.startActivity(intent);
             }
         }
+
+        @JavascriptInterface
+        public void onCommentClicked() {
+            Intent intent = new Intent(mContext, CommentActivity.class);
+            intent.putExtra("article_id", mFeed.id);
+            mContext.startActivity(intent);
+        }
     }
 
+    @Override
+    protected void applyTheme() {
+        super.applyTheme();
+        final View split1 = findViewById(R.id.split_v_1);
+        final View split2 = findViewById(R.id.split_v_2);
+        final ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
+        final ImageView shareBtn = (ImageView) findViewById(R.id.ic_share);
 
+        if (Constants.MODE_NIGHT == theme) {
+            split1.setBackgroundColor(0xFF303030);
+            split2.setBackgroundColor(0xFF303030);
+            commentBtn.setImageResource(R.drawable.ic_comment_night);
+            shareBtn.setImageResource(R.drawable.ic_share_night);
+        } else {
+            split1.setBackgroundColor(0xFFCACACA);
+            split2.setBackgroundColor(0xFFCACACA);
+            commentBtn.setImageResource(R.drawable.ic_comment);
+            shareBtn.setImageResource(R.drawable.ic_social_share);
+        }
+    }
 }

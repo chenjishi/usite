@@ -12,12 +12,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +29,74 @@ import java.util.regex.Pattern;
  */
 public class VideoUrlParser {
     private static String youkuJson;
+
+    public static Video getTudouUrl(String str) {
+        Video video = null;
+
+        HttpURLConnection conn = null;
+        URL url = null;
+
+        try {
+            url = new URL(str);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setInstanceFollowRedirects(false);
+            conn.connect();
+            String location = conn.getHeaderField("Location");
+
+            Pattern p = Pattern.compile("iid=(\\d+)");
+            Matcher m = p.matcher(location);
+            String vid = "";
+            while (m.find()) {
+                vid = m.group(1);
+            }
+
+            if (vid.length() > 0) {
+                url = new URL("http://www.tudou.com/outplay/goto/getItemSegs.action?iid=" + vid);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.connect();
+
+                InputStreamReader in = new InputStreamReader(conn.getInputStream());
+                BufferedReader buff = new BufferedReader(in);
+                StringBuilder sb = new StringBuilder();
+
+                String line;
+                while ((line = buff.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                buff.close();
+
+                String json = sb.toString();
+                if (!TextUtils.isEmpty(json)) {
+                    p = Pattern.compile("\"k\":(\\d+)");
+                    m = p.matcher(json);
+                    ArrayList<String> ids = new ArrayList<String>();
+                    while (m.find()) {
+                        ids.add(m.group(1));
+                    }
+
+                    if (ids.size() > 0) {
+                        video = new Video();
+                        final String videoId = ids.get(0);
+                        Document doc = Jsoup.connect("http://ct.v2.tudou.com/f?id=" + videoId).get();
+                        Elements tags = doc.getElementsByTag("f");
+                        video.url = tags.get(0).text();
+                        video.title = "video";
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != conn) {
+                conn.disconnect();
+            }
+        }
+
+        return video;
+    }
+
+
 
     public static Video get56VideoPath(String url) {
         Video video = null;

@@ -95,7 +95,7 @@ public class FireworksView extends SurfaceView implements SurfaceHolder.Callback
             textPaint = new Paint();
             textPaint.setColor(0xff666666);
             textPaint.setAntiAlias(true);
-            textPaint.setTextSize(40.0f);
+            textPaint.setTextSize(14 * desity);
             textPaint.setTextAlign(Paint.Align.CENTER);
 
         }
@@ -152,7 +152,7 @@ public class FireworksView extends SurfaceView implements SurfaceHolder.Callback
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             int xPos = canvas.getWidth() / 2;
             int yPos = (int) ((canvas.getHeight() / 2) - (textPaint.descent() + textPaint.ascent()) / 2);
-            canvas.drawText("This Is For Echo Yao", xPos, yPos, textPaint);
+            canvas.drawText("This Is For Ivy Yuan", xPos, yPos, textPaint);
             canvas.drawText("The Girl I Met Who Brights My Life", xPos, yPos + 46.0f, textPaint);
             fireworks.doDraw(canvas, paint);
         }

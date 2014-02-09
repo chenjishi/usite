@@ -1,9 +1,11 @@
 <resources>
     <color name="action_bar_bg">#FFFF9900</color>
+    <color name="action_bar_bg_night">#B26B00</color>
     <color name="yellow">#FFFFC641</color>
     <color name="yellow_dark">#FFFFBD21</color>
     <color name="yellow_light">#FFFFD060</color>
     <color name="background">#F0F0F0</color>
+    <color name="background_night">#222</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="text_color_red">#ffef2215</color>
@@ -14,6 +16,7 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="feedback_color">#4DFF9900</color>
     <color name="feedback_color2">#EA7500</color>
+    <color name="gray">#E5E5E5</color>
 
     <color name="menu_text_color_noraml">#FF949494</color>
     <color name="menu_text_color_selected">#FFF9F9F9</color>

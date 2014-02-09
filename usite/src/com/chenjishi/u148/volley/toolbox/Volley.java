@@ -29,9 +29,6 @@ import java.io.File;
 
 public class Volley {
 
-    /** Default on-disk cache directory. */
-    private static final String DEFAULT_CACHE_DIR = "";
-
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
      *
@@ -40,7 +37,7 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
-        File cacheDir = new File(FileCache.getImageCacheDirectory(context), DEFAULT_CACHE_DIR);
+        File cacheDir = new File(FileCache.getImageCacheDir(context));
 
         String userAgent = "volley/0";
         try {

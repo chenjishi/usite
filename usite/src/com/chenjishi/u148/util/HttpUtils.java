@@ -3,16 +3,12 @@ package com.chenjishi.u148.util;
 import android.app.ActivityManager;
 import android.content.Context;
 import com.chenjishi.u148.model.Article;
+import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.volley.AuthFailureError;
-import com.chenjishi.u148.volley.Request;
-import com.chenjishi.u148.volley.RequestQueue;
-import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.*;
 import com.chenjishi.u148.volley.toolbox.*;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -66,19 +62,25 @@ public class HttpUtils {
         }
     }
 
-    public static void getFeed(int source,
-                               String url,
-                               Response.Listener<ArrayList<Feed>> listener,
-                               Response.ErrorListener errorListener) {
+    public static void getComments(String url,
+                                   Response.Listener<ArrayList<Comment>> listener,
+                                   Response.ErrorListener errorListener) {
         RequestQueue queue = getRequestQueue();
-        queue.add(new FeedRequest(source, url, listener, errorListener));
+        queue.add(new CommentRequest(url, listener, errorListener));
     }
 
-    public static void get(String url, int source,
-                           Response.Listener<Article> listener,
-                           Response.ErrorListener errorListener) {
+    public static void feedRequest(String url,
+                                   Response.Listener<ArrayList<Feed>> listener,
+                                   Response.ErrorListener errorListener) {
         RequestQueue queue = getRequestQueue();
-        queue.add(new ContentRequest(source, url, listener, errorListener));
+        queue.add(new FeedRequest(url, listener, errorListener));
+    }
+
+    public static void ArticleRequest(String url,
+                                      Response.Listener<Article> listener,
+                                      Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        queue.add(new ArticleRequest(url, listener, errorListener));
     }
 
     public static void get(String url,
@@ -88,7 +90,21 @@ public class HttpUtils {
         queue.add(new StringRequest(url, listener, errorListener));
     }
 
-    public static void post(String url, Response.Listener<String> listener,
+    public static void post(String url,
+                            final Map<String, String> params,
+                            Response.Listener<String> listener,
                             Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        StringRequest request = new StringRequest(Request.Method.POST, url, listener, errorListener) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return params;
+            }
+        };
+        /**
+         * prevent retry by set retry number to 0
+         */
+        request.setRetryPolicy(new DefaultRetryPolicy(5000, 0, 1));
+        queue.add(request);
     }
 }

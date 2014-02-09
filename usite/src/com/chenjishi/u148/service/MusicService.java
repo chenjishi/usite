@@ -54,7 +54,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String url = intent.getStringExtra("url");
+        String url = intent.getExtras().getString("url");
         if (!TextUtils.isEmpty(url)) {
             if (!url.equals(mCurrentUrl)) {
                 mCurrentUrl = url;

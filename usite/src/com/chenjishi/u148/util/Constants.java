@@ -8,6 +8,9 @@ package com.chenjishi.u148.util;
  * To change this template use File | Settings | File Templates.
  */
 public class Constants {
+    public static final int MODE_DAY = 0;
+    public static final int MODE_NIGHT = 1;
+
     public static final int SOURCE_U148 = 100;
     public static final int SOURCE_JIANDAN = 101;
     public static final int SOURCE_NEWS = 102;

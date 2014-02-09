@@ -12,17 +12,18 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
-import com.chenjishi.u148.model.FeedItem;
-import com.chenjishi.u148.parser.FeedItemParser;
+import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.model.Feed;
+import com.chenjishi.u148.parser.JsonParser;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
-import com.chenjishi.u148.service.DataCacheService;
-import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.*;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,25 +35,18 @@ import java.util.Map;
  * Time: 下午3:20
  * To change this template use File | Settings | File Templates.
  */
-public class ItemFragment extends Fragment implements AbsListView.OnScrollListener,
-        PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener {
+public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener,
+        Response.Listener<ArrayList<Feed>>, Response.ErrorListener, View.OnClickListener {
+    private static final String REQUEST_URL = "http://www.u148.net/json/%1$d/%2$d";
     private static final int MSG_LOAD_OK = 1;
 
     private PullToRefreshListView pullToRefresh;
     private FeedListAdapter listAdapter;
     private View footView;
+    private View emptyView;
 
-    private ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
-    private String[] urls = {
-            "/list/",
-            "/video/",
-            "/image/",
-            "/audio/",
-            "/text/",
-            "/mix/"
-    };
+    private ArrayList<Feed> feedList = new ArrayList<Feed>();
 
-    private int lastItemIndex;
     protected int currentPage = 1;
     private int category;
     private boolean dataLoaded;
@@ -62,8 +56,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         category = bundle != null ? bundle.getInt("category") : 0;
-
         dataLoaded = false;
+
         listAdapter = new FeedListAdapter(getActivity());
     }
 
@@ -74,12 +68,27 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         pullToRefresh = (PullToRefreshListView) view.findViewById(R.id.lv_feeds);
         ListView listView = pullToRefresh.getRefreshableView();
 
+        emptyView = view.findViewById(R.id.empty_view);
         footView = inflater.inflate(R.layout.load_more, null);
-        footView.setVisibility(View.GONE);
+        Button loadBtn = (Button) footView.findViewById(R.id.btn_load);
+        loadBtn.setOnClickListener(this);
+
         listView.addFooterView(footView);
+        listView.setEmptyView(emptyView);
+
+        if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
+            listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
+            loadBtn.setBackgroundResource(R.drawable.btn_gray_night);
+            loadBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
+        } else {
+            listView.setDivider(getResources().getDrawable(R.drawable.split_color));
+            loadBtn.setBackgroundResource(R.drawable.btn_gray);
+            loadBtn.setTextColor(getResources().getColor(R.color.text_color_regular));
+        }
+
+        listView.setDividerHeight(1);
 
         listView.setAdapter(listAdapter);
-        listView.setOnScrollListener(this);
         listView.setOnItemClickListener(this);
 
         pullToRefresh.setOnRefreshListener(this);
@@ -88,72 +97,105 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (SCROLL_STATE_IDLE == scrollState && lastItemIndex > feedItems.size() - 1) {
+    public void onClick(View v) {
+        if (v.getId() == R.id.btn_load) {
+            footView.findViewById(R.id.btn_load).setVisibility(View.GONE);
+            footView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
             currentPage++;
             loadData();
         }
     }
 
     @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        lastItemIndex = firstVisibleItem + visibleItemCount - 1;
-    }
-
-    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FeedItem item = feedItems.get(position - 1);
-        Intent intent = new Intent(getActivity(), DetailActivity.class);
-        intent.putExtra("title", item.title);
-        intent.putExtra("link", item.link);
-        intent.putExtra("source", Constants.SOURCE_U148);
+        Feed feed = feedList.get(position - 1);
 
         Map<String, String> params = new HashMap<String, String>();
-        params.put("author", item.author);
-        params.put("title", item.title);
+        params.put("author", feed.user.nickname);
+        params.put("title", feed.title);
         FlurryAgent.logEvent("read_article", params);
+
+        Intent intent = new Intent(getActivity(), DetailActivity.class);
+        intent.putExtra("feed", feed);
 
         startActivity(intent);
     }
 
     @Override
     public void onRefresh(PullToRefreshBase refreshView) {
-        DataCacheService.getInstance().clearCaches();
-
-        if (feedItems.size() > 0) {
-            feedItems.clear();
-            listAdapter.notifyDataSetChanged();
-        }
         currentPage = 1;
         loadData();
+    }
+
+    private void loadData() {
+        if (!CommonUtil.didNetworkConnected(getActivity())) return;
+
+        String url = String.format(REQUEST_URL, category, currentPage);
+        HttpUtils.feedRequest(url, this, this);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (!dataLoaded) {
-            if (0 == category) {
-                loadCacheData();
-            } else {
-                loadData();
-            }
+            footView.setVisibility(View.GONE);
+            loadData();
         }
     }
 
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        loadCacheData();
+        setErrorView(R.string.net_error);
+
+        footView.setVisibility(View.GONE);
+        pullToRefresh.onRefreshComplete();
+    }
+
+    @Override
+    public void onResponse(ArrayList<Feed> response) {
+        if (null != response && response.size() > 0) {
+            if (currentPage == 1) feedList.clear();
+
+            feedList.addAll(response);
+            dataLoaded = true;
+            listAdapter.notifyDataSetChanged();
+
+            footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
+            footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
+            footView.setVisibility(View.VISIBLE);
+        } else {
+            setErrorView(R.string.parse_error);
+            footView.setVisibility(View.GONE);
+        }
+        pullToRefresh.onRefreshComplete();
+    }
+
+    private void setErrorView(int resId) {
+        emptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+        ((TextView) emptyView.findViewById(R.id.tv_empty_tip)).setText(getString(resId));
+    }
+
     protected void loadCacheData() {
-        String path = FileCache.getDataCacheDirectory(getActivity()) + Constants.CACHED_FILE_NAME;
-        final String data = FileUtils.readFromFile(path);
-        if (null != data) {
-            new Thread(){
-                @Override
-                public void run() {
-                    ArrayList<FeedItem> tmpList = FeedItemParser.parseFeedList(data);
-                    if (null != tmpList && tmpList.size() > 0) {
-                        feedItems.addAll(tmpList);
+        String dir = FileCache.getDataCacheDir(getActivity());
+        String url = String.format(REQUEST_URL, category, currentPage);
+        String path = dir + StringUtil.getMD5Str(url);
+        File cacheFile = new File(path);
+
+        if (cacheFile.exists()) {
+            final String data = FileUtils.readFromFile(path);
+            if (null != data) {
+                new Thread(){
+                    @Override
+                    public void run() {
+                        ArrayList<Feed> tmpList = JsonParser.getFeedList(data);
+                        if (null != tmpList && tmpList.size() > 0) {
+                            feedList.addAll(tmpList);
+                        }
+                        mHandler.sendEmptyMessage(MSG_LOAD_OK);
                     }
-                    mHandler.sendEmptyMessage(MSG_LOAD_OK);
-                }
-            }.start();
+                }.start();
+            }
         }
     }
 
@@ -162,7 +204,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         public void handleMessage(Message msg) {
             if (msg.what != MSG_LOAD_OK) return;
 
-            if (feedItems.size() > 0) {
+            if (feedList.size() > 0) {
                 dataLoaded = true;
                 listAdapter.notifyDataSetChanged();
             } else {
@@ -174,24 +216,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
         }
     };
 
-    public void loadData() {
-        footView.setVisibility(View.VISIBLE);
-        new Thread(){
-            @Override
-            public void run() {
-                ArrayList<FeedItem> tmpList = DataCacheService.getInstance().getFeedItemList(getUrl());
-                if (null != tmpList && tmpList.size() > 0) {
-                    feedItems.addAll(tmpList);
-                }
-                mHandler.sendEmptyMessage(MSG_LOAD_OK);
-            }
-        }.start();
-    }
-
-    protected String getUrl() {
-        return Constants.BASE_URL + urls[category] + currentPage + ".html";
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -199,20 +223,31 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     private class FeedListAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
+        private LayoutInflater inflater;
+        private Map<String, String> categoryMap;
+        private float density;
 
         public FeedListAdapter(Context context) {
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            categoryMap = new HashMap<String, String>();
+            feedList = new ArrayList<Feed>();
+            density = getResources().getDisplayMetrics().density;
+
+            int[] ids = context.getResources().getIntArray(R.array.category_id);
+            String[] names = context.getResources().getStringArray(R.array.category_name);
+            for (int i = 0; i < ids.length; i++) {
+                categoryMap.put(String.valueOf(ids[i]), names[i]);
+            }
         }
 
         @Override
         public int getCount() {
-            return null == feedItems ? 0 : feedItems.size();
+            return feedList.size();
         }
 
         @Override
-        public FeedItem getItem(int position) {
-            return null == feedItems ? null : feedItems.get(position);
+        public Feed getItem(int position) {
+            return feedList.get(position);
         }
 
         @Override
@@ -225,9 +260,10 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
             ViewHolder holder;
 
             if (null == convertView) {
-                convertView = mInflater.inflate(R.layout.feed_list_item, parent, false);
+                convertView = inflater.inflate(R.layout.feed_list_item, parent, false);
                 holder = new ViewHolder();
 
+                holder.cellLayout = (RelativeLayout) convertView.findViewById(R.id.cell_layout);
                 holder.thumb = (ImageView) convertView.findViewById(R.id.feed_image);
                 holder.category = (TextView) convertView.findViewById(R.id.feed_type);
                 holder.title = (TextView) convertView.findViewById(R.id.feed_title);
@@ -235,20 +271,47 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
                 holder.commentText = (TextView) convertView.findViewById(R.id.tv_comment);
                 holder.content = (TextView) convertView.findViewById(R.id.feed_content);
 
+                final int theme = PrefsUtil.getThemeMode();
+                if (Constants.MODE_NIGHT == theme) {
+                    holder.category.setTextColor(getResources().getColor(R.color.action_bar_bg_night));
+                    holder.title.setTextColor(getResources().getColor(R.color.text_color_weak));
+                    holder.content.setTextColor(getResources().getColor(R.color.text_color_summary));
+                    holder.viewsText.setTextColor(getResources().getColor(R.color.text_color_summary));
+                    holder.commentText.setTextColor(getResources().getColor(R.color.text_color_summary));
+                } else {
+                    holder.category.setTextColor(getResources().getColor(R.color.action_bar_bg));
+                    holder.title.setTextColor(getResources().getColor(R.color.text_color_regular));
+                    holder.content.setTextColor(getResources().getColor(R.color.text_color_weak));
+                    holder.viewsText.setTextColor(getResources().getColor(R.color.text_color_weak));
+                    holder.commentText.setTextColor(getResources().getColor(R.color.text_color_weak));
+                }
+
                 convertView.setTag(holder);
             }
 
             holder = (ViewHolder) convertView.getTag();
 
-            FeedItem feed = getItem(position);
+            /**
+             * here we make the first cell's top padding larger
+             */
+            int paddingTop = 12;
+            int paddingLeft = (int) (8 * density);
+            int padingBottom = (int) (12 * density);
+            if (0 == position) {
+                paddingTop = 20;
+            }
 
-            holder.category.setText(feed.category);
+            holder.cellLayout.setPadding(paddingLeft, (int) (paddingTop * density), paddingLeft, padingBottom);
+
+            Feed feed = getItem(position);
+
+            holder.category.setText("[" + categoryMap.get(feed.category + "") + "]");
             holder.title.setText(feed.title);
-            holder.viewsText.setText(String.format(getString(R.string.views), feed.readCount));
-            holder.commentText.setText(feed.commentCount);
+            holder.viewsText.setText(String.format(getString(R.string.views), feed.countBrowse));
+            holder.commentText.setText(String.format(getString(R.string.comment_count), feed.countReview));
             holder.content.setText(feed.summary);
 
-            HttpUtils.getImageLoader().get(feed.imageUrl, ImageLoader.getImageListener(holder.thumb,
+            HttpUtils.getImageLoader().get(feed.picMid, ImageLoader.getImageListener(holder.thumb,
                     R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
             return convertView;
@@ -256,6 +319,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnScrollListen
     }
 
     private static class ViewHolder {
+        RelativeLayout cellLayout;
         ImageView thumb;
         TextView category;
         TextView title;

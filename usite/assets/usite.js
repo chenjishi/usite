@@ -33,10 +33,22 @@ function initImages() {
 		}
 
 	}
+
+    var btn = document.getElementById('view-comment');
+    btn.setAttribute('onclick', 'U148.onCommentClicked()');
+}
+
+window.setScreenMode = function(mode) {
+    if (mode == 'night') {
+        document.getElementsByTagName('html')[0].setAttribute('class', 'night');
+    } else {
+        document.getElementsByTagName('html')[0].setAttribute('class', '');
+    }
 }
 
 function loadData(){
-	init();
+    U148.initTheme();
+    init();
 	window.onChange = init;
 }
 

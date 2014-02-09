@@ -5,21 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
+import android.widget.LinearLayout;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.util.CommonUtil;
-import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
-import java.io.IOException;
+import java.io.File;
 
 public class LaunchActivity extends Activity {
     private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
+
     private static final long TWO_HOURS = 2 * 60 * 60 * 1000;
     private Context context;
 
@@ -27,7 +26,7 @@ public class LaunchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        findViewById(android.R.id.content).setBackgroundColor(0xFFE3E3E3);
+        findViewById(android.R.id.content).setBackgroundColor(0xFFF0F0F0);
 
         context = this;
     }
@@ -45,25 +44,16 @@ public class LaunchActivity extends Activity {
             //clear cache of 2 days before
             long lastClearCacheTime = PrefsUtil.getClearCacheTime();
             if (System.currentTimeMillis() > lastClearCacheTime) {
-                FileUtils.clearCache();
                 context.deleteDatabase("webview.db");
                 context.deleteDatabase("webviewCache.db");
                 PrefsUtil.setClearCacheTime(System.currentTimeMillis() + TWO_DAYS);
             }
 
-            long lastUpdateCacheTime = PrefsUtil.getCacheUpdateTime();
-            if (CommonUtil.didNetworkConnected(context) && System.currentTimeMillis() > lastUpdateCacheTime) {
-                try {
-                    Document doc = Jsoup.connect(Constants.BASE_URL + "/list/1.html").get();
-                    Elements content = doc.getElementsByClass("u148content");
-                    if (null != content && content.size() > 0) {
-                        String data = content.get(0).html();
-                        String path = FileCache.getDataCacheDirectory(context) + Constants.CACHED_FILE_NAME;
-                        FileUtils.writeToFile(path, data);
-                        PrefsUtil.setCacheUpdateTime(System.currentTimeMillis() + TWO_HOURS);
-                    }
-                } catch (IOException e) {
-                }
+
+            //clear temp files, such as shared image or temp upgrade apk
+            File tempFile = new File(FileCache.getTempCacheDir());
+            if (tempFile.exists()) {
+                FileUtils.delete(tempFile);
             }
 
             return true;
@@ -71,9 +61,15 @@ public class LaunchActivity extends Activity {
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-            findViewById(R.id.loading_layout).setVisibility(View.GONE);
-            startActivity(new Intent(context, HomeActivity.class));
-            finish();
+            Handler mainThread = new Handler(Looper.getMainLooper());
+
+            mainThread.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startActivity(new Intent(context, HomeActivity.class));
+                    finish();
+                }
+            }, 3000);
         }
     }
 }

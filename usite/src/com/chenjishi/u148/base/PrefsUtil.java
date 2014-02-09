@@ -1,9 +1,11 @@
 package com.chenjishi.u148.base;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.util.Constants;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 /**
@@ -14,6 +16,8 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefsUtil {
+    private static Application mContext = AppApplication.getInstance();
+
     private static final long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
     private static final String CONFIG_FILE_NAME = "u148_prefs";
@@ -21,6 +25,8 @@ public class PrefsUtil {
     private static final String KEY_NEXT_TOKEN = "next_from";
 
     public static final String KEY_UPDATE_TIME = "last_update_time";
+
+    public static final String KEY_CHECK_UPDATE_TIME = "last_check_time";
 
     public static final String KEY_CHECK_VERSION = "check_version";
 
@@ -31,56 +37,61 @@ public class PrefsUtil {
     private static final String KEY_CACHE_CLEAR_TIME = "cache_clear_time";
     private static final String KEY_CACHE_UPDATE_TIME = "cache_update_time";
 
+    private static final String KEY_AD_SHOW_TIME = "ad_show_time";
+
     private static final String KEY_USER_NAME = "user_name";
-    private static final String KEY_PASSWORD = "password";
-    private static final String KEY_AVATAR = "avatar";
-    private static final String KEY_COOKIE = "cookie";
-    private static final String KEY_LOGIN_TIME = "login_time";
-    private static final String KEY_USER_URL = "user_url";
-    private static final String KEY_NICK_NAME = "nick_name";
-    private static final String KEY_USER_ID = "uId";
+    private static final String KEY_USER_SEX = "user_sex";
+    private static final String KEY_USER_ICON = "user_icon";
+    private static final String KEY_USER_TOKEN = "user_token";
+
+    private static final String KEY_AD_SHOWED = "key_ad_showed";
+    private static final String KEY_THEME_MODE = "theme_mode";
+
+    public static int getThemeMode() {
+        return getIntPreference(KEY_THEME_MODE, Constants.MODE_DAY);
+    }
+
+    public static void setThemeMode(int mode) {
+        saveIntPreference(KEY_THEME_MODE, mode);
+    }
+
+    public static void setAdShowed(boolean b) {
+        saveBoolPreference(KEY_AD_SHOWED, b);
+    }
+
+    public static boolean isAdShowed() {
+        return getBoolPreference(KEY_AD_SHOWED);
+    }
 
     public static void setUser(User user) {
-        if (null == user) return;
-
-        saveStringPreference(KEY_USER_NAME, user.userName);
-        saveStringPreference(KEY_PASSWORD, user.password);
-        saveStringPreference(KEY_AVATAR, user.avatar);
-        saveStringPreference(KEY_COOKIE, user.cookie);
-        saveLongPreference(KEY_LOGIN_TIME, user.loginTime);
-        saveStringPreference(KEY_USER_URL, user.url);
-        saveStringPreference(KEY_NICK_NAME, user.nickName);
-
-        if (!TextUtils.isEmpty(user.url)) {
-            int idx = user.url.lastIndexOf('/');
-            if (idx != -1) {
-                String id = user.url.substring(idx + 1);
-                saveStringPreference(KEY_USER_ID, id);
-            }
+        if (null != user && !TextUtils.isEmpty(user.token)) {
+            saveStringPreference(KEY_USER_NAME, user.nickname);
+            saveStringPreference(KEY_USER_SEX, user.sex);
+            saveStringPreference(KEY_USER_ICON, user.icon);
+            saveStringPreference(KEY_USER_TOKEN, user.token);
+        } else {
+            saveStringPreference(KEY_USER_NAME, "");
+            saveStringPreference(KEY_USER_SEX, "");
+            saveStringPreference(KEY_USER_ICON, "");
+            saveStringPreference(KEY_USER_TOKEN, "");
         }
     }
 
     public static User getUser() {
-        User user = new User();
+        String token = getStringPreference(KEY_USER_TOKEN);
 
-        user.userName = getStringPreference(KEY_USER_NAME);
-        user.password = getStringPreference(KEY_PASSWORD);
-        user.avatar = getStringPreference(KEY_AVATAR);
-        user.cookie = getStringPreference(KEY_COOKIE);
-        user.loginTime = getLongPreferences(KEY_LOGIN_TIME);
-        user.url = getStringPreference(KEY_USER_URL);
-        user.nickName = getStringPreference(KEY_NICK_NAME);
-        user.id = getStringPreference(KEY_USER_ID);
+        if (!TextUtils.isEmpty(token)) {
+            User user = new User();
 
-        return user;
-    }
+            user.nickname = getStringPreference(KEY_USER_NAME);
+            user.sex = getStringPreference(KEY_USER_SEX);
+            user.icon = getStringPreference(KEY_USER_ICON);
+            user.token = getStringPreference(KEY_USER_TOKEN);
 
-    public static void setCacheUpdateTime(long t) {
-        saveLongPreference(KEY_CACHE_UPDATE_TIME, t);
-    }
-
-    public static long getCacheUpdateTime() {
-        return getLongPreferences(KEY_CACHE_UPDATE_TIME);
+            return user;
+        } else {
+            return null;
+        }
     }
 
     public static void setClearCacheTime(long t) {
@@ -88,7 +99,7 @@ public class PrefsUtil {
     }
 
     public static long getClearCacheTime() {
-        return getLongPreferences(KEY_CACHE_CLEAR_TIME);
+        return getLongPreferences(KEY_CACHE_CLEAR_TIME, -1L);
     }
 
     public static void saveAccessToken(Oauth2AccessToken token) {
@@ -107,53 +118,43 @@ public class PrefsUtil {
         return token;
     }
 
-    private static void saveStringPreference(String key, String value) {
-        Context context = AppApplication.getInstance();
-        SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
-        editor.putString(key, value);
-        editor.commit();
+    private static int getIntPreference(String key, int defaultVal) {
+        return mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getInt(key, defaultVal);
     }
 
-    public static void saveLongPreference(String key, long value) {
-        Context context = AppApplication.getInstance();
-        SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
-        editor.putLong(key, value);
-        editor.commit();
-    }
-
-    public static long getLongPreferences(String key) {
-        Context context = AppApplication.getInstance();
-        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getLong(key, -1L);
-    }
-
-    public static String getStringPreference(String key) {
-        Context context = AppApplication.getInstance();
-        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getString(key, "");
-    }
-
-    private static void saveIntPreference(String key, int value, Context context) {
-        SharedPreferences.Editor editor = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+    private static void saveIntPreference(String key, int value) {
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
         editor.putInt(key, value);
         editor.commit();
     }
 
-    private static int getIntPreference(String key, int defaultValue, Context context) {
-        return context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getInt(key, defaultValue);
+    public static long getLongPreferences(String key, long defaultVal) {
+        return mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getLong(key, defaultVal);
     }
 
-    public static void saveNextToken(int value) {
-        saveIntPreference(KEY_NEXT_TOKEN, value, AppApplication.getInstance());
+    public static void saveLongPreference(String key, long value) {
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+        editor.putLong(key, value);
+        editor.commit();
     }
 
-    public static int getNextToken() {
-        return getIntPreference(KEY_NEXT_TOKEN, 0, AppApplication.getInstance());
+    private static boolean getBoolPreference(String key) {
+        return mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getBoolean(key, false);
     }
 
-    public static void saveCheckVersionTime(long l) {
-        saveLongPreference(KEY_CHECK_VERSION, l + VERSION_CHECK_INTERVAL);
+    private static void saveBoolPreference(String key, boolean value) {
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+        editor.putBoolean(key, value);
+        editor.commit();
     }
 
-    public static long getCheckVersionTime() {
-        return getLongPreferences(KEY_CHECK_VERSION);
+    private static String getStringPreference(String key) {
+        return mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).getString(key, "");
+    }
+
+    private static void saveStringPreference(String key, String value) {
+        SharedPreferences.Editor editor = mContext.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+        editor.putString(key, value);
+        editor.commit();
     }
 }

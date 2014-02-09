@@ -20,6 +20,8 @@ package com.chenjishi.u148.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.util.Log;
+import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.volley.*;
 
 /**
@@ -40,6 +42,7 @@ public class ImageRequest extends Request<Bitmap> {
     private final Config mDecodeConfig;
     private final int mMaxWidth;
     private final int mMaxHeight;
+    private boolean mIsCircle = false;
 
     /** Decoding lock so that we don't decode more than one image at a time (to avoid OOM's) */
     private static final Object sDecodeLock = new Object();
@@ -70,6 +73,18 @@ public class ImageRequest extends Request<Bitmap> {
         mDecodeConfig = decodeConfig;
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
+    }
+
+    public ImageRequest(String url, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight,
+                        Config decodeConfig, Response.ErrorListener errorListener, boolean isCircle) {
+        super(Method.GET, url, errorListener);
+        setRetryPolicy(
+                new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
+        mListener = listener;
+        mDecodeConfig = decodeConfig;
+        mMaxWidth = maxWidth;
+        mMaxHeight = maxHeight;
+        mIsCircle = isCircle;
     }
 
     @Override
@@ -172,6 +187,12 @@ public class ImageRequest extends Request<Bitmap> {
         if (bitmap == null) {
             return Response.error(new ParseError());
         } else {
+
+            if (mIsCircle) {
+                bitmap = CommonUtil.circleToBitmap(bitmap);
+                bitmap = CommonUtil.zoomBitmap(bitmap, mMaxWidth, mMaxHeight);
+            }
+
             return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));
         }
     }

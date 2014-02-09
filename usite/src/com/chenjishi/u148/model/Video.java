@@ -15,6 +15,8 @@ public class Video {
     public String url;
     public String localPath;
 
+    public String originalUrl;
+
     public long updateTime;
     public long watchedTime;
 }

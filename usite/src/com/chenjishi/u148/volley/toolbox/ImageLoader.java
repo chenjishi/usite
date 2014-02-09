@@ -232,6 +232,59 @@ public class ImageLoader {
         return imageContainer;
     }
 
+    public ImageContainer get(String requestUrl, ImageListener imageListener,
+                              int maxWidth, int maxHeight, boolean isCircle) {
+        // only fulfill requests that were initiated from the main thread.
+        throwIfNotOnMainThread();
+
+        final String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
+
+        // Try to look up the request in the cache of remote images.
+        Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
+        if (cachedBitmap != null) {
+            // Return the cached bitmap.
+            ImageContainer container = new ImageContainer(cachedBitmap, requestUrl, null, null);
+            imageListener.onResponse(container, true);
+            return container;
+        }
+
+        // The bitmap did not exist in the cache, fetch it!
+        ImageContainer imageContainer =
+                new ImageContainer(null, requestUrl, cacheKey, imageListener);
+
+        // Update the caller to let them know that they should use the default bitmap.
+        imageListener.onResponse(imageContainer, true);
+
+        // Check to see if a request is already in-flight.
+        BatchedImageRequest request = mInFlightRequests.get(cacheKey);
+        if (request != null) {
+            // If it is, add this request to the list of listeners.
+            request.addContainer(imageContainer);
+            return imageContainer;
+        }
+
+        // The request is not already in flight. Send the new request to the network and
+        // track it.
+        Request<?> newRequest =
+                new ImageRequest(requestUrl, new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        onGetImageSuccess(cacheKey, response);
+                    }
+                }, maxWidth, maxHeight,
+                        Config.RGB_565, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        onGetImageError(cacheKey, error);
+                    }
+                }, isCircle);
+
+        mRequestQueue.add(newRequest);
+        mInFlightRequests.put(cacheKey,
+                new BatchedImageRequest(newRequest, imageContainer));
+        return imageContainer;
+    }
+
     /**
      * Sets the amount of time to wait after the first response arrives before delivering all
      * responses. Batching can be disabled entirely by passing in 0.

@@ -1,33 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:padding="8dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_bkg"
+                android:paddingLeft="8dp"
+                android:paddingTop="12dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="12dp">
     <ImageView
-        android:id="@+id/icon_avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginRight="16dp"
-        android:layout_alignParentLeft="true"
-        android:contentDescription="@null"
-        android:scaleType="centerCrop"/>
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="16dp"
+            android:layout_alignParentLeft="true"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"/>
     <TextView
-        android:id="@+id/tag_user"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/icon_avatar"
-        android:textColor="#FF336699"
-        android:textSize="14sp"/>
-
+            android:id="@+id/user_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/avatar"
+            android:textColor="@color/action_bar_bg"
+            android:textSize="14sp"/>
     <TextView
-        android:id="@+id/tag_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="@color/black"
-        android:layout_toRightOf="@id/icon_avatar"
-        android:layout_below="@id/tag_user"
-        android:layout_marginTop="12dp"/>
-
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/text_color_regular"
+            android:layout_toRightOf="@id/avatar"
+            android:lineSpacingExtra="4dp"
+            android:layout_below="@id/user_name"
+            android:layout_marginTop="8dp"/>
+    <LinearLayout
+            android:id="@+id/reply_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="-16dp"
+            android:visibility="gone"
+            android:layout_toRightOf="@id/avatar"
+            android:layout_below="@id/content">
+        <View
+                android:id="@+id/split_v"
+                android:layout_width="3dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="8dp"
+                android:background="#cacaca"/>
+        <TextView
+                android:id="@+id/reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/text_color_weak"
+                android:textSize="14sp"/>
+    </LinearLayout>
 </RelativeLayout>

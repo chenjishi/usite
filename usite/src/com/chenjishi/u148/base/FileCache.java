@@ -15,49 +15,39 @@ import java.io.File;
 public class FileCache {
 
     public static void init(Context context) {
-        mkDirs(getImageCacheDirectory(context));
-        mkDirs(getDataCacheDirectory(context));
-        mkDirs(getTempDirectory(context));
-    }
-
-    public static String getImageCacheDirectory(Context context) {
-        return getRootDirectory(context) + "cache/";
-    }
-
-    public static String getTempDirectory(Context context) {
-        return getSDCardDirectory(context) + "temp/";
-    }
-
-    public static String getDataCacheDirectory(Context context) {
-        return getRootDirectory(context) + "data/";
+        mkDirs(getImageCacheDir(context));
+        mkDirs(getDataCacheDir(context));
     }
 
     public static void mkDirs(String dirPath) {
         File file = new File(dirPath);
-        if (!file.exists())
-            file.mkdirs();
+        if (!file.exists()) file.mkdirs();
     }
 
-    public static String getSDCardDirectory(Context context) {
+    public static String getImageCacheDir(Context context) {
+        return getInternalCacheDir(context) + "/image/";
+    }
+
+    public static String getDataCacheDir(Context context) {
+        return getInternalCacheDir(context) + "/data/";
+    }
+
+    public static String getInternalCacheDir(Context context) {
         String path = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            path = Environment.getExternalStorageDirectory() + "/u148/";
-        }
+        File cacheDir = context.getCacheDir();
+        if (cacheDir.exists()) path = cacheDir.getAbsolutePath();
 
         return path;
     }
 
-    public static String getRootDirectory(Context context) {
-        String rootPath = null;
-        File cacheDir = context.getCacheDir();
-        if (cacheDir.exists()) {
-            rootPath = cacheDir + "/u148/";
-        } else {
-            if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-                rootPath = Environment.getExternalStorageDirectory() + "/u148/";
-            }
-        }
+    public static String getTempCacheDir() {
+        return getSDCardDirectory() + "/u148/";
+    }
 
-        return rootPath;
+    public static String getSDCardDirectory() {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            return Environment.getExternalStorageDirectory().getPath();
+        }
+        return null;
     }
 }

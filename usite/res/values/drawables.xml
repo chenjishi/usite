@@ -3,6 +3,9 @@
     <drawable name="light_gray2">#FF282725</drawable>
     <drawable name="black_0_transparent">#00000000</drawable>
     <drawable name="feed_back_color">#4DD68101</drawable>
+    <drawable name="split_color_night">#333</drawable>
+    <drawable name="split_color">#e6e6e6</drawable>
+    <drawable name="press_color">#DDD</drawable>
     <drawable name="gray">#FF3B3B3B</drawable>
     <drawable name="black_40_transparent">#2D3B3B3B</drawable>
 </resources>

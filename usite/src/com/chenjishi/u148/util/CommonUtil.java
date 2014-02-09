@@ -3,12 +3,14 @@ package com.chenjishi.u148.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.*;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.base.PrefsUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,6 +32,18 @@ public class CommonUtil {
 
     public static void showToast(int resId) {
         showToast(AppApplication.getInstance().getString(resId));
+    }
+
+    public static Bitmap zoomBitmap(Bitmap bitmap, int w, int h) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Matrix matrix = new Matrix();
+        float scaleWidht = ((float) w / width);
+        float scaleHeight = ((float) h / height);
+        matrix.postScale(scaleWidht, scaleHeight);
+        Bitmap newbmp = Bitmap.createBitmap(bitmap, 0, 0, width, height,
+                matrix, true);
+        return newbmp;
     }
 
     public static synchronized boolean didNetworkConnected(Context context) {
@@ -120,7 +134,29 @@ public class CommonUtil {
         return baos.toString();
     }
 
+    public static boolean isLogin() {
+        return null != PrefsUtil.getUser();
+    }
+
     public static <T> Collection<T> nullSafe(Collection<T> c) {
         return (null == c) ? Collections.<T>emptyList() : c;
+    }
+
+    public static Bitmap circleToBitmap(Bitmap bitmap) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setFilterBitmap(false);
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        int r = Math.min(w / 2, h / 2);
+        Canvas canvas = new Canvas(bmp);
+        canvas.drawCircle(r, r, r, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        paint.setXfermode(null);
+        bitmap = null;
+
+        return bmp;
     }
 }

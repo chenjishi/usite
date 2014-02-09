@@ -1,16 +1,13 @@
 package com.chenjishi.u148.activity;
 
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.Constants;
 import com.flurry.android.FlurryAgent;
 
@@ -22,46 +19,48 @@ import com.flurry.android.FlurryAgent;
  * To change this template use File | Settings | File Templates.
  */
 public class BaseActivity extends FragmentActivity implements SlidingLayout.PanelSlideListener {
-    private ImageView mMenuIcon2;
     private FrameLayout rootView;
     private SlidingLayout slidingPane;
+
+    private boolean hideTitle = false;
+    private int titleResId = -1;
+    protected int theme;
 
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(R.layout.base_layout);
 
         rootView = (FrameLayout) findViewById(R.id.content_view);
-        rootView.setBackgroundColor(0xFFE6E6E6);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
-        lp.setMargins(0, (int) getResources().getDimension(R.dimen.action_bar_height), 0, 0);
+        rootView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == PrefsUtil.getThemeMode()
+                ? R.color.background_night : R.color.background));
+
+        if (!hideTitle) {
+            int resId = -1 == titleResId ? R.layout.base_title_layout : titleResId;
+            LayoutInflater.from(this).inflate(resId, rootView);
+        }
+
         View contentView = LayoutInflater.from(this).inflate(layoutResID, null);
         contentView.setId(R.id.content_layout);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
+        int marginTop = hideTitle ? 0 : (int) getResources().getDimension(R.dimen.action_bar_height);
+        lp.setMargins(0, marginTop, 0, 0);
         rootView.addView(contentView, lp);
 
         slidingPane = (SlidingLayout) findViewById(R.id.slide_panel);
         slidingPane.setShadowResource(R.drawable.sliding_back_shadow);
         slidingPane.setSliderFadeColor(0x00000000);
         slidingPane.setPanelSlideListener(this);
-
-        mMenuIcon2 = (ImageView) findViewById(R.id.icon_menu2);
     }
 
-    protected void setTitleVisible(boolean b) {
-        RelativeLayout titleBar = (RelativeLayout) findViewById(R.id.view_action_bar);
+    protected void setContentView(int layoutResID, int titleResId) {
+        this.titleResId = titleResId;
+        setContentView(layoutResID);
+    }
 
-        if (null != titleBar) {
-            int marginTop = b ? (int) getResources().getDimension(R.dimen.action_bar_height) : 0;
-            titleBar.setVisibility(b ? View.VISIBLE : View.GONE);
-
-            View contentView = rootView.findViewById(R.id.content_layout);
-            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
-            lp.setMargins(0, marginTop, 0, 0);
-            contentView.setLayoutParams(lp);
-        }
-
-        if (null != titleBar) titleBar.setVisibility(b ? View.VISIBLE : View.GONE);
+    protected void setContentView(int layoutResID, boolean hideTitle) {
+        this.hideTitle = hideTitle;
+        setContentView(layoutResID);
     }
 
     protected void slideDisable(boolean b) {
@@ -83,32 +82,54 @@ public class BaseActivity extends FragmentActivity implements SlidingLayout.Pane
 
     }
 
-    protected void setMenuIcon2Visibility(boolean b) {
-
-        if (b) {
-            mMenuIcon2.setVisibility(View.VISIBLE);
-        } else {
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            findViewById(R.id.content_share).setLayoutParams(layoutParams);
-            mMenuIcon2.setVisibility(View.GONE);
-        }
-        mMenuIcon2.setVisibility(b ? View.VISIBLE : View.INVISIBLE);
+    public void onBackClicked(View v) {
+        finish();
     }
 
-    protected void setMenuIcon3Visibility(boolean b) {
-        findViewById(R.id.content_share).setVisibility(b ? View.VISIBLE : View.GONE);
+    protected void setRightButtonIcon(int resId) {
+        final ImageButton button = (ImageButton) findViewById(R.id.btn_right);
+        button.setImageResource(resId);
+        button.setVisibility(View.VISIBLE);
     }
 
-    protected void setTitleText(String s) {
-        TextView textView = (TextView) findViewById(R.id.title);
-        textView.setText(s);
+    @Override
+    public void setTitle(CharSequence title) {
+        final TextView textView = (TextView) findViewById(R.id.title);
+        textView.setText(title);
         textView.setVisibility(View.VISIBLE);
     }
 
-    protected void setTitleText(int resId) {
-        setTitleText(getString(resId));
+    @Override
+    public void setTitle(int titleId) {
+        setTitle(getString(titleId));
+    }
+
+    protected void applyTheme() {
+        if (!hideTitle) {
+            final RelativeLayout titleView = (RelativeLayout) findViewById(R.id.title_bar);
+            final TextView titleText = (TextView) findViewById(R.id.title);
+            final View divider = findViewById(R.id.split_h);
+            final ImageView backBtn = (ImageView) findViewById(R.id.ic_back);
+
+            if (Constants.MODE_NIGHT == theme) {
+                titleView.setBackgroundColor(0xFF1C1C1C);
+                titleText.setTextColor(0xFF999999);
+                divider.setBackgroundColor(0xFF303030);
+                backBtn.setImageResource(R.drawable.ic_back_night);
+            } else {
+                titleView.setBackgroundColor(0xFFE5E5E5);
+                titleText.setTextColor(0xFF666666);
+                divider.setBackgroundColor(0xFFCACACA);
+                backBtn.setImageResource(R.drawable.ic_back);
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        theme = PrefsUtil.getThemeMode();
+        applyTheme();
     }
 
     @Override

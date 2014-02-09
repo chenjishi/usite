@@ -1,10 +1,15 @@
 package com.chenjishi.u148.activity;
 
-import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -12,23 +17,20 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.User;
-import com.chenjishi.u148.service.DataCacheService;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.view.AboutDialog;
+import com.chenjishi.u148.view.ExitDialog;
+import com.chenjishi.u148.view.FireworksView;
 import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -37,14 +39,7 @@ import com.flurry.android.FlurryAgent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 
 /**
  * Created with IntelliJ IDEA.
@@ -53,65 +48,171 @@ import java.util.Map;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends FragmentActivity implements View.OnClickListener, RadioGroup.OnCheckedChangeListener,
-        Response.Listener<String>, Response.ErrorListener, ViewPager.OnPageChangeListener, DrawerLayout.DrawerListener {
-
+public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheckedChangeListener,
+        ViewPager.OnPageChangeListener, DrawerLayout.DrawerListener, LoginDialog.OnLoginListener,
+        Response.Listener<String>, Response.ErrorListener {
     private ViewPager mViewPager;
     private RadioGroup mRadioGroup;
+    private TabsAdapter mTabAdapter;
 
     private DrawerLayout drawerLayout;
     private TextView mDrawerIcon;
 
     private int maxIconIndent;
-
-    private String[] categories;
+    private float density;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
+        /**
+         * we want to show Ad in detail page, so make it false
+         */
+        PrefsUtil.setAdShowed(false);
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
         mRadioGroup.setOnCheckedChangeListener(this);
-
-        categories = getResources().getStringArray(R.array.menu_category);
 
         mDrawerIcon = (TextView) findViewById(R.id.ic_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         drawerLayout.setDrawerListener(this);
 
         //maximum 8dp for the indent of drawer icon
-        maxIconIndent = (int) (getResources().getDisplayMetrics().density * 8.0f);
+        density = getResources().getDisplayMetrics().density;
+        maxIconIndent = (int) (density * 8.0f);
 
         initMenuList();
 
-        mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
+        mTabAdapter = new TabsAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mTabAdapter);
         mViewPager.setOnPageChangeListener(this);
         mViewPager.setCurrentItem(0);
 
         mRadioGroup.check(R.id.radio_home);
+        applyTheme(PrefsUtil.getThemeMode());
 
+        ImageButton button = (ImageButton) findViewById(R.id.btn_avatar);
+
+        float density = getResources().getDisplayMetrics().density;
+
+        int reqWidth = (int) (32 * density * 0.88);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_avatar);
+        Bitmap scaledBitmap = ThumbnailUtils.extractThumbnail(bitmap, reqWidth, reqWidth);
+
+        Bitmap circleBitmap = CommonUtil.circleToBitmap(scaledBitmap);
+
+        button.setImageBitmap(circleBitmap);
+
+        setUserIcon();
         checkUpdate();
+    }
 
-        //cookie will be expired after 30days, check it and login again;
-        User user = PrefsUtil.getUser();
-        if (null != user && !TextUtils.isEmpty(user.userName)) {
-            long lastLoginTime = user.loginTime;
-            if (lastLoginTime > 0) {
-                long diff = System.currentTimeMillis() - lastLoginTime;
-                long seconds = diff / 1000;
-                if (seconds >= 30 * 24 * 60 * 60) {
-                    login(user.userName, user.password);
-                }
-            }
+    private void checkUpdate() {
+        if (!CommonUtil.isWifiConnected(this)) return;
+
+        long lastCheckTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_CHECK_UPDATE_TIME, -1L);
+        if (lastCheckTime == -1 || System.currentTimeMillis() >= lastCheckTime) {
+            HttpUtils.get("http://www.u148.net/json/version", this, this);
+            PrefsUtil.saveLongPreference(PrefsUtil.KEY_CHECK_UPDATE_TIME, System.currentTimeMillis() + 24 * 60 * 60 * 1000L);
         }
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+
+    }
+
+    @Override
+    public void onResponse(String response) {
+        if (TextUtils.isEmpty(response)) return;
+
+        try {
+            JSONObject jObj = new JSONObject(response);
+            final JSONObject dataObj = jObj.getJSONObject("data");
+
+            final int versionCode = dataObj.optInt("versionCode", -1);
+            final int currentCode = CommonUtil.getVersionCode(HomeActivity.this);
+
+            if (versionCode > currentCode) {
+                downloadApk(dataObj);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadApk(final JSONObject dataObj) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.new_version_tip))
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String apkUrl = dataObj.optString("url", "");
+                        final String path = FileCache.getTempCacheDir();
+                        if (!new File(path).exists()) FileCache.mkDirs(path);
+
+                        new DownloadAPKThread(apkUrl, FileCache.getTempCacheDir(), "u148.apk").start();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+        builder.show();
+    }
+
+    private void setUserIcon() {
+        final ImageButton button = (ImageButton) findViewById(R.id.btn_avatar);
+        final float density = getResources().getDisplayMetrics().density;
+        final int reqWidth = (int) (32 * density * 0.88);
+
+        if (CommonUtil.isLogin()) {
+            User user = PrefsUtil.getUser();
+
+            HttpUtils.getImageLoader().get(user.icon, new ImageLoader.ImageListener() {
+                @Override
+                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                    Bitmap bitmap = response.getBitmap();
+
+                    if (null != bitmap) {
+                        button.setImageBitmap(bitmap);
+                    } else {
+                        button.setImageBitmap(getDefaultIcon(reqWidth));
+                    }
+                }
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    button.setImageBitmap(getDefaultIcon(reqWidth));
+
+                }
+            }, reqWidth, reqWidth, true);
+        } else {
+            button.setImageBitmap(getDefaultIcon((int) (32 * density)));
+        }
+    }
+
+    @Override
+    public void onLoginSuccess() {
+        setUserIcon();
+        CommonUtil.showToast(getString(R.string.login_success));
+    }
+
+    @Override
+    public void onLoginError() {
+        CommonUtil.showToast(getString(R.string.login_fail));
+    }
+
+    private Bitmap getDefaultIcon(int w) {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_avatar);
+        Bitmap scaledBitmap = ThumbnailUtils.extractThumbnail(bitmap, w, w);
+
+        return CommonUtil.circleToBitmap(scaledBitmap);
     }
 
     @Override
     public void onDrawerSlide(View view, float v) {
         int indent = (int) (v * maxIconIndent);
-        mDrawerIcon.setPadding(-indent, 0, 0, 0);
+        mDrawerIcon.setPadding(-indent, 0, (int) (density * 8.0f), 0);
     }
 
     @Override
@@ -191,43 +292,6 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
-    }
-
-    @Override
-    public void onResponse(String response) {
-        try {
-            JSONObject dataObj = new JSONObject(response);
-
-            String fileUrl = "http://121.199.31.3:8086/ChangeBa/upload/usite.apk";
-            int versionCode = dataObj.optInt("version_code", 0);
-            String apkUrl = dataObj.optString("url", fileUrl);
-            if (CommonUtil.getVersionCode(this) < versionCode) {
-                String path;
-
-                if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-                    path = Environment.getExternalStorageDirectory() + "/";
-                } else {
-                    path = AppApplication.getInstance().getCacheDir() + "/";
-                }
-
-                DownloadAPKThread apkThread = new DownloadAPKThread(apkUrl, path, "u148.apk");
-                apkThread.start();
-            }
-        } catch (JSONException e) {
-        }
-    }
-
-    private void checkUpdate() {
-        long lastCheckTime = PrefsUtil.getCheckVersionTime();
-        if (lastCheckTime == -1L || System.currentTimeMillis() > lastCheckTime) {
-            PrefsUtil.saveCheckVersionTime(System.currentTimeMillis());
-            String url = "http://121.199.31.3:8086/ChangeBa/upload/version.txt";
-            HttpUtils.get(url, this, this);
-        }
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, "YYHS4STVXPMH6Y9GJ8WD");
@@ -240,13 +304,36 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         FlurryAgent.onEndSession(this);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    private long lastBackPressTime;
+    private int backPressCount = 0;
 
-        TextView userText = (TextView) findViewById(R.id.user_name);
-        if (null != userText) {
-            userText.setText(getUserName());
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        } else {
+            if (backPressCount == 0) {
+                CommonUtil.showToast("再按一次退出");
+                backPressCount += 1;
+                lastBackPressTime = System.currentTimeMillis();
+            } else {
+                if (System.currentTimeMillis() - lastBackPressTime >= 1000L) {
+                    CommonUtil.showToast("再按一次退出");
+                    lastBackPressTime = System.currentTimeMillis();
+                } else {
+                    PrefsUtil.setAdShowed(false);
+                    finish();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (null != mPlayer) {
+            mPlayer.release();
+            mPlayer = null;
         }
     }
 
@@ -258,122 +345,148 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        drawerLayout.closeDrawer(Gravity.LEFT);
-        Integer index = (Integer) v.getTag();
-        if (null == index) return;
-
-        Intent intent = new Intent();
-        switch (index) {
-            case 0:
-                User user = PrefsUtil.getUser();
-                if (null != user && !TextUtils.isEmpty(user.cookie)) {
-                    startActivity(new Intent(this, UserActivity.class));
-                } else {
-                    showLoginDialog();
+    public void onLoginButtonClicked(View v) {
+        if (CommonUtil.isLogin()) {
+            final ExitDialog dialog = new ExitDialog(this, new ExitDialog.OnLogoutListener() {
+                @Override
+                public void logout() {
+                    PrefsUtil.setUser(null);
+                    setUserIcon();
+                    CommonUtil.showToast(R.string.logout_success);
                 }
-                break;
-            case 1:
-                intent.setClass(this, FunListActivity.class);
-                intent.putExtra("source", Constants.SOURCE_JIANDAN);
-                startActivity(intent);
-                break;
-            case 2:
-                intent.setClass(this, FunListActivity.class);
-                intent.putExtra("source", Constants.SOURCE_NEWS);
-                startActivity(intent);
-                break;
-            case 3:
-                intent.setClass(this, ArticleListActivity.class);
-                startActivity(intent);
-                break;
-            case 4:
-                intent.setClass(this, AboutActivity.class);
-                startActivity(intent);
-                break;
-        }
-
-    }
-
-    private void showLoginDialog() {
-
-        LoginDialog dialog = new LoginDialog(this, new LoginDialog.OnLoginListener() {
-            @Override
-            public void onConfirm(String userName, String password) {
-                new LoginTask().execute(userName, password);
-            }
-        });
-        dialog.show();
-    }
-
-    private String getUserName() {
-        User user = PrefsUtil.getUser();
-        String text;
-        if (null != user && !TextUtils.isEmpty(user.userName)) {
-            text = !TextUtils.isEmpty(user.nickName) ? user.nickName : user.userName;
+            });
+            dialog.show();
         } else {
-            text = categories[0];
+            new LoginDialog(this, this).show();
         }
+    }
 
-        return text;
+    private MediaPlayer mPlayer;
+
+    private void easterEgg() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
+        final FireworksView fireworksView = new FireworksView(this);
+        rootView.addView(fireworksView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        mPlayer = MediaPlayer.create(this, R.raw.fireworks);
+        mPlayer.setLooping(true);
+        mPlayer.start();
     }
 
     private void initMenuList() {
-        LinearLayout menuLayout = (LinearLayout) findViewById(R.id.layout_menu);
+        ListView listView = (ListView) findViewById(R.id.list_menu);
+        final MenuAdapter adapter = new MenuAdapter();
+        listView.setAdapter(adapter);
 
-        View userView = LayoutInflater.from(this).inflate(R.layout.user_info, menuLayout, false);
-        final ImageView userIcon = (ImageView) userView.findViewById(R.id.user_avatar);
-        final TextView userText = (TextView) userView.findViewById(R.id.user_name);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                switch (position) {
+                    case 0:
+                        startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                        break;
+                    case 1:
+                        PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
+                                ? Constants.MODE_NIGHT : Constants.MODE_DAY);
+                        adapter.notifyDataSetChanged();
+                        applyTheme(PrefsUtil.getThemeMode());
+                        break;
+                    case 2:
+                        Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        try {
+                            startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            CommonUtil.showToast(R.string.google_play_unavailable);
+                        }
+                        break;
+                    case 3:
+                        AboutDialog dialog = new AboutDialog(HomeActivity.this, new AboutDialog.AboutDialogListener() {
+                            @Override
+                            public void onVersionClicked() {
+                                easterEgg();
+                            }
+                        });
+                        dialog.show();
+                        break;
 
-        userText.setText(getUserName());
-        User user = PrefsUtil.getUser();
-        if (null != user && !TextUtils.isEmpty(user.avatar)) {
-            ImageLoader imageLoader = HttpUtils.getImageLoader();
-            imageLoader.get(user.avatar, ImageLoader.getImageListener(userIcon,
-                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
-            userIcon.setVisibility(View.VISIBLE);
-        }
-
-        userView.setTag(0);
-        userView.setOnClickListener(this);
-        menuLayout.addView(userView);
-
-        for (int i = 1; i < categories.length; i++) {
-            menuLayout.addView(getMenuItemView(i));
-        }
+                }
+            }
+        });
     }
 
-    private TextView getMenuItemView(int position) {
-        TextView itemView = new TextView(this);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                (int) getResources().getDimension(R.dimen.action_bar_height));
-        itemView.setLayoutParams(layoutParams);
-        itemView.setGravity(Gravity.CENTER_VERTICAL);
-        itemView.setTag(position);
+    private class MenuAdapter extends BaseAdapter {
+        private String[] menuItems;
+        private int[] iconIds;
 
-        itemView.setBackgroundResource(R.drawable.highlight_bg);
-        itemView.setTextColor(0xFFDEDEDE);
-        itemView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.0f);
-        itemView.setPadding((int) getResources().getDimension(R.dimen.padding_left), 0, 0, 0);
+        public MenuAdapter() {
+            menuItems = getResources().getStringArray(R.array.menu_item);
+            iconIds = new int[]{R.drawable.ic_action_settings,
+                    R.drawable.ic_action_about,
+                    R.drawable.ic_action_about,
+                    R.drawable.ic_action_about};
+        }
 
-        itemView.setText(categories[position]);
-        itemView.setOnClickListener(this);
+        @Override
+        public int getCount() {
+            return menuItems.length;
+        }
 
-        return itemView;
+        @Override
+        public String getItem(int position) {
+            return menuItems[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView itemView;
+            if (null == convertView) {
+                convertView = LayoutInflater.from(HomeActivity.this).inflate(R.layout.menu_cell, parent, false);
+            }
+
+            itemView = (TextView) convertView;
+
+            String str;
+            if (1 == position) {
+                final int mode = PrefsUtil.getThemeMode();
+                str = mode == Constants.MODE_DAY ? "夜间模式" : "日间模式";
+            } else {
+                str = getItem(position);
+            }
+
+            itemView.setText(str);
+            itemView.setCompoundDrawablesWithIntrinsicBounds(iconIds[position], 0, 0, 0);
+
+            return itemView;
+        }
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
+        private int[] categoryIds;
 
         public TabsAdapter(FragmentManager fm) {
             super(fm);
+            categoryIds = getResources().getIntArray(R.array.category_id);
         }
 
         @Override
         public Fragment getItem(int i) {
             Bundle bundle = new Bundle();
-            bundle.putInt("category", i);
+            bundle.putInt("category", categoryIds[i]);
             return Fragment.instantiate(HomeActivity.this, ItemFragment.class.getName(), bundle);
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
         }
 
         @Override
@@ -382,120 +495,63 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        DataCacheService.getInstance().clearCaches();
-    }
+    private void applyTheme(int theme) {
+        final FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
+        final RelativeLayout titleView = (RelativeLayout) findViewById(R.id.title_bar);
+        final TextView leftBtn = (TextView) findViewById(R.id.ic_drawer);
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radio_group);
+        final RadioButton rb1 = (RadioButton) findViewById(R.id.radio_home);
+        final RadioButton rb2 = (RadioButton) findViewById(R.id.radio_video);
+        final RadioButton rb3 = (RadioButton) findViewById(R.id.radio_image);
+        final RadioButton rb4 = (RadioButton) findViewById(R.id.radio_audio);
+        final RadioButton rb5 = (RadioButton) findViewById(R.id.radio_text);
+        final RadioButton rb6 = (RadioButton) findViewById(R.id.radio_miscell);
+        final View split = findViewById(R.id.split_h);
 
-    private static final String REQUEST_URL = "http://www.u148.net/user/login.html";
-    private static final String LOGING_URL = "http://www.u148.net/usr/ajax_login.u?usr.uname=%1$s&usr.password=%2$s&usr.exp=2592000&rand=%3$s";
+        if (Constants.MODE_NIGHT == theme) {
+            rootView.setBackgroundColor(0xFF222222);
+            titleView.setBackgroundColor(getResources().getColor(R.color.action_bar_bg_night));
+            leftBtn.setTextColor(0xFFBBBBBB);
+            leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer_night, 0, 0, 0);
+            radioGroup.setBackgroundColor(0xFF1C1C1C);
+            rb1.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
+            rb2.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
+            rb3.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
+            rb4.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
+            rb5.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
+            rb6.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
 
-    private class LoginTask extends AsyncTask<String, Void, Boolean> {
+            rb1.setBackgroundResource(R.drawable.tab_indicator_night);
+            rb2.setBackgroundResource(R.drawable.tab_indicator_night);
+            rb3.setBackgroundResource(R.drawable.tab_indicator_night);
+            rb4.setBackgroundResource(R.drawable.tab_indicator_night);
+            rb5.setBackgroundResource(R.drawable.tab_indicator_night);
+            rb6.setBackgroundResource(R.drawable.tab_indicator_night);
 
-        private ProgressDialog progess;
+            split.setBackgroundColor(getResources().getColor(R.color.text_color_regular));
+        } else {
+            rootView.setBackgroundColor(getResources().getColor(R.color.background));
+            titleView.setBackgroundColor(0xFFff9900);
+            leftBtn.setTextColor(0xFFFFFFFF);
+            leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer, 0, 0, 0);
+            radioGroup.setBackgroundColor(0xFFE5E5E5);
+            rb1.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
+            rb2.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
+            rb3.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
+            rb4.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
+            rb5.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
+            rb6.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
 
-        @Override
-        protected void onPreExecute() {
-            progess = new ProgressDialog(HomeActivity.this);
-            progess.setMessage("登录中...");
-            progess.show();
+            rb1.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+            rb2.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+            rb3.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+            rb4.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+            rb5.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+            rb6.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
+
+            split.setBackgroundColor(0xFFE6E6E6);
         }
 
-        @Override
-        protected Boolean doInBackground(String... params) {
-            String userName = params[0];
-            String email = params[1];
-
-            return login(userName, email);
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            Toast.makeText(HomeActivity.this, aBoolean ? "登陆成功!" : "登录失败!", Toast.LENGTH_SHORT).show();
-            progess.dismiss();
-            if (aBoolean) {
-                User user = PrefsUtil.getUser();
-
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("userName", user.userName);
-                params.put("password", user.password);
-                FlurryAgent.logEvent("login", params);
-
-                startActivity(new Intent(HomeActivity.this, UserActivity.class));
-            }
-        }
-    }
-
-    private boolean login(String userName, String passWord) {
-        boolean result = false;
-
-        HttpURLConnection conn = null;
-        URL url = null;
-        try {
-            url = new URL(REQUEST_URL);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5000);
-            conn.connect();
-            String headerName = null;
-            String cookie = "";
-            for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
-                if (headerName.equals("Set-Cookie")) {
-                    cookie = conn.getHeaderField(i);
-                    break;
-                }
-            }
-
-            double rand = Math.random();
-            String loginUrl = String.format(LOGING_URL, userName, passWord, rand + "");
-
-            url = new URL(loginUrl);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(5000);
-            conn.setRequestProperty("Cookie", cookie);
-            conn.connect();
-
-            for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
-                if (headerName.equals("Set-Cookie")) {
-                    cookie = conn.getHeaderField(i);
-                    break;
-                }
-            }
-
-            InputStreamReader in = new InputStreamReader((InputStream) conn.getContent());
-            BufferedReader buff = new BufferedReader(in);
-            StringBuilder sb = new StringBuilder();
-
-            String line;
-            while ((line = buff.readLine()) != null) {
-                sb.append(line);
-            }
-            buff.close();
-
-            String json = sb.toString();
-            if (!TextUtils.isEmpty(json)) {
-                JSONObject jsonObj = new JSONObject(json);
-                int code = jsonObj.optInt("status", -1);
-                if (code == 1) {
-                    User user = new User();
-                    user.userName = userName;
-                    user.password = passWord;
-                    user.cookie = cookie;
-                    user.loginTime = System.currentTimeMillis();
-                    PrefsUtil.setUser(user);
-                    result = true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-
-        } finally {
-            if (null != conn) {
-                conn.disconnect();
-            }
-        }
-
-        return result;
+        mTabAdapter.notifyDataSetChanged();
     }
 }
