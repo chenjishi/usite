@@ -424,10 +424,10 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
         public MenuAdapter() {
             menuItems = getResources().getStringArray(R.array.menu_item);
-            iconIds = new int[]{R.drawable.ic_action_settings,
-                    R.drawable.ic_action_about,
-                    R.drawable.ic_action_about,
-                    R.drawable.ic_action_about};
+            iconIds = new int[]{R.drawable.ic_settings,
+                    R.drawable.ic_bulb,
+                    R.drawable.ic_star,
+                    R.drawable.ic_info};
         }
 
         @Override
@@ -457,7 +457,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
             String str;
             if (1 == position) {
                 final int mode = PrefsUtil.getThemeMode();
-                str = mode == Constants.MODE_DAY ? "夜间模式" : "日间模式";
+                str = mode == Constants.MODE_DAY ? "夜间" : "日间";
             } else {
                 str = getItem(position);
             }
