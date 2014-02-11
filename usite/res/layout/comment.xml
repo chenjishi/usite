@@ -42,7 +42,7 @@
                 android:textColorHint="#9C9C9C"/>
         <View android:id="@+id/split_h_comment"
               android:layout_width="match_parent"
-              android:layout_height="1px"
+              android:layout_height="2px"
               android:layout_alignParentTop="true"
               android:background="@color/white"/>
     </RelativeLayout>

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +48,6 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
     private long lastClickTime;
 
     private ArrayList<Comment> commentList = new ArrayList<Comment>();
-    private ListView mListView;
     private CommentAdapter mAdapter;
 
     private View emptyView;
@@ -68,16 +66,29 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
         emptyView = findViewById(R.id.empty_view);
         footView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        footView.findViewById(R.id.btn_load).setOnClickListener(this);
+        Button button = (Button) footView.findViewById(R.id.btn_load);
+        button.setOnClickListener(this);
+
         mEditText = (EditText) findViewById(R.id.et_content);
 
         mAdapter = new CommentAdapter(this);
-        mListView = (ListView) findViewById(R.id.list_comment);
-        mListView.addFooterView(footView);
+        ListView listView = (ListView) findViewById(R.id.list_comment);
+        listView.addFooterView(footView);
         footView.setVisibility(View.GONE);
-        mListView.setEmptyView(emptyView);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
+        listView.setEmptyView(emptyView);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(this);
+
+        if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
+            listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
+            button.setBackgroundResource(R.drawable.btn_gray_night);
+            button.setTextColor(getResources().getColor(R.color.text_color_summary));
+        } else {
+            listView.setDivider(getResources().getDrawable(R.drawable.split_color));
+            button.setBackgroundResource(R.drawable.btn_gray);
+            button.setTextColor(getResources().getColor(R.color.text_color_regular));
+        }
+        listView.setDividerHeight(1);
 
         loadData();
     }
@@ -167,7 +178,6 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
             params.put("review_id", id);
         }
 
-        Log.i("test", "########sendComment");
         HttpUtils.post(url, params, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -336,19 +346,19 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
         final View split = findViewById(R.id.split_h_comment);
 
         if (Constants.MODE_NIGHT == theme) {
-            mListView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
             sendBtn.setBackgroundResource(R.drawable.btn_gray_night);
             sendBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
             replyView.setBackgroundColor(0xFF1C1C1C);
             split.setBackgroundColor(0xFF303030);
+            mEditText.setTextColor(getResources().getColor(R.color.text_color_weak));
+            mEditText.setHintTextColor(0xFF666666);
         } else {
-            mListView.setDivider(getResources().getDrawable(R.drawable.split_color));
             sendBtn.setBackgroundResource(R.drawable.btn_gray);
             sendBtn.setTextColor(getResources().getColor(R.color.text_color_regular));
             replyView.setBackgroundColor(0xFFF6F6F6);
             split.setBackgroundColor(0xFFFFFFFF);
+            mEditText.setTextColor(getResources().getColor(R.color.text_color_regular));
+            mEditText.setHintTextColor(0xFF9C9C9C);
         }
-
-        mListView.setDividerHeight(1);
     }
 }

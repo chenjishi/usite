@@ -121,6 +121,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     private InterstitialAd interstitialAd;
     private void initAd() {
+        Log.i("test", "initAd");
         interstitialAd = new InterstitialAd(this, "a152d3545a2e658");
         interstitialAd.setAdListener(this);
 
