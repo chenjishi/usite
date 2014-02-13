@@ -9,13 +9,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.*;
+import com.baidu.mobads.InterstitialAd;
+import com.baidu.mobads.InterstitialAdListener;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Article;
@@ -33,10 +34,6 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
-import com.google.ads.Ad;
-import com.google.ads.AdListener;
-import com.google.ads.AdRequest;
-import com.google.ads.InterstitialAd;
 import com.sina.weibo.sdk.exception.WeiboException;
 
 import java.io.ByteArrayOutputStream;
@@ -56,7 +53,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
-        Response.Listener<Article>, Response.ErrorListener, AdListener {
+        Response.Listener<Article>, Response.ErrorListener, InterstitialAdListener {
     private final static String REQUEST_URL = "http://www.u148.net/json/article/%1$s";
     private ArticleWebView mWebView;
     private JavascriptBridge mJsBridge;
@@ -121,36 +118,34 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     private InterstitialAd interstitialAd;
     private void initAd() {
-        Log.i("test", "initAd");
-        interstitialAd = new InterstitialAd(this, "a152d3545a2e658");
-        interstitialAd.setAdListener(this);
-
-        interstitialAd.loadAd(new AdRequest());
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setListener(this);
+        interstitialAd.loadAd();
     }
 
     @Override
-    public void onReceiveAd(Ad ad) {
-        interstitialAd.show();
+    public void onAdReady() {
+        interstitialAd.showAd(this);
         PrefsUtil.setAdShowed(true);
     }
 
     @Override
-    public void onFailedToReceiveAd(Ad ad, AdRequest.ErrorCode errorCode) {
+    public void onAdPresent() {
 
     }
 
     @Override
-    public void onPresentScreen(Ad ad) {
+    public void onAdClick(InterstitialAd interstitialAd) {
 
     }
 
     @Override
-    public void onDismissScreen(Ad ad) {
+    public void onAdDismissed() {
 
     }
 
     @Override
-    public void onLeaveApplication(Ad ad) {
+    public void onAdFailed(String s) {
 
     }
 

@@ -104,7 +104,7 @@ public class HttpUtils {
         /**
          * prevent retry by set retry number to 0
          */
-        request.setRetryPolicy(new DefaultRetryPolicy(5000, 0, 1));
+        request.setRetryPolicy(new DefaultRetryPolicy(10000, 0, 1));
         queue.add(request);
     }
 }

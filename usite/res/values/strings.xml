@@ -43,6 +43,7 @@
 
     <string name="image_save_success">已保存至相册</string>
     <string name="image_save_fail">下载失败,请重试...</string>
+    <string name="video_decoder_fail">解码器初始化失败，无法播放视频</string>
     <string name="music_album_unknown">专辑:%1$s</string>
     <string name="music_artist_unknown">歌手:%1$s</string>
 
