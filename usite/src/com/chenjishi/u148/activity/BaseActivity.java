@@ -94,7 +94,7 @@ public class BaseActivity extends FragmentActivity implements SlidingLayout.Pane
 
     @Override
     public void setTitle(CharSequence title) {
-        final TextView textView = (TextView) findViewById(R.id.title);
+        final TextView textView = (TextView) findViewById(R.id.tv_title);
         textView.setText(title);
         textView.setVisibility(View.VISIBLE);
     }
@@ -107,9 +107,9 @@ public class BaseActivity extends FragmentActivity implements SlidingLayout.Pane
     protected void applyTheme() {
         if (!hideTitle) {
             final RelativeLayout titleView = (RelativeLayout) findViewById(R.id.title_bar);
-            final TextView titleText = (TextView) findViewById(R.id.title);
+            final TextView titleText = (TextView) findViewById(R.id.tv_title);
             final View divider = findViewById(R.id.split_h);
-            final ImageView backBtn = (ImageView) findViewById(R.id.ic_back);
+            final ImageView backBtn = (ImageView) findViewById(R.id.ic_arrow);
 
             if (Constants.MODE_NIGHT == theme) {
                 titleView.setBackgroundColor(0xFF1C1C1C);

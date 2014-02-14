@@ -172,22 +172,24 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
 
         @Override
         protected String doInBackground(Void... params) {
-            String result;
+            String result = "";
 
             if (mVideoUrl.contains("youku")) {
                 mVideo = VideoUrlParser.getYoukuUrl(mVideoUrl);
-                result = mVideo.url;
             } else if (mVideoUrl.contains("sina")) {
                 result = VideoUrlParser.getSinaUrl(mVideoUrl);
             } else if (mVideoUrl.contains("tudou")) {
                 mVideo = VideoUrlParser.getTudouUrl(mVideoUrl);
-                result = mVideo.url;
             } else if (mVideoUrl.contains("qiyi.com")) {
                 mVideo = getQiyiVideo(mVideoUrl);
-                result = null != mVideo ? mVideo.url : "";
-            } else {
+            } else if (mVideoUrl.contains("56.com")) {
                 mVideo = VideoUrlParser.get56VideoPath(mVideoUrl);
-                result = mVideo.url;
+            } else {
+                mVideo = null;
+            }
+
+            if (TextUtils.isEmpty(result)) {
+                result = mVideo == null ? "" : mVideo.url;
             }
 
             return result;

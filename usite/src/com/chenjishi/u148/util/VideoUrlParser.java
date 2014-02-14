@@ -1,7 +1,6 @@
 package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
-import android.util.Log;
 import com.chenjishi.u148.model.Video;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,10 +11,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,13 +29,14 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class VideoUrlParser {
+    private static final String CONVERT_URL = "http://dservice.wandoujia.com/convert?target=%1$s&f=phoenix2&v=3.44.1&u=d83dc65e84c34305a1afee4a95879a35943891e2&vc=4513&ch=wandoujia_pc_baidu_pt&type=VIDEO";
+
     private static String youkuJson;
 
     public static Video getTudouUrl(String str) {
         Video video = null;
-
         HttpURLConnection conn = null;
-        URL url = null;
+        URL url;
 
         try {
             url = new URL(str);
@@ -43,50 +45,42 @@ public class VideoUrlParser {
             conn.connect();
             String location = conn.getHeaderField("Location");
 
-            Pattern p = Pattern.compile("iid=(\\d+)");
+            Pattern p = Pattern.compile("lCode=(\\w+)&");
             Matcher m = p.matcher(location);
-            String vid = "";
+            String vid1 = "";
             while (m.find()) {
-                vid = m.group(1);
+                vid1 = m.group(1);
             }
 
-            if (vid.length() > 0) {
-                url = new URL("http://www.tudou.com/outplay/goto/getItemSegs.action?iid=" + vid);
-                conn = (HttpURLConnection) url.openConnection();
-                conn.connect();
+            p = Pattern.compile("code=(\\w+)&");
+            m = p.matcher(location);
+            String vid2 = "";
+            while (m.find()) {
+                vid2 = m.group(1);
+            }
 
-                InputStreamReader in = new InputStreamReader(conn.getInputStream());
-                BufferedReader buff = new BufferedReader(in);
-                StringBuilder sb = new StringBuilder();
+            if (TextUtils.isEmpty(vid1)) return null;
 
-                String line;
-                while ((line = buff.readLine()) != null) {
-                    sb.append(line);
-                }
+            String link = String.format("http://www.tudou.com/listplay/%1$s/%2$s.html", vid1, vid2);
+            String requestUrl = String.format(CONVERT_URL, link);
+            String result = HttpUtils.getSync(requestUrl);
 
-                buff.close();
+            if (TextUtils.isEmpty(result)) return null;
 
-                String json = sb.toString();
-                if (!TextUtils.isEmpty(json)) {
-                    p = Pattern.compile("\"k\":(\\d+)");
-                    m = p.matcher(json);
-                    ArrayList<String> ids = new ArrayList<String>();
-                    while (m.find()) {
-                        ids.add(m.group(1));
-                    }
+            JSONObject jObj = new JSONObject(result);
+            video = new Video();
 
-                    if (ids.size() > 0) {
-                        video = new Video();
-                        final String videoId = ids.get(0);
-                        Document doc = Jsoup.connect("http://ct.v2.tudou.com/f?id=" + videoId).get();
-                        Elements tags = doc.getElementsByTag("f");
-                        video.url = tags.get(0).text();
-                        video.title = "video";
-                    }
-                }
+            video.originalUrl = jObj.getString("target");
+            JSONArray jArr = jObj.getJSONArray("result");
+
+            if (null != jArr && jArr.length() > 0) {
+                JSONObject _obj = jArr.getJSONObject(0);
+                video.url = _obj.getString("url");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            video = null;
+        } catch (JSONException e) {
+            video = null;
         } finally {
             if (null != conn) {
                 conn.disconnect();
@@ -95,7 +89,6 @@ public class VideoUrlParser {
 
         return video;
     }
-
 
 
     public static Video get56VideoPath(String url) {
