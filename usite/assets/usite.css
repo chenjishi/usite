@@ -62,8 +62,9 @@ h1, h2, h3, h4, h5, h6 {
 
 }
 
-#content p {
-    margin: 10px 0 10px 0;
+#content p, #content div {
+    margin: 0;
+    padding: 0;
     word-wrap: break-word;
     font-size: 1em;
     clear: both;

@@ -30,8 +30,47 @@ import java.util.regex.Pattern;
  */
 public class VideoUrlParser {
     private static final String CONVERT_URL = "http://dservice.wandoujia.com/convert?target=%1$s&f=phoenix2&v=3.44.1&u=d83dc65e84c34305a1afee4a95879a35943891e2&vc=4513&ch=wandoujia_pc_baidu_pt&type=VIDEO";
-
     private static String youkuJson;
+
+    public static Video getQiyiVideo(String url) {
+        Video video = null;
+        Pattern pattern = Pattern.compile("/(\\w+)\\.swf");
+        Matcher matcher = pattern.matcher(url);
+
+        String videoId = "";
+        while (matcher.find()) {
+            videoId = matcher.group(1);
+        }
+        if (TextUtils.isEmpty(videoId)) return null;
+
+        String targetUrl = "http://www.iqiyi.com/" + videoId + ".html";
+        String result = HttpUtils.getSync(String.format(CONVERT_URL, targetUrl));
+        if (TextUtils.isEmpty(result)) return null;
+
+        try {
+            JSONObject jObj = new JSONObject(result);
+            JSONArray jArray = jObj.getJSONArray("result");
+            if (null != jArray && jArray.length() > 0) {
+                video = new Video();
+
+                video.originalUrl = targetUrl;
+                JSONObject obj = jArray.getJSONObject(0);
+
+                String redirectUrl = obj.getString("url");
+                String result2 = HttpUtils.getSync(redirectUrl);
+
+                pattern = Pattern.compile("l\":\"(.*?)\"");
+                matcher = pattern.matcher(result2);
+                while (matcher.find()) {
+                    video.url = matcher.group(1);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return video;
+    }
 
     public static Video getTudouUrl(String str) {
         Video video = null;
@@ -55,6 +94,7 @@ public class VideoUrlParser {
             p = Pattern.compile("code=(\\w+)&");
             m = p.matcher(location);
             String vid2 = "";
+
             while (m.find()) {
                 vid2 = m.group(1);
             }
@@ -506,5 +546,69 @@ public class VideoUrlParser {
         return new String(data, charsetName);
     }
 
-
+    //    private Video getQiyiVideo(String url) {
+//        Pattern pattern = Pattern.compile("qiyi\\.com/(\\w+)/");
+//        Matcher matcher = pattern.matcher(url);
+//
+//        String videoId = "";
+//        while (matcher.find()) {
+//            videoId = matcher.group(1);
+//        }
+//
+//        if (TextUtils.isEmpty(videoId)) return null;
+//
+//        Video video = null;
+//        HttpURLConnection conn = null;
+//        try {
+//            Document doc = Jsoup.connect("http://cache.video.qiyi.com/v/" + videoId).get();
+//            if (null == doc) return null;
+//
+//            Elements fileUrls = doc.getElementsByTag("file");
+//            if (null != fileUrls && fileUrls.size() > 0) {
+//                String fileUrl = fileUrls.get(0).text();
+//
+//                pattern = Pattern.compile("/(\\w+)\\.f4v");
+//                matcher = pattern.matcher(fileUrl);
+//                String videoId2 = "";
+//                while (matcher.find()) {
+//                    videoId2 = matcher.group(1);
+//                }
+//
+//                if (TextUtils.isEmpty(videoId2)) return null;
+//
+//                conn = (HttpURLConnection) (new URL("http://data.video.qiyi.com/" + videoId2 + ".ts").openConnection());
+//                conn.setInstanceFollowRedirects(false);
+//                conn.connect();
+//                String location = conn.getHeaderField("Location");
+//
+//                if (TextUtils.isEmpty(location)) return null;
+//
+//                pattern = Pattern.compile("key=(\\w+)");
+//                matcher = pattern.matcher(location);
+//                String key = "";
+//                while (matcher.find()) {
+//                    key = matcher.group(1);
+//                }
+//
+//                if (TextUtils.isEmpty(key)) return null;
+//
+//                video = new Video();
+//                video.url = fileUrl + "?key=" + key;
+//
+//                String title = doc.getElementsByTag("title").get(0).ownText();
+//                title = title.replace("<![CDATA[", "");
+//                title = title.replace("]]>", "");
+//                video.title = title;
+//                video.thumbUrl = doc.getElementsByTag("pic").get(0).ownText();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (null != conn) {
+//                conn.disconnect();
+//            }
+//        }
+//
+//        return video;
+//    }
 }

@@ -78,7 +78,7 @@ public class MediaController extends FrameLayout {
   private static final int FADE_OUT = 1;
   private static final int SHOW_PROGRESS = 2;
   private MediaPlayerControl mPlayer;
-  private Context mContext;
+  protected Context mContext;
   private PopupWindow mWindow;
   private int mAnimStyle;
   private View mAnchor;

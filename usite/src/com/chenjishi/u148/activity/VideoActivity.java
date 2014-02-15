@@ -7,24 +7,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.model.Video;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.ShareDialog;
+import com.chenjishi.u148.view.VideoController;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
 import com.sina.weibo.sdk.exception.WeiboException;
 import io.vov.vitamio.MediaPlayer;
-import io.vov.vitamio.widget.MediaController;
+import io.vov.vitamio.Vitamio;
 import io.vov.vitamio.widget.VideoView;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,12 +34,10 @@ import java.util.regex.Pattern;
  * Time: 上午11:03
  * To change this template use File | Settings | File Templates.
  */
-public class VideoActivity extends Activity implements MediaController.OnHiddenListener,
-        ShareDialog.OnShareListener, MediaController.OnShownListener {
-    private static final String CONVERT_URL = "http://dservice.wandoujia.com/convert?target=%1$s&f=phoenix2&v=3.44.1&u=d83dc65e84c34305a1afee4a95879a35943891e2&vc=4513&ch=wandoujia_pc_baidu_pt&type=VIDEO";
+public class VideoActivity extends Activity implements View.OnClickListener, ShareDialog.OnShareListener,
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private VideoView mVideoView;
-    private MediaController mMediaController;
-    private RelativeLayout mTopLayout;
+    private VideoController mMediaController;
 
     private String mVideoUrl;
 
@@ -53,13 +46,18 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this)) return;
+
+        if (!Vitamio.isInitialized(this)) {
+            new InitLibsTask().execute();
+        } else {
+            initView();
+        }
+    }
+
+    private void initView() {
         setContentView(R.layout.videoview);
 
-        mTopLayout = (RelativeLayout) findViewById(R.id.title_bar);
-        mMediaController = new MediaController(this);
-        mMediaController.setOnHiddenListener(this);
-        mMediaController.setOnShownListener(this);
+        mMediaController = new VideoController(this);
         mVideoView = (VideoView) findViewById(R.id.surface_view);
         mVideoView.setMediaController(mMediaController);
 
@@ -71,22 +69,40 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
         }
     }
 
-    @Override
-    public void onHidden() {
-        mTopLayout.setVisibility(View.GONE);
+    private class InitLibsTask extends AsyncTask<Void, Void, Boolean> {
+        private ProgressDialog progress;
+
+        @Override
+        protected void onPreExecute() {
+            progress = new ProgressDialog(VideoActivity.this);
+            progress.setCancelable(false);
+            progress.setMessage("解码器初始化...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return Vitamio.initialize(VideoActivity.this, R.raw.libarm);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            progress.dismiss();
+            initView();
+        }
     }
 
     @Override
-    public void onShown() {
-        mTopLayout.setVisibility(View.VISIBLE);
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.mediacontroller_share:
+                mShareDialog = new ShareDialog(this, this);
+                mShareDialog.show();
+                break;
+        }
     }
 
     private ShareDialog mShareDialog;
-
-    public void onShareButtonClicked(View view) {
-        mShareDialog = new ShareDialog(this, this);
-        mShareDialog.show();
-    }
 
     //http://www.56.com/u48/v_OTY2NTkyMzQ.html
 //    http://v.youku.com/v_show/id_XMzE5MDA1ODQ0.html
@@ -175,13 +191,24 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
             String result = "";
 
             if (mVideoUrl.contains("youku")) {
-                mVideo = VideoUrlParser.getYoukuUrl(mVideoUrl);
+                String vId = null;
+                String regex = "sid\\/(\\w+)\\/";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(mVideoUrl);
+
+                if (matcher.find()) vId = matcher.group(1);
+
+                String m3u8Url = "http://v.youku.com/player/getRealM3U8/vid/%1$s/type/video.m3u8";
+
+                mVideo = new Video();
+                mVideo.id = vId;
+                mVideo.url = String.format(m3u8Url, vId);
             } else if (mVideoUrl.contains("sina")) {
                 result = VideoUrlParser.getSinaUrl(mVideoUrl);
             } else if (mVideoUrl.contains("tudou")) {
                 mVideo = VideoUrlParser.getTudouUrl(mVideoUrl);
             } else if (mVideoUrl.contains("qiyi.com")) {
-                mVideo = getQiyiVideo(mVideoUrl);
+                mVideo = VideoUrlParser.getQiyiVideo(mVideoUrl);
             } else if (mVideoUrl.contains("56.com")) {
                 mVideo = VideoUrlParser.get56VideoPath(mVideoUrl);
             } else {
@@ -197,129 +224,33 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
 
         @Override
         protected void onPostExecute(String s) {
+            progress.dismiss();
             if (!TextUtils.isEmpty(s)) {
-                mVideoView.setVideoPath(s);
-                mVideoView.setVideoQuality(MediaPlayer.VIDEOQUALITY_HIGH);
-
-                mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mediaPlayer) {
-                        mMediaController.setFileName("");
-                        ((TextView) findViewById(R.id.video_title)).setText(mVideo.title);
-                        progress.dismiss();
-                    }
-                });
+               startPlay(s);
             } else {
                 errorHandle();
             }
         }
     }
 
-    private Video getQiyiVideo(String url) {
-        Video video = null;
-        Pattern pattern = Pattern.compile("/(\\w+)\\.swf");
-        Matcher matcher = pattern.matcher(url);
+    private void startPlay(String url) {
+        mVideoView.setVideoPath(url);
+        mVideoView.setVideoQuality(MediaPlayer.VIDEOQUALITY_HIGH);
+        mVideoView.setOnPreparedListener(this);
+        mVideoView.setOnCompletionListener(this);
 
-        String videoId = "";
-        while (matcher.find()) {
-            videoId = matcher.group(1);
-        }
-        if (TextUtils.isEmpty(videoId)) return null;
-
-        String targetUrl = "http://www.iqiyi.com/" + videoId + ".html";
-        String result = HttpUtils.getSync(String.format(CONVERT_URL, targetUrl));
-        if (TextUtils.isEmpty(result)) return null;
-
-        try {
-            JSONObject jObj = new JSONObject(result);
-            JSONArray jArray = jObj.getJSONArray("result");
-            if (null != jArray && jArray.length() > 0) {
-                video = new Video();
-
-                video.originalUrl = targetUrl;
-                JSONObject obj = jArray.getJSONObject(0);
-
-                String redirectUrl = obj.getString("url");
-                String result2 = HttpUtils.getSync(redirectUrl);
-
-                pattern = Pattern.compile("l\":\"(.*?)\"");
-                matcher = pattern.matcher(result2);
-                while (matcher.find()) {
-                    video.url = matcher.group(1);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return video;
+        mMediaController.findViewById(R.id.mediacontroller_share).setOnClickListener(this);
     }
 
-//    private Video getQiyiVideo(String url) {
-//        Pattern pattern = Pattern.compile("qiyi\\.com/(\\w+)/");
-//        Matcher matcher = pattern.matcher(url);
-//
-//        String videoId = "";
-//        while (matcher.find()) {
-//            videoId = matcher.group(1);
-//        }
-//
-//        if (TextUtils.isEmpty(videoId)) return null;
-//
-//        Video video = null;
-//        HttpURLConnection conn = null;
-//        try {
-//            Document doc = Jsoup.connect("http://cache.video.qiyi.com/v/" + videoId).get();
-//            if (null == doc) return null;
-//
-//            Elements fileUrls = doc.getElementsByTag("file");
-//            if (null != fileUrls && fileUrls.size() > 0) {
-//                String fileUrl = fileUrls.get(0).text();
-//
-//                pattern = Pattern.compile("/(\\w+)\\.f4v");
-//                matcher = pattern.matcher(fileUrl);
-//                String videoId2 = "";
-//                while (matcher.find()) {
-//                    videoId2 = matcher.group(1);
-//                }
-//
-//                if (TextUtils.isEmpty(videoId2)) return null;
-//
-//                conn = (HttpURLConnection) (new URL("http://data.video.qiyi.com/" + videoId2 + ".ts").openConnection());
-//                conn.setInstanceFollowRedirects(false);
-//                conn.connect();
-//                String location = conn.getHeaderField("Location");
-//
-//                if (TextUtils.isEmpty(location)) return null;
-//
-//                pattern = Pattern.compile("key=(\\w+)");
-//                matcher = pattern.matcher(location);
-//                String key = "";
-//                while (matcher.find()) {
-//                    key = matcher.group(1);
-//                }
-//
-//                if (TextUtils.isEmpty(key)) return null;
-//
-//                video = new Video();
-//                video.url = fileUrl + "?key=" + key;
-//
-//                String title = doc.getElementsByTag("title").get(0).ownText();
-//                title = title.replace("<![CDATA[", "");
-//                title = title.replace("]]>", "");
-//                video.title = title;
-//                video.thumbUrl = doc.getElementsByTag("pic").get(0).ownText();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (null != conn) {
-//                conn.disconnect();
-//            }
-//        }
-//
-//        return video;
-//    }
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mMediaController.setFileName(mVideo.title);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        finish();
+    }
 
     @Override
     protected void onResume() {
@@ -341,7 +272,7 @@ public class VideoActivity extends Activity implements MediaController.OnHiddenL
     }
 
     private void errorHandle() {
-        Toast.makeText(this, getString(R.string.video_play_failed), Toast.LENGTH_SHORT).show();
+        CommonUtil.showToast(R.string.video_play_failed);
         finish();
     }
 

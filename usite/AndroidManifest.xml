@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.chenjishi.u148"
-          android:versionCode="28"
-          android:versionName="1.3">
+          android:versionCode="30"
+          android:versionName="1.3.2">
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="17"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -49,12 +49,6 @@
         <activity android:name=".activity.VideoActivity" android:screenOrientation="landscape"
                   android:configChanges="keyboardHidden|orientation|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-        <activity
-                android:name="io.vov.vitamio.activity.InitActivity"
-                android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
-                android:launchMode="singleTop"
-                android:theme="@android:style/Theme.NoTitleBar"
-                android:windowSoftInputMode="stateAlwaysHidden"/>
         <service android:name=".service.MusicService" android:exported="false"/>
     </application>
 </manifest> 
