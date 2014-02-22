@@ -154,7 +154,7 @@ public class VideoActivity extends Activity implements View.OnClickListener, Sha
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        CommonUtil.showToast(R.string.share_success);
+                        Utils.showToast(R.string.share_success);
                     }
                 });
             }
@@ -272,7 +272,7 @@ public class VideoActivity extends Activity implements View.OnClickListener, Sha
     }
 
     private void errorHandle() {
-        CommonUtil.showToast(R.string.video_play_failed);
+        Utils.showToast(R.string.video_play_failed);
         finish();
     }
 

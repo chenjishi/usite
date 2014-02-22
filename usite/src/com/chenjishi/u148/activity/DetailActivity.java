@@ -9,7 +9,9 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -21,13 +23,14 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Article;
 import com.chenjishi.u148.model.Feed;
+import com.chenjishi.u148.model.User;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
-import com.chenjishi.u148.util.CommonUtil;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.ArticleWebView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
@@ -57,18 +60,13 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     private final static String REQUEST_URL = "http://www.u148.net/json/article/%1$s";
     private ArticleWebView mWebView;
     private JavascriptBridge mJsBridge;
+    private View mEmptyView;
 
     private MusicService mMusicService;
 
     private Article mArticle;
 
     private Feed mFeed;
-
-    private RelativeLayout mMusicPanel;
-    private TextView mSongText;
-    private TextView mArtistText;
-    private ProgressBar mMusicProgress;
-    private ImageButton mPlayBtn;
 
     private boolean mBounded = false;
 
@@ -77,7 +75,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.detail, R.layout.article_title_layout);
+        setContentView(R.layout.detail);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -95,21 +93,15 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             categoryMap.put(String.valueOf(ids[i]), names[i]);
         }
 
+        mEmptyView = findViewById(R.id.empty_layout);
+
         String title = categoryMap.get(String.valueOf(mFeed.category));
         setTitle(title);
-
-        mSongText = (TextView) findViewById(R.id.tv_song_title);
-        mArtistText = (TextView) findViewById(R.id.tv_artist);
-        mMusicProgress = (ProgressBar) findViewById(R.id.pb_music_loading);
-        mPlayBtn = (ImageButton) findViewById(R.id.btn_play);
-        mMusicPanel = (RelativeLayout) findViewById(R.id.panel_music);
 
         mWebView = (ArticleWebView) findViewById(R.id.webview_content);
 
         mJsBridge = new JavascriptBridge(this);
         mWebView.addJavascriptInterface(mJsBridge, "U148");
-
-        renderPage(getString(R.string.content_loading));
 
         //for debug javascript only
 //        mWebView.setWebChromeClient(new MyWebChromeClient());
@@ -117,6 +109,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     }
 
     private InterstitialAd interstitialAd;
+
     private void initAd() {
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setListener(this);
@@ -149,33 +142,55 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     }
 
-    private void initMusicPanel() {
-        mSongText.setText("正在加载...");
-        mArtistText.setVisibility(View.GONE);
-        mMusicProgress.setVisibility(View.VISIBLE);
-        mPlayBtn.setVisibility(View.GONE);
-        mMusicPanel.setVisibility(View.VISIBLE);
-    }
+    private View mMusicPanel;
+    private TextView mSongText;
+    private TextView mArtistText;
+    private ProgressBar mMusicProgress;
+    private ImageButton mPlayBtn;
 
     @Override
     public void onMusicStartParse() {
-        initMusicPanel();
+        if (null == mMusicPanel) {
+            mMusicPanel = LayoutInflater.from(this).inflate(R.layout.music_pane_layout, null);
+
+            mSongText = (TextView) mMusicPanel.findViewById(R.id.tv_song_title);
+            mArtistText = (TextView) mMusicPanel.findViewById(R.id.tv_artist);
+            mMusicProgress = (ProgressBar) mMusicPanel.findViewById(R.id.pb_music_loading);
+            mPlayBtn = (ImageButton) mMusicPanel.findViewById(R.id.btn_play);
+        }
+
+        mSongText.setText(getString(R.string.content_loading));
+        mArtistText.setVisibility(View.GONE);
+        mPlayBtn.setVisibility(View.GONE);
+        mMusicProgress.setVisibility(View.VISIBLE);
+        mMusicPanel.setVisibility(View.VISIBLE);
+
+        if (null != mMusicPanel.getParent()) return;
+
+        final FrameLayout view = (FrameLayout) findViewById(android.R.id.content);
+        final float density = getResources().getDisplayMetrics().density;
+        final RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                (int) (density * 60. + 0.5));
+        view.addView(mMusicPanel, lp);
     }
 
     @Override
     public void onMusicPrepared(String song, String artist) {
         mSongText.setText(song);
         mArtistText.setText(artist);
-        mArtistText.setVisibility(View.VISIBLE);
-
         mMusicProgress.setVisibility(View.GONE);
+
+        mArtistText.setVisibility(View.VISIBLE);
         mPlayBtn.setImageResource(R.drawable.ic_pause);
         mPlayBtn.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onMusicCompleted() {
-        mMusicPanel.setVisibility(View.GONE);
+        if (null == mMusicPanel) return;
+
+        final FrameLayout view = (FrameLayout) findViewById(android.R.id.content);
+        view.removeView(mMusicPanel);
     }
 
     @Override
@@ -191,11 +206,41 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (isFavorite && !isSend) {
+            final User user = PrefsUtil.getUser();
+            if (null == user || TextUtils.isEmpty(user.token)) return;
+
+            final String url = "http://www.u148.net/json/favourite";
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("id", mFeed.id);
+            params.put("token", user.token);
+
+            HttpUtils.post(url, params, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    isSend = true;
+                }
+            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    });
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mBounded) {
             unbindService(mConnection);
             mBounded = false;
+
+            if (null != mMusicPanel && mMusicPanel.getParent() != null) {
+                ((ViewGroup) mMusicPanel.getParent()).removeView(mMusicPanel);
+            }
         }
     }
 
@@ -215,19 +260,35 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         }
     };
 
+    public void onCommentClicked(View v) {
+        Intent intent = new Intent(this, CommentActivity.class);
+        intent.putExtra("article_id", mFeed.id);
+        startActivity(intent);
+    }
+
+    private boolean isFavorite = false;
+    private boolean isSend = false;
+    public void onFavoriteClicked(View v) {
+        final User user = PrefsUtil.getUser();
+
+        if (null == user || TextUtils.isEmpty(user.token)) {
+            Utils.showToast("请先登录再收藏");
+            return;
+        }
+
+        isFavorite = !isFavorite;
+        Utils.showToast(isFavorite ? R.string.favorite_success : R.string.favorite_cancel);
+    }
+
+    public void onShareClicked(View v) {
+        if (null == mShareDialog) {
+            mShareDialog = new ShareDialog(this, this);
+        }
+        mShareDialog.show();
+    }
+
     public void onButtonClicked(View v) {
         switch (v.getId()) {
-            case R.id.ic_share:
-                if (null == mShareDialog) {
-                    mShareDialog = new ShareDialog(this, this);
-                }
-                mShareDialog.show();
-                break;
-            case R.id.ic_comment:
-                Intent intent = new Intent(this, CommentActivity.class);
-                intent.putExtra("article_id", mFeed.id);
-                startActivity(intent);
-                break;
             case R.id.btn_play:
                 if (mMusicService != null) {
                     mPlayBtn.setImageResource(mMusicService.isPlaying()
@@ -240,37 +301,44 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        CommonUtil.showToast(R.string.connection_error);
+        mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+        ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText("网络错误");
     }
 
     @Override
     public void onResponse(Article response) {
         if (null != response && !TextUtils.isEmpty(response.content)) {
             mArticle = response;
-            renderPage(mArticle.content);
+            renderPage();
+            findViewById(R.id.article_layout).setVisibility(View.VISIBLE);
             boolean adShowed = PrefsUtil.isAdShowed();
             if (!adShowed) initAd();
         } else {
-            CommonUtil.showToast(R.string.parse_error);
+            mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+            ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText(getString(R.string.parse_error));
             finish();
         }
     }
 
-    private void renderPage(String content) {
-        String template = CommonUtil.readFromAssets(this, "usite.html");
+    private void renderPage() {
+        String template = Utils.readFromAssets(this, "usite.html");
         template = template.replace("{TITLE}", mFeed.title);
 
         long t = mFeed.createTime * 1000L;
         Date date = new Date(t);
         Format format = new SimpleDateFormat("yyyy-MM-dd");
 
+        String author = "unknown";
+        if (null != mFeed.user) {
+            author = mFeed.user.nickname;
+        }
         String pubTime = String.format(getString(R.string.pub_time),
-                mFeed.user.nickname, format.format(date));
+                author, format.format(date));
         template = template.replace("{U_AUTHOR}", pubTime);
         String reviews = String.format(getString(R.string.pub_reviews), mFeed.countBrowse, mFeed.countReview);
         template = template.replace("{U_COMMENT}", reviews);
 
-        template = template.replace("{CONTENT}", content);
+        template = template.replace("{CONTENT}", mArticle.content);
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
     }
@@ -332,7 +400,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        CommonUtil.showToast(R.string.share_success);
+                        Utils.showToast(R.string.share_success);
                     }
                 });
             }
@@ -354,7 +422,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         });
     }
 
-    private class JavascriptBridge {
+    class JavascriptBridge {
         private Context mContext;
 
         public JavascriptBridge(Context context) {
@@ -381,6 +449,8 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         @JavascriptInterface
         public void onVideoClick(String src) {
+            if (TextUtils.isEmpty(src)) return;
+
             Intent intent = new Intent();
             if (src.contains("xiami")) {
                 intent.setClass(mContext, MusicService.class);
@@ -404,21 +474,39 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     @Override
     protected void applyTheme() {
         super.applyTheme();
+
+        final View splitBottom = findViewById(R.id.split_h1);
+        final View BottomLayout = findViewById(R.id.bottom_layout);
         final View split1 = findViewById(R.id.split_v_1);
         final View split2 = findViewById(R.id.split_v_2);
-        final ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
-        final ImageView shareBtn = (ImageView) findViewById(R.id.ic_share);
+        final TextView commentBtn = (TextView) findViewById(R.id.btn_comment);
+        final TextView favoriteBtn = (TextView) findViewById(R.id.btn_favorite);
+        final TextView shareBtn = (TextView) findViewById(R.id.btn_share);
 
         if (Constants.MODE_NIGHT == theme) {
+            splitBottom.setBackgroundColor(0xFF303030);
+            BottomLayout.setBackgroundColor(0xFF1C1C1C);
+
             split1.setBackgroundColor(0xFF303030);
             split2.setBackgroundColor(0xFF303030);
-            commentBtn.setImageResource(R.drawable.ic_comment_night);
-            shareBtn.setImageResource(R.drawable.ic_share_night);
+            commentBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
+            commentBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_comment_night, 0, 0, 0);
+            favoriteBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_night, 0, 0, 0);
+            shareBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
+            shareBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_share_night, 0, 0, 0);
         } else {
-            split1.setBackgroundColor(0xFFCACACA);
-            split2.setBackgroundColor(0xFFCACACA);
-            commentBtn.setImageResource(R.drawable.ic_comment);
-            shareBtn.setImageResource(R.drawable.ic_social_share);
+            splitBottom.setBackgroundColor(0xFFEEEEEE);
+            BottomLayout.setBackgroundColor(0xFFF9F9F9);
+
+            split1.setBackgroundColor(0xFFCCCCCC);
+            split2.setBackgroundColor(0xFFCCCCCC);
+            commentBtn.setTextColor(getResources().getColor(R.color.gray_2));
+            commentBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_comment, 0, 0, 0);
+            favoriteBtn.setTextColor(getResources().getColor(R.color.gray_2));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite, 0, 0, 0);
+            shareBtn.setTextColor(getResources().getColor(R.color.gray_2));
+            shareBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_social_share, 0, 0, 0);
         }
     }
 }

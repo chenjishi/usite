@@ -46,6 +46,8 @@
                   android:theme="@style/Theme.Transparent"/>
         <activity android:name=".activity.ImageActivity" android:screenOrientation="portrait"
                   android:theme="@style/Theme.Transparent"/>
+        <activity android:name=".activity.FavoriteActivity" android:screenOrientation="portrait"
+                  android:theme="@style/Theme.Transparent"/>
         <activity android:name=".activity.VideoActivity" android:screenOrientation="landscape"
                   android:configChanges="keyboardHidden|orientation|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>

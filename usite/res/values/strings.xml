@@ -18,8 +18,6 @@
     <string name="feedback">意见反馈</string>
     <string name="feedback2">有意思吧意见反馈</string>
     <string name="send">发送</string>
-    <string name="jian_dan">煎蛋最新</string>
-    <string name="news">科技新闻</string>
     <string name="about">关于</string>
     <string name="app_settings">设置</string>
     <string name="net_error">网络无连接，请检查网络设置</string>
@@ -33,7 +31,6 @@
     <string name="google_play_unavailable">无法打开Google Play</string>
 
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
-    <string name="tips">小提示:首页手指下拉可刷新当日最新内容</string>
     <string name="video_play_failed">此视频无法播放</string>
     <string name="video_loading">视频加载中...</string>
     <string name="updating_app">正在更新应用程序&#8230;</string>
@@ -73,10 +70,13 @@
 
     <string name="comment">评论</string>
     <string name="no_comment">暂无评论</string>
-    <string name="occupied_size">緩存視頻占用%1$s</string>
-    <string name="video">視頻</string>
     <string name="views">%1$d人看过</string>
     <string name="comment_count">%1$d评论</string>
+
+    <string name="favorite">收藏</string>
+    <string name="favorite_success">收藏成功</string>
+    <string name="favorite_cancel">取消收藏</string>
+    <string name="share">分享</string>
 
     <string name="login">登陆</string>
     <string name="logout_tips">确认退出账号吗？</string>

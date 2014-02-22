@@ -107,4 +107,13 @@ public class HttpUtils {
         request.setRetryPolicy(new DefaultRetryPolicy(10000, 0, 1));
         queue.add(request);
     }
+
+    public static <T> void get(String url,
+                               Class<T> clazz,
+                               Response.Listener<T> listener,
+                               Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        GsonRequest<T> request = new GsonRequest<T>(url, clazz, listener, errorListener);
+        queue.add(request);
+    }
 }

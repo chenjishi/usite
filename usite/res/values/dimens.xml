@@ -9,6 +9,7 @@
     <dimen name="header_footer_top_bottom_padding">12dp</dimen>
 
     <dimen name="action_bar_height">48dp</dimen>
+    <dimen name="bottom_bar_height">36dp</dimen>
 
     <dimen name="action_bar_icon_vertical_padding">4dp</dimen>
     <dimen name="action_bar_title_text_size">18dp</dimen>

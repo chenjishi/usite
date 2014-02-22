@@ -71,4 +71,20 @@
         <item name="android:clickable">true</item>
         <item name="android:background">@drawable/home_button_bkg</item>
     </style>
+    <style name="BottomButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#ccc</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="BottomButtonWrapper">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1.0</item>
+        <item name="android:background">@drawable/home_up_bg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:onClick">onButtonClicked</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

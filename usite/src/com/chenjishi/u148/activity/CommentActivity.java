@@ -14,9 +14,10 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.User;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -105,7 +106,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        CommonUtil.showToast("出错啦~~");
+        Utils.showToast("出错啦~~");
         footView.setVisibility(View.GONE);
     }
 
@@ -122,7 +123,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
     @Override
     public void onLoginError() {
-        CommonUtil.showToast(getString(R.string.login_fail));
+        Utils.showToast(getString(R.string.login_fail));
     }
 
     @Override
@@ -145,7 +146,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
             lastClickTime = nowTime;
 
             if (!TextUtils.isEmpty(content)) {
-                if (CommonUtil.isLogin()) {
+                if (Utils.isLogin()) {
                     if (!TextUtils.isEmpty(commentId)) {
                         sendComment(content, commentId);
                         commentId = "";
@@ -156,7 +157,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
                     new LoginDialog(this, this).show();
                 }
             } else {
-                CommonUtil.showToast("评论不能为空");
+                Utils.showToast("评论不能为空");
             }
         }
     }
@@ -192,23 +193,23 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
                                     mEditText.setHint("");
                                     mEditText.clearFocus();
                                     mContent = content;
-                                    CommonUtil.showToast("评论成功");
+                                    Utils.showToast("评论成功");
                                     loadData();
                                 } else {
-                                    CommonUtil.showToast("评论失败，请稍后再试");
+                                    Utils.showToast("评论失败，请稍后再试");
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            CommonUtil.showToast("评论失败，请稍后再试");
+                            Utils.showToast("评论失败，请稍后再试");
                         }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         pd.dismiss();
-                        CommonUtil.showToast("评论失败，请稍后再试");
+                        Utils.showToast("评论失败，请稍后再试");
                     }
                 }
         );

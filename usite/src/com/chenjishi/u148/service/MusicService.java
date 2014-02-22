@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 import org.jsoup.Jsoup;
@@ -54,20 +55,21 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String url = intent.getExtras().getString("url");
-        if (!TextUtils.isEmpty(url)) {
-            if (!url.equals(mCurrentUrl)) {
-                mCurrentUrl = url;
-                if (null != mPlayer) {
-                    mPlayer.reset();
-                }
-                mListener.onMusicStartParse();
-                parseMp3Url(url);
-            } else {
-                togglePlayer();
+        final Bundle bundle = intent.getExtras();
+        if (null == bundle) return START_STICKY;
+
+        final String url = bundle.getString("url");
+        if (TextUtils.isEmpty(url)) return START_STICKY;
+
+        if (!url.equals(mCurrentUrl)) {
+            mCurrentUrl = url;
+            if (null != mPlayer) {
+                mPlayer.reset();
             }
+            mListener.onMusicStartParse();
+            parseMp3Url(url);
         } else {
-            mListener.onMusicParseError();
+            togglePlayer();
         }
 
         return START_STICKY;

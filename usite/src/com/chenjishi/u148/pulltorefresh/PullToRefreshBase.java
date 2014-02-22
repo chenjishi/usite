@@ -1106,7 +1106,6 @@ public abstract class PullToRefreshBase<T extends View> extends LinearLayout imp
 				mRefreshableView.setBackgroundDrawable(background);
 			}
 		} else if (a.hasValue(R.styleable.PullToRefresh_ptrAdapterViewBackground)) {
-			Utils.warnDeprecation("ptrAdapterViewBackground", "ptrRefreshableViewBackground");
 			Drawable background = a.getDrawable(R.styleable.PullToRefresh_ptrAdapterViewBackground);
 			if (null != background) {
 				mRefreshableView.setBackgroundDrawable(background);

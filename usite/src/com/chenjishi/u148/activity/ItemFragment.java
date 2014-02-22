@@ -128,7 +128,7 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
     }
 
     private void loadData() {
-        if (!CommonUtil.didNetworkConnected(getActivity())) return;
+        if (!Utils.didNetworkConnected(getActivity())) return;
 
         String url = String.format(REQUEST_URL, category, currentPage);
         HttpUtils.feedRequest(url, this, this);

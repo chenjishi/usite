@@ -2,6 +2,7 @@
     <string-array name="menu_item">
         <item>设置</item>
         <item>夜间</item>
+        <item>收藏</item>
         <item>评分</item>
         <item>关于</item>
     </string-array>

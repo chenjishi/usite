@@ -33,9 +33,6 @@ function initImages() {
 		}
 
 	}
-
-    var btn = document.getElementById('view-comment');
-    btn.setAttribute('onclick', 'U148.onCommentClicked()');
 }
 
 window.setScreenMode = function(mode) {

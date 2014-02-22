@@ -80,7 +80,7 @@ public class ShareUtils {
         String path = FileCache.getTempCacheDir() + "temp";
         File file = new File(path);
         if (!file.exists()) {
-            CommonUtil.showToast(R.string.share_file_error);
+            Utils.showToast(R.string.share_file_error);
             return;
         }
 

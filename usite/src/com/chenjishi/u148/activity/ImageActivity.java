@@ -19,10 +19,11 @@ import android.widget.RelativeLayout;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.sina.RequestListener;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.VolleyError;
@@ -165,17 +166,17 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
                             ShareUtils.shareImage(ImageActivity.this, url, type, bitmap);
                         }
                     } else {
-                        CommonUtil.showToast(R.string.share_error);
+                        Utils.showToast(R.string.share_error);
                     }
                 }
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    CommonUtil.showToast(R.string.share_error);
+                    Utils.showToast(R.string.share_error);
                 }
             });
         } else {
-            CommonUtil.showToast(R.string.share_error);
+            Utils.showToast(R.string.share_error);
         }
 
         shareDialog.dismiss();
@@ -188,7 +189,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        CommonUtil.showToast(R.string.share_success);
+                        Utils.showToast(R.string.share_success);
                     }
                 });
             }
@@ -291,13 +292,13 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
                     }
                 }
 
-                CommonUtil.showToast(getString(TextUtils.isEmpty(picUrl) ?
+                Utils.showToast(getString(TextUtils.isEmpty(picUrl) ?
                         R.string.image_save_fail : R.string.image_save_success));
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                CommonUtil.showToast(getString(R.string.image_save_fail));
+                Utils.showToast(getString(R.string.image_save_fail));
             }
         });
     }

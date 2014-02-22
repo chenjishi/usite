@@ -152,7 +152,6 @@ public abstract class LoadingLayout extends FrameLayout implements ILoadingLayou
 				if (attrs.hasValue(R.styleable.PullToRefresh_ptrDrawableStart)) {
 					imageDrawable = attrs.getDrawable(R.styleable.PullToRefresh_ptrDrawableStart);
 				} else if (attrs.hasValue(R.styleable.PullToRefresh_ptrDrawableTop)) {
-					Utils.warnDeprecation("ptrDrawableTop", "ptrDrawableStart");
 					imageDrawable = attrs.getDrawable(R.styleable.PullToRefresh_ptrDrawableTop);
 				}
 				break;
@@ -161,7 +160,6 @@ public abstract class LoadingLayout extends FrameLayout implements ILoadingLayou
 				if (attrs.hasValue(R.styleable.PullToRefresh_ptrDrawableEnd)) {
 					imageDrawable = attrs.getDrawable(R.styleable.PullToRefresh_ptrDrawableEnd);
 				} else if (attrs.hasValue(R.styleable.PullToRefresh_ptrDrawableBottom)) {
-					Utils.warnDeprecation("ptrDrawableBottom", "ptrDrawableEnd");
 					imageDrawable = attrs.getDrawable(R.styleable.PullToRefresh_ptrDrawableBottom);
 				}
 				break;

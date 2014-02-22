@@ -21,7 +21,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.*;
 
 /**
@@ -189,8 +190,8 @@ public class ImageRequest extends Request<Bitmap> {
         } else {
 
             if (mIsCircle) {
-                bitmap = CommonUtil.circleToBitmap(bitmap);
-                bitmap = CommonUtil.zoomBitmap(bitmap, mMaxWidth, mMaxHeight);
+                bitmap = Utils.circleToBitmap(bitmap);
+                bitmap = Utils.zoomBitmap(bitmap, mMaxWidth, mMaxHeight);
             }
 
             return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));

@@ -11,9 +11,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
+import com.chenjishi.u148.util.Utils;
 
 /**
  * Created by chenjishi on 14-1-11.
@@ -85,7 +86,7 @@ public class SettingsActivity extends BaseActivity {
         protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
             progress.dismiss();
-            CommonUtil.showToast("清除缓存成功!");
+            Utils.showToast("清除缓存成功!");
             String cache = String.format(getString(R.string.cache_clear), "0KB");
             ((TextView) findViewById(R.id.tv_cache)).setText(cache);
         }

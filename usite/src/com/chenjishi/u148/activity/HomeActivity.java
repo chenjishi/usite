@@ -25,9 +25,10 @@ import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.User;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.AboutDialog;
 import com.chenjishi.u148.view.ExitDialog;
 import com.chenjishi.u148.view.FireworksView;
@@ -101,7 +102,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_avatar);
         Bitmap scaledBitmap = ThumbnailUtils.extractThumbnail(bitmap, reqWidth, reqWidth);
 
-        Bitmap circleBitmap = CommonUtil.circleToBitmap(scaledBitmap);
+        Bitmap circleBitmap = Utils.circleToBitmap(scaledBitmap);
 
         button.setImageBitmap(circleBitmap);
 
@@ -110,7 +111,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     }
 
     private void checkUpdate() {
-        if (!CommonUtil.isWifiConnected(this)) return;
+        if (!Utils.isWifiConnected(this)) return;
 
         long lastCheckTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_CHECK_UPDATE_TIME, -1L);
         if (lastCheckTime == -1 || System.currentTimeMillis() >= lastCheckTime) {
@@ -133,7 +134,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
             final JSONObject dataObj = jObj.getJSONObject("data");
 
             final int versionCode = dataObj.optInt("versionCode", -1);
-            final int currentCode = CommonUtil.getVersionCode(HomeActivity.this);
+            final int currentCode = Utils.getVersionCode(HomeActivity.this);
 
             if (versionCode > currentCode) {
                 downloadApk(dataObj);
@@ -165,7 +166,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         final float density = getResources().getDisplayMetrics().density;
         final int reqWidth = (int) (32 * density * 0.88);
 
-        if (CommonUtil.isLogin()) {
+        if (Utils.isLogin()) {
             User user = PrefsUtil.getUser();
 
             HttpUtils.getImageLoader().get(user.icon, new ImageLoader.ImageListener() {
@@ -194,19 +195,19 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     @Override
     public void onLoginSuccess() {
         setUserIcon();
-        CommonUtil.showToast(getString(R.string.login_success));
+        Utils.showToast(getString(R.string.login_success));
     }
 
     @Override
     public void onLoginError() {
-        CommonUtil.showToast(getString(R.string.login_fail));
+        Utils.showToast(getString(R.string.login_fail));
     }
 
     private Bitmap getDefaultIcon(int w) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_avatar);
         Bitmap scaledBitmap = ThumbnailUtils.extractThumbnail(bitmap, w, w);
 
-        return CommonUtil.circleToBitmap(scaledBitmap);
+        return Utils.circleToBitmap(scaledBitmap);
     }
 
     @Override
@@ -313,12 +314,12 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
             drawerLayout.closeDrawer(Gravity.LEFT);
         } else {
             if (backPressCount == 0) {
-                CommonUtil.showToast("再按一次退出");
+                Utils.showToast("再按一次退出");
                 backPressCount += 1;
                 lastBackPressTime = System.currentTimeMillis();
             } else {
                 if (System.currentTimeMillis() - lastBackPressTime >= 1000L) {
-                    CommonUtil.showToast("再按一次退出");
+                    Utils.showToast("再按一次退出");
                     lastBackPressTime = System.currentTimeMillis();
                 } else {
                     PrefsUtil.setAdShowed(false);
@@ -346,13 +347,13 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     }
 
     public void onLoginButtonClicked(View v) {
-        if (CommonUtil.isLogin()) {
+        if (Utils.isLogin()) {
             final ExitDialog dialog = new ExitDialog(this, new ExitDialog.OnLogoutListener() {
                 @Override
                 public void logout() {
                     PrefsUtil.setUser(null);
                     setUserIcon();
-                    CommonUtil.showToast(R.string.logout_success);
+                    Utils.showToast(R.string.logout_success);
                 }
             });
             dialog.show();
@@ -395,15 +396,18 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                         applyTheme(PrefsUtil.getThemeMode());
                         break;
                     case 2:
+                        startActivity(new Intent(HomeActivity.this, FavoriteActivity.class));
+                        break;
+                    case 3:
                         Uri uri = Uri.parse("market://details?id=" + getPackageName());
                         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                         try {
                             startActivity(intent);
                         } catch (ActivityNotFoundException e) {
-                            CommonUtil.showToast(R.string.google_play_unavailable);
+                            Utils.showToast(R.string.google_play_unavailable);
                         }
                         break;
-                    case 3:
+                    case 4:
                         AboutDialog dialog = new AboutDialog(HomeActivity.this, new AboutDialog.AboutDialogListener() {
                             @Override
                             public void onVersionClicked() {
@@ -426,6 +430,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
             menuItems = getResources().getStringArray(R.array.menu_item);
             iconIds = new int[]{R.drawable.ic_settings,
                     R.drawable.ic_bulb,
+                    R.drawable.ic_favorite_menu,
                     R.drawable.ic_star,
                     R.drawable.ic_info};
         }

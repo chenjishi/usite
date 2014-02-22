@@ -11,8 +11,9 @@ import android.widget.EditText;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.User;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import org.json.JSONException;
@@ -48,7 +49,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Respons
             final String str2 = ((EditText) findViewById(R.id.password)).getText().toString().trim();
 
             if (TextUtils.isEmpty(str1) || TextUtils.isEmpty(str2)) {
-                CommonUtil.showToast(context.getString(R.string.login_input_empty));
+                Utils.showToast(context.getString(R.string.login_input_empty));
                 return;
             }
 

@@ -25,7 +25,7 @@ import java.util.Collections;
  * Time: 上午11:06
  * To change this template use File | Settings | File Templates.
  */
-public class CommonUtil {
+public class Utils {
     public static void showToast(String msg) {
         Toast.makeText(AppApplication.getInstance(), msg, Toast.LENGTH_SHORT).show();
     }

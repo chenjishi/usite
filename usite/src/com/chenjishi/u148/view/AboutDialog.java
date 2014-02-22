@@ -8,7 +8,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.util.CommonUtil;
+import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.Utils;
 
 /**
  * Created by chenjishi on 14-1-10.
@@ -26,7 +27,7 @@ public class AboutDialog extends Dialog implements View.OnClickListener {
         setContentView(view);
 
         Button versionBtn = (Button) view.findViewById(R.id.btn_version);
-        String versionName = CommonUtil.getVersionName(context);
+        String versionName = Utils.getVersionName(context);
         if (null != versionName) {
             versionBtn.setText(versionName);
         }
@@ -40,7 +41,7 @@ public class AboutDialog extends Dialog implements View.OnClickListener {
         if (v.getId() == R.id.btn_version) {
             count++;
             if (count == 5) {
-                CommonUtil.showToast("再点击两次有惊喜哦~");
+                Utils.showToast("再点击两次有惊喜哦~");
                 return;
             }
 
