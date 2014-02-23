@@ -3,7 +3,6 @@ package com.chenjishi.u148.util;
 import android.app.ActivityManager;
 import android.content.Context;
 import com.chenjishi.u148.model.Article;
-import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.volley.*;
 import com.chenjishi.u148.volley.toolbox.*;
@@ -60,13 +59,6 @@ public class HttpUtils {
         } catch (Exception e) {
             return "";
         }
-    }
-
-    public static void getComments(String url,
-                                   Response.Listener<ArrayList<Comment>> listener,
-                                   Response.ErrorListener errorListener) {
-        RequestQueue queue = getRequestQueue();
-        queue.add(new CommentRequest(url, listener, errorListener));
     }
 
     public static void feedRequest(String url,

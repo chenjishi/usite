@@ -1,8 +1,7 @@
-package com.chenjishi.u148.parser;
+package com.chenjishi.u148.util;
 
 import android.text.TextUtils;
 import android.util.Log;
-import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.User;
 import org.json.JSONArray;
@@ -68,50 +67,5 @@ public class JsonParser {
         }
 
         return feedList;
-    }
-
-    public static ArrayList<Comment> getCommentList(String json) {
-        if (TextUtils.isEmpty(json)) return null;
-
-        ArrayList<Comment> list = null;
-
-        try {
-            JSONObject jObj = new JSONObject(json);
-            JSONObject dataObj = jObj.getJSONObject("data");
-            JSONArray jArray = dataObj.getJSONArray("data");
-            if (null != jArray && jArray.length() > 0) {
-                int len = jArray.length();
-
-                list = new ArrayList<Comment>();
-                for (int i = 0; i < len; i++) {
-                    JSONObject obj = jArray.getJSONObject(i);
-                    Comment comment = new Comment();
-
-                    comment.id = obj.optString("id", "");
-                    comment.content = obj.optString("contents", "");
-                    comment.articleId = obj.optString("aid", "");
-                    comment.time = obj.optLong("create_time", -1L);
-                    comment.floor = obj.optInt("floor_no", 0);
-
-                    User user = new User();
-                    JSONObject uObj = obj.getJSONObject("usr");
-                    user.icon = uObj.optString("icon", "");
-                    user.alias = uObj.optString("alias", "");
-                    user.nickname = uObj.optString("nickname", "");
-                    user.sex = uObj.optString("sexStr", "");
-                    user.status = uObj.optString("statusStr", "");
-
-                    user.id = obj.optString("uid", "");
-
-                    comment.user = user;
-
-                    list.add(comment);
-                }
-            }
-        } catch (JSONException e) {
-            Log.e("FeedParser", "getFeedList json parse error " + e);
-        }
-
-        return list;
     }
 }

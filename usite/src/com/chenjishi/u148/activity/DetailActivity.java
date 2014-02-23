@@ -96,6 +96,9 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         mEmptyView = findViewById(R.id.empty_layout);
 
         String title = categoryMap.get(String.valueOf(mFeed.category));
+        if (null == mFeed.user) {
+            title = "返回";
+        }
         setTitle(title);
 
         mWebView = (ArticleWebView) findViewById(R.id.webview_content);
@@ -103,8 +106,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         mJsBridge = new JavascriptBridge(this);
         mWebView.addJavascriptInterface(mJsBridge, "U148");
 
-        //for debug javascript only
-//        mWebView.setWebChromeClient(new MyWebChromeClient());
         HttpUtils.ArticleRequest(String.format(REQUEST_URL, mFeed.id), this, this);
     }
 
@@ -311,8 +312,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             mArticle = response;
             renderPage();
             findViewById(R.id.article_layout).setVisibility(View.VISIBLE);
-            boolean adShowed = PrefsUtil.isAdShowed();
-            if (!adShowed) initAd();
         } else {
             mEmptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
             ((TextView) mEmptyView.findViewById(R.id.tv_empty_tip)).setText(getString(R.string.parse_error));
@@ -341,13 +340,23 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         template = template.replace("{CONTENT}", mArticle.content);
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
+        mWebView.setWebChromeClient(new MyWebChromeClient());
     }
 
     class MyWebChromeClient extends WebChromeClient {
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            if (newProgress == 100) {
+                boolean adShowed = PrefsUtil.isAdShowed();
+                if (!adShowed) initAd();
+            }
+        }
+
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            Toast.makeText(DetailActivity.this, message, Toast.LENGTH_SHORT).show();
-            result.cancel();
+//            Toast.makeText(DetailActivity.this, message, Toast.LENGTH_SHORT).show();
+//            result.cancel();
             return true;
         }
     }

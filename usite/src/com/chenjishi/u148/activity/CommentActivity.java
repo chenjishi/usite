@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,9 @@ import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Comment;
+import com.chenjishi.u148.model.CommentItem;
 import com.chenjishi.u148.model.User;
-import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.model.User2;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
@@ -41,14 +43,14 @@ import java.util.regex.Pattern;
  * Time: 下午12:35
  * To change this template use File | Settings | File Templates.
  */
-public class CommentActivity extends BaseActivity implements Response.Listener<ArrayList<Comment>>,
+public class CommentActivity extends BaseActivity implements Response.Listener<Comment>,
         Response.ErrorListener, View.OnClickListener, LoginDialog.OnLoginListener, AdapterView.OnItemClickListener {
     private String articleId;
     private String mContent;
     private String commentId;
     private long lastClickTime;
 
-    private ArrayList<Comment> commentList = new ArrayList<Comment>();
+    private ArrayList<CommentItem> commentList = new ArrayList<CommentItem>();
     private CommentAdapter mAdapter;
 
     private View emptyView;
@@ -96,8 +98,8 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Comment comment = commentList.get(position);
-        mEditText.setHint("回复:" + comment.user.nickname);
+        final CommentItem comment = commentList.get(position);
+        mEditText.setHint("回复:" + comment.usr.nickname);
         mEditText.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(mEditText, InputMethodManager.SHOW_IMPLICIT);
@@ -135,8 +137,8 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
     }
 
     private void loadData() {
-        HttpUtils.getComments(String.format("http://www.u148.net/json/get_comment/%1$s/%2$d",
-                articleId, currentPage), this, this);
+        final String url = String.format("http://www.u148.net/json/get_comment/%1$s/%2$d", articleId, currentPage);
+        HttpUtils.get(url, Comment.class, this, this);
     }
 
     public void onSendButtonClicked(View v) {
@@ -216,17 +218,21 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
     }
 
     @Override
-    public void onResponse(ArrayList<Comment> response) {
-        if (null != response && response.size() > 0) {
-            if (1 == currentPage) commentList.clear();
+    public void onResponse(Comment response) {
+        if (null != response && response.code == 0) {
+            final int count = response.data.data.size();
 
-            commentList.addAll(response);
-            mAdapter.notifyDataSetChanged();
+            if (count > 0) {
+                commentList.addAll(response.data.data);
 
-            if (response.size() >= 30) {
-                footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                footView.setVisibility(View.VISIBLE);
+                if (count >= 30) {
+                    footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
+                    footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
+                    footView.setVisibility(View.VISIBLE);
+                } else {
+                    footView.setVisibility(View.GONE);
+                }
+                mAdapter.notifyDataSetChanged();
             } else {
                 footView.setVisibility(View.GONE);
             }
@@ -239,9 +245,13 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
     private class CommentAdapter extends BaseAdapter {
         LayoutInflater inflater;
+        Format format;
+        Date date;
 
         public CommentAdapter(Context context) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            format = new SimpleDateFormat("yyyy-MM-dd");
+            date = new Date(System.currentTimeMillis());
         }
 
         @Override
@@ -250,7 +260,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
         }
 
         @Override
-        public Comment getItem(int position) {
+        public CommentItem getItem(int position) {
             return commentList.get(position);
         }
 
@@ -290,20 +300,20 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
 
             holder = (ViewHolder) convertView.getTag();
 
-            Comment comment = getItem(position);
-            long t = comment.time * 1000L;
-            Date date = new Date(t);
-            Format format = new SimpleDateFormat("yyyy-MM-dd");
+            final CommentItem comment = getItem(position);
+            final long t = comment.create_time * 1000L;
+            final User2 user = comment.usr;
+            date.setTime(t);
 
             ImageLoader imageLoader = HttpUtils.getImageLoader();
-            imageLoader.get(comment.user.icon, ImageLoader.getImageListener(holder.avatarImage,
+            imageLoader.get(user.icon, ImageLoader.getImageListener(holder.avatarImage,
                     R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
-            String formattedString = comment.user.nickname + " " + (Constants.MODE_NIGHT == theme
+            String formattedString = user.nickname + " " + (Constants.MODE_NIGHT == theme
                     ? "<font color='#666666'>" : "<font color='#999999'>") + format.format(date) + "</font>";
             holder.userText.setText(Html.fromHtml(formattedString));
 
-            String content = comment.content;
+            String content = comment.contents;
 
             if (content.contains("blockquote")) {
                 final Pattern pattern = Pattern.compile("(.*?)<blockquote>(.*?)<\\/blockquote>");
@@ -329,13 +339,13 @@ public class CommentActivity extends BaseActivity implements Response.Listener<A
         }
     }
 
-    private static class ViewHolder {
-        private ImageView avatarImage;
-        private TextView userText;
-        private TextView contentText;
-        private TextView replyText;
-        private LinearLayout replyLayout;
-        private View splitLine;
+    static class ViewHolder {
+        ImageView avatarImage;
+        TextView userText;
+        TextView contentText;
+        TextView replyText;
+        LinearLayout replyLayout;
+        View splitLine;
     }
 
     @Override

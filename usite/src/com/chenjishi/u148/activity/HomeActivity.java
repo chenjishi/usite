@@ -396,7 +396,11 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                         applyTheme(PrefsUtil.getThemeMode());
                         break;
                     case 2:
-                        startActivity(new Intent(HomeActivity.this, FavoriteActivity.class));
+                        if (Utils.isLogin()) {
+                            startActivity(new Intent(HomeActivity.this, FavoriteActivity.class));
+                        } else {
+                            new LoginDialog(HomeActivity.this, HomeActivity.this).show();
+                        }
                         break;
                     case 3:
                         Uri uri = Uri.parse("market://details?id=" + getPackageName());

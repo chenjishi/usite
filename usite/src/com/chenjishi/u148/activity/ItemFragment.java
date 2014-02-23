@@ -14,7 +14,6 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.parser.JsonParser;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.util.*;
