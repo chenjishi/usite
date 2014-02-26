@@ -2,42 +2,41 @@ package com.chenjishi.u148.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.chenjishi.u148.volley.toolbox.StringRequest;
 
 /**
- * Created by chenjishi on 14-1-7.
+ * Created by chenjishi on 14-2-23.
  */
-public class User implements Parcelable {
-    public String id;
+public class UserInfo implements Parcelable {
     public String icon;
     public String alias;
     public String nickname;
-    public String sex;
-    public String status;
+    public String sexStr;
+    public String statusStr;
+    public String id;
     public String token;
 
-    public static final Creator<User> CREATOR = new Creator<User>() {
+    public static final Creator<UserInfo> CREATOR = new Creator<UserInfo>() {
         @Override
-        public User createFromParcel(Parcel source) {
-            return new User(source);
+        public UserInfo createFromParcel(Parcel source) {
+            return new UserInfo(source);
         }
 
         @Override
-        public User[] newArray(int size) {
-            return new User[size];
+        public UserInfo[] newArray(int size) {
+            return new UserInfo[size];
         }
     };
 
-    public User() {
+    public UserInfo() {
     }
 
-    public User(Parcel in) {
-        id = in.readString();
+    public UserInfo(Parcel in) {
         icon = in.readString();
         alias = in.readString();
         nickname = in.readString();
-        sex = in.readString();
-        status = in.readString();
+        sexStr = in.readString();
+        statusStr = in.readString();
+        id = in.readString();
         token = in.readString();
     }
 
@@ -48,12 +47,12 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
         dest.writeString(icon);
         dest.writeString(alias);
         dest.writeString(nickname);
-        dest.writeString(sex);
-        dest.writeString(status);
+        dest.writeString(sexStr);
+        dest.writeString(statusStr);
+        dest.writeString(id);
         dest.writeString(token);
     }
 }

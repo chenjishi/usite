@@ -22,13 +22,12 @@ import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.AboutDialog;
 import com.chenjishi.u148.view.ExitDialog;
 import com.chenjishi.u148.view.FireworksView;
@@ -167,7 +166,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         final int reqWidth = (int) (32 * density * 0.88);
 
         if (Utils.isLogin()) {
-            User user = PrefsUtil.getUser();
+            UserInfo user = PrefsUtil.getUser();
 
             HttpUtils.getImageLoader().get(user.icon, new ImageLoader.ImageListener() {
                 @Override
@@ -490,7 +489,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         public Fragment getItem(int i) {
             Bundle bundle = new Bundle();
             bundle.putInt("category", categoryIds[i]);
-            return Fragment.instantiate(HomeActivity.this, ItemFragment.class.getName(), bundle);
+            return Fragment.instantiate(HomeActivity.this, FeedListFragment.class.getName(), bundle);
         }
 
         @Override

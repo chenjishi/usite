@@ -10,10 +10,9 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import org.json.JSONException;
@@ -78,10 +77,10 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Respons
                 int code = jObj.optInt("code", -1);
                 if (0 == code) {
                     JSONObject dataObj = jObj.getJSONObject("data");
-                    User user = new User();
+                    UserInfo user = new UserInfo();
 
                     user.nickname = dataObj.optString("nickname", "");
-                    user.sex = dataObj.optString("sex", "");
+                    user.sexStr = dataObj.optString("sex", "");
                     user.icon = dataObj.optString("icon", "");
                     user.token = dataObj.optString("token", "");
 

@@ -17,5 +17,5 @@ public class CommentItem {
     public int count_tread;
     public int floor_no;
 
-    public User2 usr;
+    public UserInfo usr;
 }

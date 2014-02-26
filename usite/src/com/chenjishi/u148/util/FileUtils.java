@@ -2,7 +2,7 @@ package com.chenjishi.u148.util;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
-import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.base.App;
 import com.chenjishi.u148.base.FileCache;
 
 import java.io.*;
@@ -93,7 +93,7 @@ public class FileUtils {
     }
 
     public static String getImageCacheSize() {
-        String cachePath = FileCache.getInternalCacheDir(AppApplication.getInstance());
+        String cachePath = FileCache.getInternalCacheDir(App.getInstance());
         return getCurrentCacheSize(cachePath);
     }
 
@@ -117,7 +117,7 @@ public class FileUtils {
         HttpUtils.getRequestQueue().getCache().clear();
 
         //clear data
-        String dataCacheDir = FileCache.getDataCacheDir(AppApplication.getInstance());
+        String dataCacheDir = FileCache.getDataCacheDir(App.getInstance());
         File[] cachedFiles = new File(dataCacheDir).listFiles();
         if (cachedFiles == null) return;
         for (File f : cachedFiles) {

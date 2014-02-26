@@ -32,7 +32,7 @@ public class ShareUtils {
     public static final int SHARE_FRIEND = 2;
     public static final int SHARE_WEIBO = 3;
 
-    public static void shareWebpage(Context context, String url, int type, String title, Bitmap thumb) {
+    public static void shareWebpage(Context context, String url, int type, String title, String desc, Bitmap thumb) {
         IWXAPI api = WXAPIFactory.createWXAPI(context, Constants.WX_APP_ID);
         api.registerApp(Constants.WX_APP_ID);
 
@@ -42,7 +42,7 @@ public class ShareUtils {
 
         WXMediaMessage msg = new WXMediaMessage(webObject);
         msg.title = title;
-        msg.description = title;
+        msg.description = desc;
 
         if (null != thumb) {
             //thumbData do not exceed 32KB

@@ -23,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:singleLine="true"
             android:textColor="@color/text_color_regular"
             android:layout_toLeftOf="@id/tv_time"
             />

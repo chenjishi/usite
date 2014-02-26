@@ -3,11 +3,9 @@ package com.chenjishi.u148.util;
 import android.app.ActivityManager;
 import android.content.Context;
 import com.chenjishi.u148.model.Article;
-import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.volley.*;
 import com.chenjishi.u148.volley.toolbox.*;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -59,13 +57,6 @@ public class HttpUtils {
         } catch (Exception e) {
             return "";
         }
-    }
-
-    public static void feedRequest(String url,
-                                   Response.Listener<ArrayList<Feed>> listener,
-                                   Response.ErrorListener errorListener) {
-        RequestQueue queue = getRequestQueue();
-        queue.add(new FeedRequest(url, listener, errorListener));
     }
 
     public static void ArticleRequest(String url,

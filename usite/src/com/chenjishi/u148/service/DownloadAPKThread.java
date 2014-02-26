@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Process;
-import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.base.App;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +33,7 @@ public class DownloadAPKThread extends Thread {
     private Context mContext;
 
     public DownloadAPKThread(String downloadURL, String directory, String fileName) {
-        this.mContext = AppApplication.getInstance().getApplicationContext();
+        this.mContext = App.getInstance().getApplicationContext();
         this.mDownloadURL = downloadURL;
         this.mDirectory = directory;
         this.mFileName = fileName;

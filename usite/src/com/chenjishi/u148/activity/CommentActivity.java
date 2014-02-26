@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +14,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.CommentItem;
-import com.chenjishi.u148.model.User;
-import com.chenjishi.u148.model.User2;
+import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
@@ -108,7 +106,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Utils.showToast("出错啦~~");
+        Utils.setErrorView(emptyView, R.string.net_error);
         footView.setVisibility(View.GONE);
     }
 
@@ -168,7 +166,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
         if (content.equals(mContent)) return;
 
         final String url = "http://www.u148.net/json/comment";
-        final User user = PrefsUtil.getUser();
+        final UserInfo user = PrefsUtil.getUser();
         final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("评论提交中...");
         pd.show();
@@ -176,7 +174,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
         Map<String, String> params = new HashMap<String, String>();
         params.put("id", articleId);
         params.put("token", user.token);
-        params.put("content", content + "（来自有意思吧安卓客户端）");
+        params.put("content", content + " (来自Android客户端)");
         if (!TextUtils.isEmpty(id)) {
             params.put("review_id", id);
         }
@@ -223,6 +221,8 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
             final int count = response.data.data.size();
 
             if (count > 0) {
+                if (1 == currentPage) commentList.clear();
+
                 commentList.addAll(response.data.data);
 
                 if (count >= 30) {
@@ -234,11 +234,11 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
                 }
                 mAdapter.notifyDataSetChanged();
             } else {
+                Utils.setErrorView(emptyView, R.string.no_comment);
                 footView.setVisibility(View.GONE);
             }
         } else {
-            emptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-            ((TextView) emptyView.findViewById(R.id.tv_empty_tip)).setText(getString(R.string.no_comment));
+            Utils.setErrorView(emptyView, R.string.no_comment);
             footView.setVisibility(View.GONE);
         }
     }
@@ -302,12 +302,12 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
 
             final CommentItem comment = getItem(position);
             final long t = comment.create_time * 1000L;
-            final User2 user = comment.usr;
+            final UserInfo user = comment.usr;
             date.setTime(t);
 
             ImageLoader imageLoader = HttpUtils.getImageLoader();
             imageLoader.get(user.icon, ImageLoader.getImageListener(holder.avatarImage,
-                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
+                    R.drawable.user_default, R.drawable.user_default));
 
             String formattedString = user.nickname + " " + (Constants.MODE_NIGHT == theme
                     ? "<font color='#666666'>" : "<font color='#999999'>") + format.format(date) + "</font>";

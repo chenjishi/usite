@@ -10,9 +10,11 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.LinearLayout;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.DBHelper;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.FileUtils;
+import com.chenjishi.u148.util.HttpUtils;
 
 import java.io.File;
 
@@ -37,10 +39,18 @@ public class LaunchActivity extends Activity {
         new LoadTask().execute();
     }
 
-    private class LoadTask extends AsyncTask<Void, Void, Boolean> {
+    class LoadTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
+
+            /**
+             * init
+             */
+            FileCache.init(LaunchActivity.this);
+            HttpUtils.init(LaunchActivity.this);
+            DBHelper.getInstance(LaunchActivity.this);
+
             //clear cache of 2 days before
             long lastClearCacheTime = PrefsUtil.getClearCacheTime();
             if (System.currentTimeMillis() > lastClearCacheTime) {

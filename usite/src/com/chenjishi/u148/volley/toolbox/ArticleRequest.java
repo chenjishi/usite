@@ -1,6 +1,5 @@
 package com.chenjishi.u148.volley.toolbox;
 
-import android.util.Log;
 import com.chenjishi.u148.model.Article;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.ParseError;

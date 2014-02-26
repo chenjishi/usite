@@ -10,19 +10,16 @@ import com.chenjishi.u148.util.HttpUtils;
  * Time: 下午9:57
  * To change this template use File | Settings | File Templates.
  */
-public class AppApplication extends Application {
-    private static AppApplication mInstance;
+public class App extends Application {
+    private static App mInstance;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-
-        FileCache.init(this);
-        HttpUtils.init(this);
     }
 
-    public static AppApplication getInstance() {
+    public static App getInstance() {
         return mInstance;
     }
 

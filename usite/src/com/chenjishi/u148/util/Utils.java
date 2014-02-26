@@ -8,8 +8,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
-import com.chenjishi.u148.base.AppApplication;
+import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.App;
 import com.chenjishi.u148.base.PrefsUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -26,12 +29,26 @@ import java.util.Collections;
  * To change this template use File | Settings | File Templates.
  */
 public class Utils {
+
+    public static void setErrorView(View errorView, int resId) {
+        setErrorView(errorView, App.getInstance().getString(resId));
+    }
+
+    public static void setErrorView(View errorView, String msg) {
+        final TextView errorText = (TextView) errorView.findViewById(R.id.tv_empty_tip);
+        errorView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+        errorText.setText(msg);
+        final int mode = PrefsUtil.getThemeMode();
+        errorText.setTextColor(mode == Constants.MODE_NIGHT ? 0xFF999999: 0xFF333333);
+        errorText.setVisibility(View.VISIBLE);
+    }
+
     public static void showToast(String msg) {
-        Toast.makeText(AppApplication.getInstance(), msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(App.getInstance(), msg, Toast.LENGTH_SHORT).show();
     }
 
     public static void showToast(int resId) {
-        showToast(AppApplication.getInstance().getString(resId));
+        showToast(App.getInstance().getString(resId));
     }
 
     public static Bitmap zoomBitmap(Bitmap bitmap, int w, int h) {

@@ -61,7 +61,7 @@
     <string name="weibo_not_install">您还没有安装新浪微博，无法使用微博分享</string>
     <string name="wechat_not_support">您的微信版本过低，不支持该分享功能</string>
     <string name="wechat_timeline_not_support">您的微信版本过低，不支持朋友圈分享</string>
-    <string name="share_title">有意思吧【%1$s】</string>
+    <string name="share_title">%1$s&#160;-&#160;U148.Net</string>
     <string name="share_file_error">分享失败, 文件不存在</string>
     <string name="share_error">分享失败</string>
     <string name="share_success">分享成功</string>

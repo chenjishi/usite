@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
@@ -16,7 +16,7 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefsUtil {
-    private static Application mContext = AppApplication.getInstance();
+    private static Application mContext = App.getInstance();
 
     private static final long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
@@ -63,10 +63,10 @@ public class PrefsUtil {
         return getBoolPreference(KEY_AD_SHOWED);
     }
 
-    public static void setUser(User user) {
+    public static void setUser(UserInfo user) {
         if (null != user && !TextUtils.isEmpty(user.token)) {
             saveStringPreference(KEY_USER_NAME, user.nickname);
-            saveStringPreference(KEY_USER_SEX, user.sex);
+            saveStringPreference(KEY_USER_SEX, user.sexStr);
             saveStringPreference(KEY_USER_ICON, user.icon);
             saveStringPreference(KEY_USER_TOKEN, user.token);
         } else {
@@ -77,14 +77,14 @@ public class PrefsUtil {
         }
     }
 
-    public static User getUser() {
+    public static UserInfo getUser() {
         String token = getStringPreference(KEY_USER_TOKEN);
 
         if (!TextUtils.isEmpty(token)) {
-            User user = new User();
+            UserInfo user = new UserInfo();
 
             user.nickname = getStringPreference(KEY_USER_NAME);
-            user.sex = getStringPreference(KEY_USER_SEX);
+            user.sexStr = getStringPreference(KEY_USER_SEX);
             user.icon = getStringPreference(KEY_USER_ICON);
             user.token = getStringPreference(KEY_USER_TOKEN);
 
@@ -103,14 +103,14 @@ public class PrefsUtil {
     }
 
     public static void saveAccessToken(Oauth2AccessToken token) {
-        SharedPreferences.Editor editor = AppApplication.getInstance().getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = App.getInstance().getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE).edit();
         editor.putString(KEY_ACESS_TOKEN, token.getToken());
         editor.putLong(KEY_EXPIRE_IN, token.getExpiresTime());
         editor.commit();
     }
 
     public static Oauth2AccessToken getAccessToken() {
-        Context context = AppApplication.getInstance();
+        Context context = App.getInstance();
         Oauth2AccessToken token = new Oauth2AccessToken();
         SharedPreferences prfs = context.getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE);
         token.setToken(prfs.getString(KEY_ACESS_TOKEN, ""));

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
+import com.chenjishi.u148.model.FeedItem;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
 import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.util.*;
@@ -21,6 +23,8 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,8 +38,8 @@ import java.util.Map;
  * Time: 下午3:20
  * To change this template use File | Settings | File Templates.
  */
-public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener,
-        Response.Listener<ArrayList<Feed>>, Response.ErrorListener, View.OnClickListener {
+public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener,
+        Response.Listener<Feed>, Response.ErrorListener, View.OnClickListener {
     private static final String REQUEST_URL = "http://www.u148.net/json/%1$d/%2$d";
     private static final int MSG_LOAD_OK = 1;
 
@@ -44,7 +48,7 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
     private View footView;
     private View emptyView;
 
-    private ArrayList<Feed> feedList = new ArrayList<Feed>();
+    private ArrayList<FeedItem> feedList = new ArrayList<FeedItem>();
 
     protected int currentPage = 1;
     private int category;
@@ -107,10 +111,10 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Feed feed = feedList.get(position - 1);
+        FeedItem feed = feedList.get(position - 1);
 
         Map<String, String> params = new HashMap<String, String>();
-        params.put("author", feed.user.nickname);
+        params.put("author", feed.usr.nickname);
         params.put("title", feed.title);
         FlurryAgent.logEvent("read_article", params);
 
@@ -127,10 +131,13 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
     }
 
     private void loadData() {
-        if (!Utils.didNetworkConnected(getActivity())) return;
+        if (!Utils.didNetworkConnected(getActivity())) {
+            Utils.setErrorView(emptyView, getString(R.string.net_error));
+            return;
+        }
 
-        String url = String.format(REQUEST_URL, category, currentPage);
-        HttpUtils.feedRequest(url, this, this);
+        final String url = String.format(REQUEST_URL, category, currentPage);
+        HttpUtils.get(url, Feed.class, this, this);
     }
 
     @Override
@@ -145,57 +152,70 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
     @Override
     public void onErrorResponse(VolleyError error) {
         loadCacheData();
-        setErrorView(R.string.net_error);
+        Utils.setErrorView(emptyView, getString(R.string.net_error));
 
         footView.setVisibility(View.GONE);
         pullToRefresh.onRefreshComplete();
     }
 
     @Override
-    public void onResponse(ArrayList<Feed> response) {
-        if (null != response && response.size() > 0) {
-            if (currentPage == 1) feedList.clear();
-
-            feedList.addAll(response);
+    public void onResponse(Feed response) {
+        if (null != response && response.code == 0) {
+            if (1 == currentPage) feedList.clear();
             dataLoaded = true;
-            listAdapter.notifyDataSetChanged();
 
-            footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-            footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-            footView.setVisibility(View.VISIBLE);
+            final ArrayList<FeedItem> feedItems = response.data.data;
+            final int size = feedItems.size();
+            if (size > 0) {
+                for (FeedItem item : feedItems) {
+                    /**
+                     * filter the Game category
+                     */
+                    if (item.category != 4) {
+                        feedList.add(item);
+                    }
+                }
+                listAdapter.notifyDataSetChanged();
+
+                footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
+                footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
+                footView.setVisibility(View.VISIBLE);
+            } else {
+                footView.setVisibility(View.GONE);
+            }
+
         } else {
-            setErrorView(R.string.parse_error);
+            Utils.setErrorView(emptyView, getString(R.string.parse_error));
             footView.setVisibility(View.GONE);
         }
         pullToRefresh.onRefreshComplete();
     }
 
-    private void setErrorView(int resId) {
-        emptyView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-        ((TextView) emptyView.findViewById(R.id.tv_empty_tip)).setText(getString(resId));
-    }
-
     protected void loadCacheData() {
-        String dir = FileCache.getDataCacheDir(getActivity());
-        String url = String.format(REQUEST_URL, category, currentPage);
-        String path = dir + StringUtil.getMD5Str(url);
-        File cacheFile = new File(path);
+        final String dir = FileCache.getDataCacheDir(getActivity());
+        final String url = String.format(REQUEST_URL, category, currentPage);
+        final String path = dir + StringUtil.getMD5Str(url);
 
-        if (cacheFile.exists()) {
-            final String data = FileUtils.readFromFile(path);
-            if (null != data) {
-                new Thread(){
-                    @Override
-                    public void run() {
-                        ArrayList<Feed> tmpList = JsonParser.getFeedList(data);
-                        if (null != tmpList && tmpList.size() > 0) {
-                            feedList.addAll(tmpList);
-                        }
-                        mHandler.sendEmptyMessage(MSG_LOAD_OK);
-                    }
-                }.start();
+        File cacheFile = new File(path);
+        if (!cacheFile.exists()) return;
+
+        final String data = FileUtils.readFromFile(path);
+        if (TextUtils.isEmpty(data)) return;
+
+        new Thread() {
+            @Override
+            public void run() {
+                final Gson mGson = new GsonBuilder().create();
+                Feed feed = mGson.fromJson(data, Feed.class);
+                if (null == feed) return;
+
+                ArrayList<FeedItem> feedItems = feed.data.data;
+                if (null != feedItems && feedItems.size() > 0) {
+                    feedList.addAll(feedItems);
+                    mHandler.sendEmptyMessage(MSG_LOAD_OK);
+                }
             }
-        }
+        }.start();
     }
 
     private Handler mHandler = new Handler() {
@@ -221,15 +241,14 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    private class FeedListAdapter extends BaseAdapter {
-        private LayoutInflater inflater;
-        private Map<String, String> categoryMap;
-        private float density;
+    class FeedListAdapter extends BaseAdapter {
+        LayoutInflater inflater;
+        Map<String, String> categoryMap;
+        float density;
 
         public FeedListAdapter(Context context) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             categoryMap = new HashMap<String, String>();
-            feedList = new ArrayList<Feed>();
             density = getResources().getDisplayMetrics().density;
 
             int[] ids = context.getResources().getIntArray(R.array.category_id);
@@ -245,7 +264,7 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
         }
 
         @Override
-        public Feed getItem(int position) {
+        public FeedItem getItem(int position) {
             return feedList.get(position);
         }
 
@@ -302,22 +321,22 @@ public class ItemFragment extends Fragment implements PullToRefreshBase.OnRefres
 
             holder.cellLayout.setPadding(paddingLeft, (int) (paddingTop * density), paddingLeft, padingBottom);
 
-            Feed feed = getItem(position);
+            final FeedItem feed = getItem(position);
 
             holder.category.setText("[" + categoryMap.get(feed.category + "") + "]");
             holder.title.setText(feed.title);
-            holder.viewsText.setText(String.format(getString(R.string.views), feed.countBrowse));
-            holder.commentText.setText(String.format(getString(R.string.comment_count), feed.countReview));
+            holder.viewsText.setText(String.format(getString(R.string.views), feed.count_browse));
+            holder.commentText.setText(String.format(getString(R.string.comment_count), feed.count_review));
             holder.content.setText(feed.summary);
 
-            HttpUtils.getImageLoader().get(feed.picMid, ImageLoader.getImageListener(holder.thumb,
+            HttpUtils.getImageLoader().get(feed.pic_mid, ImageLoader.getImageListener(holder.thumb,
                     R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
             return convertView;
         }
     }
 
-    private static class ViewHolder {
+    static class ViewHolder {
         RelativeLayout cellLayout;
         ImageView thumb;
         TextView category;

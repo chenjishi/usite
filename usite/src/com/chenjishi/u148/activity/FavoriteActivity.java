@@ -1,6 +1,8 @@
 package com.chenjishi.u148.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,23 +13,22 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Favorite;
 import com.chenjishi.u148.model.FavoriteItem;
-import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.model.User;
+import com.chenjishi.u148.model.FeedItem;
+import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by chenjishi on 14-2-22.
  */
 public class FavoriteActivity extends BaseActivity implements Response.Listener<Favorite>,
-        Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener {
+        Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
     private FavoriteAdapter mAdapter;
     private ArrayList<FavoriteItem> favoriteList = new ArrayList<FavoriteItem>();
 
@@ -50,6 +51,7 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         ListView listView = (ListView) findViewById(R.id.list_favorite);
         listView.addFooterView(footView);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
         footView.setVisibility(View.GONE);
         listView.setEmptyView(emptyView);
         mAdapter = new FavoriteAdapter(this);
@@ -72,14 +74,14 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
 
     void loadData() {
         final String url = "http://www.u148.net/json/get_favourite/0/%1$d?token=%2$s";
-        final User user = PrefsUtil.getUser();
+        final UserInfo user = PrefsUtil.getUser();
 
         HttpUtils.get(String.format(url, currentPage, user.token), Favorite.class, this, this);
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        setErrorTip("网络无连接，请检查网络");
+        Utils.setErrorView(emptyView, "网络无连接，请检查网络");
         footView.setVisibility(View.GONE);
     }
 
@@ -100,7 +102,7 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
                 footView.setVisibility(View.GONE);
             }
         } else {
-            setErrorTip("解析错误或者网络无返回，请稍后再试");
+            Utils.setErrorView(emptyView, "解析错误或者网络无返回，请稍后再试");
             footView.setVisibility(View.GONE);
         }
     }
@@ -114,24 +116,51 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FavoriteItem favoriteItem = favoriteList.get(position);
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        final String[] items = new String[]{"删除收藏"};
+        final int pos = position;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final FavoriteItem favoriteItem = favoriteList.get(pos);
+                favoriteList.remove(favoriteItem);
+                mAdapter.notifyDataSetChanged();
+                deleteFavorite(favoriteItem.aid);
+            }
+        });
+        builder.show();
 
-        Feed feed = new Feed();
+
+        return true;
+    }
+
+    void deleteFavorite(String id) {
+        final String url = "http://www.u148.net/json/del_favourite";
+        final UserInfo user = PrefsUtil.getUser();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("id", id);
+        params.put("token", user.token);
+        HttpUtils.post(url, params, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+            }
+        }, this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        final FavoriteItem favoriteItem = favoriteList.get(position);
+
+        FeedItem feed = new FeedItem();
         feed.id = favoriteItem.aid;
         feed.title = favoriteItem.title;
-        feed.createTime = favoriteItem.create_time;
+        feed.create_time = favoriteItem.create_time;
         feed.category = favoriteItem.category;
 
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("feed", feed);
         startActivity(intent);
-    }
-
-    void setErrorTip(String s) {
-        final View errorView = emptyView;
-        errorView.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-        ((TextView) errorView.findViewById(R.id.tv_empty_tip)).setText(s);
     }
 
     class FavoriteAdapter extends BaseAdapter {
