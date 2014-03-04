@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
@@ -51,9 +52,12 @@ import java.io.File;
 public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheckedChangeListener,
         ViewPager.OnPageChangeListener, DrawerLayout.DrawerListener, LoginDialog.OnLoginListener,
         Response.Listener<String>, Response.ErrorListener {
+    public static final int REQUEST_CODE_REGISTER = 101;
+    public static final int RESULT_CODE_REGISTER = 102;
     private ViewPager mViewPager;
     private RadioGroup mRadioGroup;
     private TabsAdapter mTabAdapter;
+    private MenuAdapter mMenuAdapter;
 
     private DrawerLayout drawerLayout;
     private TextView mDrawerIcon;
@@ -194,6 +198,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     @Override
     public void onLoginSuccess() {
         setUserIcon();
+        mMenuAdapter.notifyDataSetChanged();
         Utils.showToast(getString(R.string.login_success));
     }
 
@@ -353,6 +358,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                     PrefsUtil.setUser(null);
                     setUserIcon();
                     Utils.showToast(R.string.logout_success);
+                    mMenuAdapter.notifyDataSetChanged();
                 }
             });
             dialog.show();
@@ -377,40 +383,49 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
     private void initMenuList() {
         ListView listView = (ListView) findViewById(R.id.list_menu);
-        final MenuAdapter adapter = new MenuAdapter();
-        listView.setAdapter(adapter);
+        mMenuAdapter = new MenuAdapter();
+        listView.setAdapter(mMenuAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 drawerLayout.closeDrawer(Gravity.LEFT);
+                Intent intent;
                 switch (position) {
                     case 0:
-                        startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                        if (!Utils.isLogin()) {
+                            intent = new Intent(HomeActivity.this, RegisterActivity.class);
+                            startActivityForResult(intent, REQUEST_CODE_REGISTER);
+                        } else {
+                            Utils.showToast("您已经登录");
+                        }
                         break;
                     case 1:
-                        PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
-                                ? Constants.MODE_NIGHT : Constants.MODE_DAY);
-                        adapter.notifyDataSetChanged();
-                        applyTheme(PrefsUtil.getThemeMode());
+                        startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
                         break;
                     case 2:
+                        PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
+                                ? Constants.MODE_NIGHT : Constants.MODE_DAY);
+                        mMenuAdapter.notifyDataSetChanged();
+                        applyTheme(PrefsUtil.getThemeMode());
+                        break;
+                    case 3:
                         if (Utils.isLogin()) {
                             startActivity(new Intent(HomeActivity.this, FavoriteActivity.class));
                         } else {
                             new LoginDialog(HomeActivity.this, HomeActivity.this).show();
                         }
                         break;
-                    case 3:
+                    case 4:
                         Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
                         try {
                             startActivity(intent);
                         } catch (ActivityNotFoundException e) {
                             Utils.showToast(R.string.google_play_unavailable);
                         }
                         break;
-                    case 4:
+                    case 5:
                         AboutDialog dialog = new AboutDialog(HomeActivity.this, new AboutDialog.AboutDialogListener() {
                             @Override
                             public void onVersionClicked() {
@@ -419,7 +434,6 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                         });
                         dialog.show();
                         break;
-
                 }
             }
         });
@@ -431,7 +445,8 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
         public MenuAdapter() {
             menuItems = getResources().getStringArray(R.array.menu_item);
-            iconIds = new int[]{R.drawable.ic_settings,
+            iconIds = new int[]{R.drawable.user_default,
+                    R.drawable.ic_settings,
                     R.drawable.ic_bulb,
                     R.drawable.ic_favorite_menu,
                     R.drawable.ic_star,
@@ -455,26 +470,53 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView itemView;
+            ViewHolder holder;
+
             if (null == convertView) {
                 convertView = LayoutInflater.from(HomeActivity.this).inflate(R.layout.menu_cell, parent, false);
+                holder = new ViewHolder();
+
+                holder.iconImage = (ImageView) convertView.findViewById(R.id.iv_icon);
+                holder.titleText = (TextView) convertView.findViewById(R.id.tv_title);
+
+                convertView.setTag(holder);
             }
 
-            itemView = (TextView) convertView;
+            holder = (ViewHolder) convertView.getTag();
 
-            String str;
-            if (1 == position) {
+            if (0 == position) {
+                final boolean isLogin = Utils.isLogin();
+                if (isLogin) {
+                    final UserInfo userInfo = PrefsUtil.getUser();
+                    final ImageLoader imageLoader = HttpUtils.getImageLoader();
+                    final RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams((int) (32. * density),
+                            (int)(32. * density));
+                    lp.setMargins(0, 0, (int) (8. * density), 0);
+
+                    holder.titleText.setText(userInfo.nickname);
+                    holder.iconImage.setLayoutParams(lp);
+                    imageLoader.get(userInfo.icon, ImageLoader.getImageListener(holder.iconImage, R.drawable.ic_avatar_2,
+                            R.drawable.ic_avatar_2));
+                } else {
+                    holder.titleText.setText(getItem(position));
+                    holder.iconImage.setImageResource(R.drawable.ic_avatar_2);
+                }
+            } else if (2 == position) {
                 final int mode = PrefsUtil.getThemeMode();
-                str = mode == Constants.MODE_DAY ? "夜间" : "日间";
+                holder.titleText.setText(mode == Constants.MODE_DAY ? "夜间" : "日间");
+                holder.iconImage.setImageResource(iconIds[position]);
             } else {
-                str = getItem(position);
+                holder.titleText.setText(getItem(position));
+                holder.iconImage.setImageResource(iconIds[position]);
             }
 
-            itemView.setText(str);
-            itemView.setCompoundDrawablesWithIntrinsicBounds(iconIds[position], 0, 0, 0);
-
-            return itemView;
+            return convertView;
         }
+    }
+
+    private static class ViewHolder {
+        ImageView iconImage;
+        TextView titleText;
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
@@ -561,5 +603,18 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         }
 
         mTabAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_REGISTER) {
+            /**
+             * register success, update the user icon in menu
+             */
+            if (resultCode == RESULT_CODE_REGISTER) {
+                mMenuAdapter.notifyDataSetChanged();
+                setUserIcon();
+            }
+        }
     }
 }

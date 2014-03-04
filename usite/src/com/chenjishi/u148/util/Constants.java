@@ -39,6 +39,10 @@ public class Constants {
     public static final String KEY_MESSAGE_TYPE = "message_type";
     public static final int MSG_DOWNLOAD_SUCCESS = 0;
 
+    public static final String KEY_SONG_NAME = "songName";
+    public static final String KEY_SONG_ARTIST = "artistName";
+    public static final String KEY_SONG_ICON = "songIcon";
+
     public static final String EVENT_VIDEO_SHARE = "VideoShare";
     public static final String EVENT_ARTICLE_SHARE = "ArticleShare";
     public static final String EVENT_IMAGE_SHARE = "ArticleShare";

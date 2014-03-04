@@ -39,6 +39,8 @@ public class PrefsUtil {
 
     private static final String KEY_AD_SHOW_TIME = "ad_show_time";
 
+    private static final String KEY_REGISTER_TIME = "register_time";
+
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_SEX = "user_sex";
     private static final String KEY_USER_ICON = "user_icon";
@@ -61,6 +63,14 @@ public class PrefsUtil {
 
     public static boolean isAdShowed() {
         return getBoolPreference(KEY_AD_SHOWED);
+    }
+
+    public static void setRegisterTime(long time) {
+        saveLongPreference(KEY_REGISTER_TIME, time);
+    }
+
+    public static long getRegisterTime() {
+        return getLongPreferences(KEY_REGISTER_TIME, -1L);
     }
 
     public static void setUser(UserInfo user) {

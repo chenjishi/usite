@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 import com.chenjishi.u148.model.FeedItem;
 import com.chenjishi.u148.model.UserInfo;
 
@@ -17,6 +18,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION = 1;
 
     private static final String TB_NAME_FAVORITE = "favorites";
+    private static final String TB_NAME_ARTICLE = "article";
 
     private static final String COL_ID = "id";
     private static final String COL_UID = "uid";
@@ -29,6 +31,9 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String COL_NICKNAME = "nickname";
     private static final String COL_USER_ICON = "icon";
     private static final String COL_CONTENT = "content";
+
+    private static final String COL_OFFSET = "offset";
+    private static final String COL_READ_STATE = "readState";
 
     private static SQLiteDatabase mDb = null;
     private static DBHelper INSTANCE = null;
@@ -62,6 +67,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_USER_ICON + " TEXT," +
                 COL_CONTENT + " TEXT," +
                 " UNIQUE (" + COL_ID + ") ON CONFLICT REPLACE)");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TB_NAME_ARTICLE + " (" +
+                COL_ID + " TEXT," +
+                COL_OFFSET + " INTEGER," +
+                COL_READ_STATE + " INTEGER, UNIQUE (" + COL_ID + ") ON CONFLICT REPLACE)");
     }
 
     @Override
@@ -90,6 +100,37 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public void updateArticleOffset(String id, int offset) {
+        final String sql = "INSERT OR REPLACE INTO " + TB_NAME_ARTICLE +
+                " VALUES (?, ?, ?)";
+        mDb.execSQL(sql, new String[] {
+                id,
+                String.valueOf(offset),
+                String.valueOf(0)
+        });
+    }
+
+    public int getOffsetById(String id) {
+        int result = 0;
+        final String sql = "SELECT " + COL_ID + ", " +
+                COL_OFFSET + ", " +
+                COL_READ_STATE + " FROM " +
+                TB_NAME_ARTICLE + " WHERE " +
+                COL_ID + " = ?";
+        Cursor c = null;
+
+        try {
+            c = mDb.rawQuery(sql, new String[]{id});
+            if (c.moveToNext()) {
+                result = c.getInt(1);
+            }
+        } finally {
+            if (null != c) c.close();
+        }
+
+        return result;
+    }
+
     public void insert(FeedItem feed) {
         if (null == feed) return;
 
@@ -108,6 +149,25 @@ public class DBHelper extends SQLiteOpenHelper {
                 feed.usr.nickname,
                 feed.usr.icon,
                 "reserved"});
+    }
+
+    public void loadAllOffset() {
+        final String sql = "SELECT " + COL_ID + ", " +
+                COL_OFFSET + ", " +
+                COL_READ_STATE + " FROM " +
+                TB_NAME_ARTICLE;
+
+        Cursor c = null;
+
+        try {
+            c = mDb.rawQuery(sql, null);
+            while (c.moveToNext()) {
+                Log.i("test", c.getString(0) + " offset " + c.getInt(1));
+            }
+        } finally {
+            if (null != c) c.close();
+        }
+
     }
 
     public ArrayList<FeedItem> loadAll() {

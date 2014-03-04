@@ -32,6 +32,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private String songName;
     private String artistName;
+    private String coverUrl;
 
     private String mCurrentUrl;
 
@@ -47,6 +48,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     @Override
     public void onCreate() {
         super.onCreate();
+
         mPlayer = new MediaPlayer();
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
@@ -55,6 +57,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (null == intent) return START_STICKY;
+
         final Bundle bundle = intent.getExtras();
         if (null == bundle) return START_STICKY;
 
@@ -66,7 +70,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
             if (null != mPlayer) {
                 mPlayer.reset();
             }
-            mListener.onMusicStartParse();
+            if (null != mListener) mListener.onMusicStartParse();
             parseMp3Url(url);
         } else {
             togglePlayer();
@@ -79,6 +83,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         if (null != mPlayer && mPlayer.isPlaying()) {
             mPlayer.stop();
         }
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mPlayer;
     }
 
     public void togglePlayer() {
@@ -119,7 +127,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mListener.onMusicPrepared(songName, artistName);
+        if (null != mListener) mListener.onMusicPrepared(songName, artistName);
     }
 
     public class MusicBinder extends Binder {
@@ -142,6 +150,11 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                     if (!TextUtils.isEmpty(queryString)) {
                         String[] params = queryString.split("=");
                         Document doc = Jsoup.connect(params[1]).get();
+
+                        Elements cover = doc.getElementsByTag("album_cover");
+                        if (null != cover && cover.size() > 0) {
+                            coverUrl = cover.get(0).text();
+                        }
 
                         Elements song = doc.getElementsByTag("song_name");
                         if (null != song && song.size() > 0) {
@@ -167,7 +180,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }.start();
     }
 
-    private void play() {
+    void play() {
         if (TextUtils.isEmpty(mUrl)) {
             mListener.onMusicParseError();
             return;
@@ -184,7 +197,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     //get xiami's real mp3 path
-    private String getLink(String location) {
+    String getLink(String location) {
         int loc_2 = Integer.valueOf(location.substring(0, 1));
         String loc_3 = location.substring(1);
         int loc_4 = (int) Math.floor(Double.valueOf(loc_3.length()) / loc_2);

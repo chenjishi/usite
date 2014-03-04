@@ -13,6 +13,8 @@
     <string name="usite">www.u148.net</string>
     <string name="exit_tip">确定退出应用吗?</string>
     <string name="email_choose">选择邮箱</string>
+    <string name="register">注&#160;&#160;&#160;&#160;册</string>
+    <string name="register_title">注册</string>
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
     <string name="feedback">意见反馈</string>

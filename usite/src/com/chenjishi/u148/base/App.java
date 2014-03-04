@@ -17,6 +17,13 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+
+        /**
+         * init
+         */
+        FileCache.init(this);
+        HttpUtils.init(this);
+        DBHelper.getInstance(this);
     }
 
     public static App getInstance() {

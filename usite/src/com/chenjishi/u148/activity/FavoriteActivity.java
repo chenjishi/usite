@@ -1,10 +1,10 @@
 package com.chenjishi.u148.activity;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +18,7 @@ import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.view.DeletePopupWindow;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 
@@ -28,7 +29,8 @@ import java.util.*;
  * Created by chenjishi on 14-2-22.
  */
 public class FavoriteActivity extends BaseActivity implements Response.Listener<Favorite>,
-        Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+        Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
     private FavoriteAdapter mAdapter;
     private ArrayList<FavoriteItem> favoriteList = new ArrayList<FavoriteItem>();
 
@@ -115,22 +117,24 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         loadData();
     }
 
+    private DeletePopupWindow mPopupWindow;
+
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        final String[] items = new String[]{"删除收藏"};
-        final int pos = position;
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        if (null == mPopupWindow) {
+            mPopupWindow = new DeletePopupWindow(this);
+        }
+
+        final FavoriteItem favorite = favoriteList.get(position);
+        mPopupWindow.setOnDeleteListener(new DeletePopupWindow.OnDeleteListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final FavoriteItem favoriteItem = favoriteList.get(pos);
-                favoriteList.remove(favoriteItem);
+            public void onDelete() {
+                favoriteList.remove(favorite);
                 mAdapter.notifyDataSetChanged();
-                deleteFavorite(favoriteItem.aid);
+                deleteFavorite(favorite.id);
             }
         });
-        builder.show();
-
+        mPopupWindow.showAtLocation(findViewById(android.R.id.content), Gravity.NO_GRAVITY, 0, 0);
 
         return true;
     }
@@ -144,6 +148,7 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         HttpUtils.post(url, params, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                Log.i("test", "response " + response);
             }
         }, this);
     }

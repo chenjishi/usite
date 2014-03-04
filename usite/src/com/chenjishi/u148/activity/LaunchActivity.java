@@ -43,14 +43,6 @@ public class LaunchActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-
-            /**
-             * init
-             */
-            FileCache.init(LaunchActivity.this);
-            HttpUtils.init(LaunchActivity.this);
-            DBHelper.getInstance(LaunchActivity.this);
-
             //clear cache of 2 days before
             long lastClearCacheTime = PrefsUtil.getClearCacheTime();
             if (System.currentTimeMillis() > lastClearCacheTime) {

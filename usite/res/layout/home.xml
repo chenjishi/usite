@@ -33,7 +33,7 @@
                 android:clickable="true"
                 android:layout_centerVertical="true"
                 android:onClick="onLoginButtonClicked"
-                android:src="@drawable/ic_avatar"
+                android:src="@drawable/ic_avatar_2"
                 android:layout_alignParentRight="true"/>
         <View
                 android:id="@+id/split_h"

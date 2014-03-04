@@ -172,6 +172,8 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             mPlayBtn = (ImageButton) mMusicPanel.findViewById(R.id.btn_play);
         }
 
+        getWindow().getDecorView();
+
         mSongText.setText(getString(R.string.content_loading));
         mArtistText.setVisibility(View.GONE);
         mPlayBtn.setVisibility(View.GONE);
@@ -229,6 +231,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 ((ViewGroup) mMusicPanel.getParent()).removeView(mMusicPanel);
             }
         }
+        mDatabase.updateArticleOffset(mFeed.id, mWebView.getScrollY());
         favorite();
     }
 
@@ -368,6 +371,11 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             if (newProgress == 100) {
+                final int offset = mDatabase.getOffsetById(mFeed.id);
+                if (offset > 0) {
+                    mWebView.scrollTo(0, offset);
+                }
+
                 boolean adShowed = PrefsUtil.isAdShowed();
                 if (!adShowed) initAd();
             }
