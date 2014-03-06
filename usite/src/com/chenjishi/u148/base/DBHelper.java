@@ -134,6 +134,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void insert(FeedItem feed) {
         if (null == feed) return;
 
+        final UserInfo usr = feed.usr;
         final String sql = "INSERT OR REPLACE INTO " + TB_NAME_FAVORITE +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -145,9 +146,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 feed.summary,
                 feed.pic_mid,
                 String.valueOf(feed.create_time),
-                feed.usr.alias,
-                feed.usr.nickname,
-                feed.usr.icon,
+                null != usr ? usr.alias : "",
+                null != usr ? usr.nickname : "",
+                null != usr ? usr.icon : "",
                 "reserved"});
     }
 

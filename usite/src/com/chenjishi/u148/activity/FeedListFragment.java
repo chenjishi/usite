@@ -80,10 +80,12 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
         listView.setEmptyView(emptyView);
 
         if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
+            view.setBackgroundColor(getResources().getColor(R.color.background_night));
             listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
             loadBtn.setBackgroundResource(R.drawable.btn_gray_night);
             loadBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
         } else {
+            view.setBackgroundColor(getResources().getColor(R.color.background));
             listView.setDivider(getResources().getDrawable(R.drawable.split_color));
             loadBtn.setBackgroundResource(R.drawable.btn_gray);
             loadBtn.setTextColor(getResources().getColor(R.color.text_color_regular));

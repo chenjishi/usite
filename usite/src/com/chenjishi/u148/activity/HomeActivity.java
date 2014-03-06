@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -29,10 +30,7 @@ import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.view.AboutDialog;
-import com.chenjishi.u148.view.ExitDialog;
-import com.chenjishi.u148.view.FireworksView;
-import com.chenjishi.u148.view.LoginDialog;
+import com.chenjishi.u148.view.*;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
@@ -92,6 +90,15 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         mViewPager.setAdapter(mTabAdapter);
         mViewPager.setOnPageChangeListener(this);
         mViewPager.setCurrentItem(0);
+
+        /**
+         * apply depth page animation
+         */
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//            mViewPager.setPageTransformer(true, new DepthPageTransformer());
+//            mViewPager.setPageMargin((int) (density * 8.f));
+//            mViewPager.setPageMarginDrawable(R.drawable.shadow_right);
+//        }
 
         mRadioGroup.check(R.id.radio_home);
         applyTheme(PrefsUtil.getThemeMode());
@@ -486,19 +493,24 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
             if (0 == position) {
                 final boolean isLogin = Utils.isLogin();
+                RelativeLayout.LayoutParams layoutParams;
                 if (isLogin) {
                     final UserInfo userInfo = PrefsUtil.getUser();
                     final ImageLoader imageLoader = HttpUtils.getImageLoader();
-                    final RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams((int) (32. * density),
+                    layoutParams = new RelativeLayout.LayoutParams((int) (32. * density),
                             (int)(32. * density));
-                    lp.setMargins(0, 0, (int) (8. * density), 0);
+                    layoutParams.setMargins(0, 0, (int) (8. * density), 0);
 
                     holder.titleText.setText(userInfo.nickname);
-                    holder.iconImage.setLayoutParams(lp);
+                    holder.iconImage.setLayoutParams(layoutParams);
                     imageLoader.get(userInfo.icon, ImageLoader.getImageListener(holder.iconImage, R.drawable.ic_avatar_2,
                             R.drawable.ic_avatar_2));
                 } else {
+                    layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layoutParams.setMargins(0, 0, (int) (density * 8.), 0);
                     holder.titleText.setText(getItem(position));
+                    holder.iconImage.setLayoutParams(layoutParams);
                     holder.iconImage.setImageResource(R.drawable.ic_avatar_2);
                 }
             } else if (2 == position) {
