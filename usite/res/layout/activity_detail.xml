@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <include layout="@layout/empty_view" android:id="@+id/empty_view"/>
+    <com.chenjishi.u148.view.ArticleWebView
+            android:id="@id/webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
+            android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
+            android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
+            android:scrollbarSize="4dp"
+            android:visibility="gone"
+            android:fadingEdge="none"
+            android:padding="8dp"/>
+</FrameLayout>

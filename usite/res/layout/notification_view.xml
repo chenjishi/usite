@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="64dp">
+    <ImageView
+            android:id="@id/iv_album"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:layout_marginRight="8dp"
+            android:contentDescription="@null"/>
+    <TextView
+            android:id="@id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/iv_album"
+            android:layout_alignTop="@id/iv_album"
+            android:textSize="18sp"
+            android:textColor="@color/white"/>
+    <TextView
+            android:id="@id/tv_artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/iv_album"
+            android:layout_below="@id/tv_name"
+            android:textSize="14sp"
+            android:textColor="@color/text_color_weak"/>
+    <ImageButton
+            android:id="@id/btn_close"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/home_up_bg"
+            android:src="@drawable/ic_notify_clear"
+            android:contentDescription="@null"
+            android:layout_alignParentRight="true"/>
+</RelativeLayout>
