@@ -18,10 +18,12 @@ package com.chenjishi.u148.volley.toolbox;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
-import android.widget.LinearLayout.LayoutParams;
-import com.chenjishi.u148.volley.VolleyError;
 
+import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.ImageLoader.ImageContainer;
+import com.chenjishi.u148.volley.toolbox.ImageLoader.ImageListener;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
@@ -45,7 +47,7 @@ public class NetworkImageView extends ImageView {
     private ImageLoader mImageLoader;
 
     /** Current ImageContainer. (either in-flight or finished) */
-    private ImageLoader.ImageContainer mImageContainer;
+    private ImageContainer mImageContainer;
 
     public NetworkImageView(Context context) {
         this(context, null);
@@ -62,10 +64,10 @@ public class NetworkImageView extends ImageView {
     /**
      * Sets URL of the image that should be loaded into this view. Note that calling this will
      * immediately either set the cached image (if available) or the default image specified by
-     * {@link com.chenjishi.meizi.volley.toolbox.NetworkImageView#setDefaultImageResId(int)} on the view.
+     * {@link com.chenjishi.u148.volley.toolbox.NetworkImageView#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link com.chenjishi.meizi.volley.toolbox.NetworkImageView#setDefaultImageResId(int)} and
-     * {@link com.chenjishi.meizi.volley.toolbox.NetworkImageView#setErrorImageResId(int)} should be called prior to calling
+     * NOTE: If applicable, {@link com.chenjishi.u148.volley.toolbox.NetworkImageView#setDefaultImageResId(int)} and
+     * {@link com.chenjishi.u148.volley.toolbox.NetworkImageView#setErrorImageResId(int)} should be called prior to calling
      * this function.
      *
      * @param url The URL that should be loaded into this ImageView.
@@ -98,14 +100,19 @@ public class NetworkImageView extends ImageView {
      * Loads the image for the view if it isn't already loaded.
      * @param isInLayoutPass True if this was invoked from a layout pass, false otherwise.
      */
-    private void loadImageIfNecessary(final boolean isInLayoutPass) {
+    void loadImageIfNecessary(final boolean isInLayoutPass) {
         int width = getWidth();
         int height = getHeight();
 
-        boolean isFullyWrapContent = getLayoutParams().height == LayoutParams.WRAP_CONTENT
-                && getLayoutParams().width == LayoutParams.WRAP_CONTENT;
+        boolean wrapWidth = false, wrapHeight = false;
+        if (getLayoutParams() != null) {
+            wrapWidth = getLayoutParams().width == LayoutParams.WRAP_CONTENT;
+            wrapHeight = getLayoutParams().height == LayoutParams.WRAP_CONTENT;
+        }
+
         // if the view's bounds aren't known yet, and this is not a wrap-content/wrap-content
         // view, hold off on loading the image.
+        boolean isFullyWrapContent = wrapWidth && wrapHeight;
         if (width == 0 && height == 0 && !isFullyWrapContent) {
             return;
         }
@@ -117,7 +124,7 @@ public class NetworkImageView extends ImageView {
                 mImageContainer.cancelRequest();
                 mImageContainer = null;
             }
-            setImageBitmap(null);
+            setDefaultImageOrNull();
             return;
         }
 
@@ -129,14 +136,18 @@ public class NetworkImageView extends ImageView {
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
                 mImageContainer.cancelRequest();
-                setImageBitmap(null);
+                setDefaultImageOrNull();
             }
         }
 
+        // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
+        int maxWidth = wrapWidth ? 0 : width;
+        int maxHeight = wrapHeight ? 0 : height;
+
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        ImageLoader.ImageContainer newContainer = mImageLoader.get(mUrl,
-                new ImageLoader.ImageListener() {
+        ImageContainer newContainer = mImageLoader.get(mUrl,
+                new ImageListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (mErrorImageId != 0) {
@@ -145,7 +156,7 @@ public class NetworkImageView extends ImageView {
                     }
 
                     @Override
-                    public void onResponse(final ImageLoader.ImageContainer response, boolean isImmediate) {
+                    public void onResponse(final ImageContainer response, boolean isImmediate) {
                         // If this was an immediate response that was delivered inside of a layout
                         // pass do not set the image immediately as it will trigger a requestLayout
                         // inside of a layout. Instead, defer setting the image by posting back to
@@ -166,10 +177,19 @@ public class NetworkImageView extends ImageView {
                             setImageResource(mDefaultImageId);
                         }
                     }
-                });
+                }, maxWidth, maxHeight);
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
+    }
+
+    private void setDefaultImageOrNull() {
+        if(mDefaultImageId != 0) {
+            setImageResource(mDefaultImageId);
+        }
+        else {
+            setImageBitmap(null);
+        }
     }
 
     @Override

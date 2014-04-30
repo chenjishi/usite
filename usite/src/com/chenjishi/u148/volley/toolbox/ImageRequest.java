@@ -16,14 +16,17 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
+import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.volley.DefaultRetryPolicy;
+import com.chenjishi.u148.volley.NetworkResponse;
+import com.chenjishi.u148.volley.ParseError;
+import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyLog;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.util.Log;
-import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.volley.*;
 
 /**
  * A canned request for getting an image at a given URL and calling
@@ -186,9 +189,8 @@ public class ImageRequest extends Request<Bitmap> {
         }
 
         if (bitmap == null) {
-            return Response.error(new ParseError());
+            return Response.error(new ParseError(response));
         } else {
-
             if (mIsCircle) {
                 bitmap = Utils.circleToBitmap(bitmap);
                 bitmap = Utils.zoomBitmap(bitmap, mMaxWidth, mMaxHeight);

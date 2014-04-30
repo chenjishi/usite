@@ -16,6 +16,7 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
+import com.chenjishi.u148.volley.AuthFailureError;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -23,7 +24,6 @@ import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import com.chenjishi.u148.volley.AuthFailureError;
 
 /**
  * An Authenticator that uses {@link android.accounts.AccountManager} to get auth
@@ -67,6 +67,8 @@ public class AndroidAuthenticator implements Authenticator {
         return mAccount;
     }
 
+    // TODO: Figure out what to do about notifyAuthFailure
+    @SuppressWarnings("deprecation")
     @Override
     public String getAuthToken() throws AuthFailureError {
         final AccountManager accountManager = AccountManager.get(mContext);

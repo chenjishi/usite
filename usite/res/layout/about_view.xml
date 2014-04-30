@@ -23,13 +23,6 @@
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="@string/app_author"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/text_color_weak"/>
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="@string/copyright"
             android:textColor="@color/text_color_weak"
             android:layout_marginTop="8dp"

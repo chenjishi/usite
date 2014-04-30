@@ -19,13 +19,15 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
-import android.util.Log;
 import android.widget.ImageView;
+
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.RequestQueue;
 import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.Response.ErrorListener;
+import com.chenjishi.u148.volley.Response.Listener;
 import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.toolbox.ImageRequest;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,8 +35,9 @@ import java.util.LinkedList;
 /**
  * Helper that handles loading and caching images from remote URLs.
  *
- * The simple way to use this class is to call {@link}
+ * The simple way to use this class is to call {@link com.chenjishi.u148.volley.toolbox.ImageLoader#get(String, com.chenjishi.u148.volley.toolbox.ImageLoader.ImageListener)}
  * and to pass in the default image listener provided by
+ * {@link com.chenjishi.u148.volley.toolbox.ImageLoader#getImageListener(android.widget.ImageView, int, int)}. Note that all function calls to
  * this class must be made from the main thead, and all responses will be delivered to the main
  * thread as well.
  */
@@ -89,6 +92,7 @@ public class ImageLoader {
      * The default implementation of ImageListener which handles basic functionality
      * of showing a default image until the network response is received, at which point
      * it will switch to either the actual image or the error image.
+     * @param view The imageView that the listener is associated with.
      * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
      * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
      */
@@ -126,7 +130,7 @@ public class ImageLoader {
      *   or
      *   - onErrorResponse will be called if there was an error loading the image.
      */
-    public interface ImageListener extends Response.ErrorListener {
+    public interface ImageListener extends ErrorListener {
         /**
          * Listens for non-error changes to the loading of the image request.
          *
@@ -158,7 +162,7 @@ public class ImageLoader {
      * Returns an ImageContainer for the requested URL.
      *
      * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
-     * If the default was returned, the {@link } will be invoked when the
+     * If the default was returned, the {@link com.chenjishi.u148.volley.toolbox.ImageLoader} will be invoked when the
      * request is fulfilled.
      *
      * @param requestUrl The URL of the image to be loaded.
@@ -213,13 +217,13 @@ public class ImageLoader {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         Request<?> newRequest =
-            new ImageRequest(requestUrl, new Response.Listener<Bitmap>() {
+            new ImageRequest(requestUrl, new Listener<Bitmap>() {
                 @Override
                 public void onResponse(Bitmap response) {
                     onGetImageSuccess(cacheKey, response);
                 }
             }, maxWidth, maxHeight,
-            Config.RGB_565, new Response.ErrorListener() {
+            Config.RGB_565, new ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     onGetImageError(cacheKey, error);
@@ -324,10 +328,10 @@ public class ImageLoader {
         // Remove this request from the list of in-flight requests.
         BatchedImageRequest request = mInFlightRequests.remove(cacheKey);
 
-        // Set the error for this request
-        request.setError(error);
-
         if (request != null) {
+            // Set the error for this request
+            request.setError(error);
+
             // Send the batched response
             batchResponse(cacheKey, request);
         }
@@ -522,11 +526,7 @@ public class ImageLoader {
      * @param maxHeight The max-height of the output.
      */
     private static String getCacheKey(String url, int maxWidth, int maxHeight) {
-        if (!TextUtils.isEmpty(url)) {
-            return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
-                    .append("#H").append(maxHeight).append(url).toString();
-        } else {
-            return null;
-        }
+        return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
+                .append("#H").append(maxHeight).append(url).toString();
     }
 }

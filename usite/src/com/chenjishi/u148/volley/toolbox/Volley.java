@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
+
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.volley.Network;
 import com.chenjishi.u148.volley.RequestQueue;
@@ -28,6 +29,9 @@ import com.chenjishi.u148.volley.RequestQueue;
 import java.io.File;
 
 public class Volley {
+
+    /** Default on-disk cache directory. */
+    private static final String DEFAULT_CACHE_DIR = "volley";
 
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
@@ -42,7 +46,6 @@ public class Volley {
         String userAgent = "volley/0";
         try {
             String packageName = context.getPackageName();
-
             PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
             userAgent = packageName + "/" + info.versionCode;
         } catch (NameNotFoundException e) {

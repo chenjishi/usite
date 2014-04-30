@@ -1,30 +1,8 @@
-/*
- * Copyright (C) 2012 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.chenjishi.u148.activity;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
+import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
@@ -37,11 +15,7 @@ import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.ViewParent;
+import android.view.*;
 import android.view.accessibility.AccessibilityEvent;
 
 import java.lang.reflect.Field;
@@ -49,54 +23,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
- * SlidingLayout provides a horizontal, multi-pane layout for use at the top level
- * of a UI. A left (or first) pane is treated as a content list or browser, subordinate to a
- * primary detail view for displaying content.
- *
- * <p>Child views may overlap if their combined width exceeds the available width
- * in the SlidingLayout. When this occurs the user may slide the topmost view out of the way
- * by dragging it, or by navigating in the direction of the overlapped view using a keyboard.
- * If the content of the dragged child view is itself horizontally scrollable, the user may
- * grab it by the very edge.</p>
- *
- * <p>Thanks to this sliding behavior, SlidingLayout may be suitable for creating layouts
- * that can smoothly adapt across many different screen sizes, expanding out fully on larger
- * screens and collapsing on smaller screens.</p>
- *
- * <p>SlidingLayout is distinct from a navigation drawer as described in the design
- * guide and should not be used in the same scenarios. SlidingLayout should be thought
- * of only as a way to allow a two-pane layout normally used on larger screens to adapt to smaller
- * screens in a natural way. The interaction patterns expressed by SlidingLayout imply
- * a physicality and direct information hierarchy between panes that does not necessarily exist
- * in a scenario where a navigation drawer should be used instead.</p>
- *
- * <p>Appropriate uses of SlidingLayout include pairings of panes such as a contact list and
- * subordinate interactions with those contacts, or an email thread list with the content pane
- * displaying the contents of the selected thread. Inappropriate uses of SlidingLayout include
- * switching between disparate functions of your app, such as jumping from a social stream view
- * to a view of your personal profile - cases such as this should use the navigation drawer
- * pattern instead. ({@link android.support.v4.widget.DrawerLayout DrawerLayout} implements this pattern.)</p>
- *
- * <p>Like {@link android.widget.LinearLayout LinearLayout}, SlidingLayout supports
- * the use of the layout parameter <code>layout_weight</code> on child views to determine
- * how to divide leftover space after measurement is complete. It is only relevant for width.
- * When views do not overlap weight behaves as it does in a LinearLayout.</p>
- *
- * <p>When views do overlap, weight on a slideable pane indicates that the pane should be
- * sized to fill all available space in the closed state. Weight on a pane that becomes covered
- * indicates that the pane should be sized to fill all available space except a small minimum strip
- * that the user may use to grab the slideable view and pull it back over into a closed state.</p>
+ * Created by chenjishi on 14-3-17.
  */
 public class SlidingLayout extends ViewGroup {
     private static final String TAG = "SlidingLayout";
-
-    /**
-     * Default size of the overhang for a pane in the open state.
-     * At least this much of a sliding pane will remain visible.
-     * This indicates that there is more content available and provides
-     * a "physical" edge to grab to pull it closed.
-     */
-    private static final int DEFAULT_OVERHANG_SIZE = 32; // dp;
 
     /**
      * If no fade color is given by default it will fade to 80% gray.
@@ -124,16 +54,9 @@ public class SlidingLayout extends ViewGroup {
     private Drawable mShadowDrawable;
 
     /**
-     * The size of the overhang in pixels.
-     * This is the minimum section of the sliding panel that will
-     * be visible in the open state to allow for a closing drag.
-     */
-    private final int mOverhangSize;
-
-    /**
      * True if a panel can slide with the current measurements
      */
-    private boolean mCanSlide;
+    private boolean mCanSlide = true;
 
     /**
      * The child view that can slide, if any.
@@ -171,11 +94,9 @@ public class SlidingLayout extends ViewGroup {
     private float mInitialMotionX;
     private float mInitialMotionY;
 
-    private PanelSlideListener mPanelSlideListener;
+    private SlideListener mPanelSlideListener;
 
     private final ViewDragHelper mDragHelper;
-
-    private boolean mSlideDisable = false;
 
     /**
      * Stores whether or not the pane was open the last time it was slideable.
@@ -206,16 +127,19 @@ public class SlidingLayout extends ViewGroup {
     /**
      * Listener for monitoring events about sliding panes.
      */
-    public interface PanelSlideListener {
+    public interface SlideListener {
         /**
          * Called when a sliding pane's position changes.
-         * @param panel The child view that was moved
+         *
+         * @param panel       The child view that was moved
          * @param slideOffset The new offset of this sliding pane within its range, from 0-1
          */
         public void onPanelSlide(View panel, float slideOffset);
+
         /**
          * Called when a sliding pane becomes slid completely open. The pane may or may not
          * be interactive at this point depending on how much of the pane is visible.
+         *
          * @param panel The child view that was slid to an open position, revealing other panes
          */
         public void onPanelOpened(View panel);
@@ -223,24 +147,30 @@ public class SlidingLayout extends ViewGroup {
         /**
          * Called when a sliding pane becomes slid completely closed. The pane is now guaranteed
          * to be interactive. It may now obscure other views in the layout.
+         *
          * @param panel The child view that was slid to a closed position
          */
         public void onPanelClosed(View panel);
     }
 
     /**
-     * No-op stubs for {@link SlidingLayout.PanelSlideListener}. If you only want to implement a subset
+     * No-op stubs for {@link com.chenjishi.u148.activity.SlidingLayout.SlideListener}. If you only want to implement a subset
      * of the listener methods you can extend this instead of implement the full interface.
      */
-    public static class SimplePanelSlideListener implements PanelSlideListener {
+    public static class SimpleSlideListener implements SlideListener {
         @Override
         public void onPanelSlide(View panel, float slideOffset) {
+
         }
+
         @Override
         public void onPanelOpened(View panel) {
+
         }
+
         @Override
         public void onPanelClosed(View panel) {
+
         }
     }
 
@@ -256,7 +186,6 @@ public class SlidingLayout extends ViewGroup {
         super(context, attrs, defStyle);
 
         final float density = context.getResources().getDisplayMetrics().density;
-        mOverhangSize = (int) (DEFAULT_OVERHANG_SIZE * density + 0.5f);
 
         final ViewConfiguration viewConfig = ViewConfiguration.get(context);
 
@@ -268,10 +197,6 @@ public class SlidingLayout extends ViewGroup {
         mDragHelper = ViewDragHelper.create(this, 0.5f, new DragHelperCallback());
         mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_LEFT);
         mDragHelper.setMinVelocity(MIN_FLING_VELOCITY * density);
-    }
-
-    public void disableSlide(boolean b) {
-        mSlideDisable = b;
     }
 
     /**
@@ -288,7 +213,6 @@ public class SlidingLayout extends ViewGroup {
 
     /**
      * @return The distance the lower pane will parallax by when the upper pane is fully closed.
-     *
      * @see #setParallaxDistance(int)
      */
     public int getParallaxDistance() {
@@ -328,7 +252,7 @@ public class SlidingLayout extends ViewGroup {
         return mCoveredFadeColor;
     }
 
-    public void setPanelSlideListener(PanelSlideListener listener) {
+    public void setPanelSlideListener(SlideListener listener) {
         mPanelSlideListener = listener;
     }
 
@@ -551,7 +475,7 @@ public class SlidingLayout extends ViewGroup {
 
         // Resolve weight and make sure non-sliding panels are smaller than the full screen.
         if (canSlide || weightSum > 0) {
-            final int fixedPanelWidthLimit = widthSize - mOverhangSize;
+            final int fixedPanelWidthLimit = widthSize;
 
             for (int i = 0; i < childCount; i++) {
                 final View child = getChildAt(i);
@@ -635,7 +559,10 @@ public class SlidingLayout extends ViewGroup {
         }
 
         setMeasuredDimension(widthSize, layoutHeight);
-        mCanSlide = canSlide;
+
+//        mCanSlide = canSlide;
+        mCanSlide = mCanSlide ? canSlide : mCanSlide;
+
         if (mDragHelper.getViewDragState() != ViewDragHelper.STATE_IDLE && !canSlide) {
             // Cancel scrolling in progress, it's no longer relevant.
             mDragHelper.abort();
@@ -673,7 +600,7 @@ public class SlidingLayout extends ViewGroup {
             if (lp.slideable) {
                 final int margin = lp.leftMargin + lp.rightMargin;
                 final int range = Math.min(nextXStart,
-                        width - paddingRight - mOverhangSize) - xStart - margin;
+                        width - paddingRight) - xStart - margin;
                 mSlideRange = range;
                 lp.dimWhenOffset = xStart + lp.leftMargin + range + childWidth / 2 >
                         width - paddingRight;
@@ -733,8 +660,6 @@ public class SlidingLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mSlideDisable) return false;
-
         final int action = MotionEventCompat.getActionMasked(ev);
 
         // Preserve the open state based on the last view that was touched.
@@ -898,15 +823,6 @@ public class SlidingLayout extends ViewGroup {
     }
 
     /**
-     * @return true if content in this layout can be slid open and closed
-     * @deprecated Renamed to {@link #isSlideable()} - this method is going away soon!
-     */
-    @Deprecated
-    public boolean canSlide() {
-        return mCanSlide;
-    }
-
-    /**
      * Check if the content in this layout cannot fully fit side by side and therefore
      * the content pane can be slid back and forth.
      *
@@ -914,6 +830,10 @@ public class SlidingLayout extends ViewGroup {
      */
     public boolean isSlideable() {
         return mCanSlide;
+    }
+
+    public void setSlideable(boolean b) {
+        mCanSlide = b;
     }
 
     private void onPanelDragged(int newLeft) {
@@ -1006,7 +926,7 @@ public class SlidingLayout extends ViewGroup {
      * Smoothly animate mDraggingPane to the target X position within its range.
      *
      * @param slideOffset position to animate to
-     * @param velocity initial velocity in case of fling, or 0.
+     * @param velocity    initial velocity in case of fling, or 0.
      */
     boolean smoothSlideTo(float slideOffset, int velocity) {
         if (!mCanSlide) {
@@ -1102,12 +1022,12 @@ public class SlidingLayout extends ViewGroup {
     /**
      * Tests scrollability within child views of v given a delta of dx.
      *
-     * @param v View to test for horizontal scrollability
+     * @param v      View to test for horizontal scrollability
      * @param checkV Whether the view v passed should itself be checked for scrollability (true),
      *               or just its children (false).
-     * @param dx Delta scrolled in pixels
-     * @param x X coordinate of the active touch point
-     * @param y Y coordinate of the active touch point
+     * @param dx     Delta scrolled in pixels
+     * @param x      X coordinate of the active touch point
+     * @param y      Y coordinate of the active touch point
      * @return true if child views of v can be scrolled by delta of dx.
      */
     protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
@@ -1130,8 +1050,8 @@ public class SlidingLayout extends ViewGroup {
             }
         }
 
-        return checkV && ViewCompat.canScrollHorizontally(v, -dx) ||
-                ((v instanceof ViewPager) && canViewPagerScrollHorizontally((ViewPager) v, -dx));
+        return checkV && (ViewCompat.canScrollHorizontally(v, -dx) ||
+                ((v instanceof ViewPager) && canViewPagerScrollHorizontally((ViewPager) v, -dx)));
     }
 
     boolean canViewPagerScrollHorizontally(ViewPager p, int dx) {
@@ -1263,8 +1183,8 @@ public class SlidingLayout extends ViewGroup {
     }
 
     public static class LayoutParams extends MarginLayoutParams {
-        private static final int[] ATTRS = new int[] {
-            android.R.attr.layout_weight
+        private static final int[] ATTRS = new int[]{
+                android.R.attr.layout_weight
         };
 
         /**
@@ -1337,14 +1257,14 @@ public class SlidingLayout extends ViewGroup {
 
         public static final Creator<SavedState> CREATOR =
                 new Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
 
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
     }
 
     interface SlidingPanelLayoutImpl {
@@ -1450,7 +1370,7 @@ public class SlidingLayout extends ViewGroup {
 
         @Override
         public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
-                AccessibilityEvent event) {
+                                                       AccessibilityEvent event) {
             if (!filter(child)) {
                 return super.onRequestSendAccessibilityEvent(host, child, event);
             }
@@ -1467,7 +1387,7 @@ public class SlidingLayout extends ViewGroup {
          * Leave it private here as it's not general-purpose useful.
          */
         private void copyNodeInfoNoChildren(AccessibilityNodeInfoCompat dest,
-                AccessibilityNodeInfoCompat src) {
+                                            AccessibilityNodeInfoCompat src) {
             final Rect rect = mTmpRect;
 
             src.getBoundsInParent(rect);

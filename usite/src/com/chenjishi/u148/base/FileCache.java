@@ -25,19 +25,11 @@ public class FileCache {
     }
 
     public static String getImageCacheDir(Context context) {
-        return getInternalCacheDir(context) + "/image/";
+        return getRootDirectory(context) + "/image/";
     }
 
     public static String getDataCacheDir(Context context) {
-        return getInternalCacheDir(context) + "/data/";
-    }
-
-    public static String getInternalCacheDir(Context context) {
-        String path = null;
-        File cacheDir = context.getCacheDir();
-        if (cacheDir.exists()) path = cacheDir.getAbsolutePath();
-
-        return path;
+        return getRootDirectory(context) + "/data/";
     }
 
     public static String getTempCacheDir() {
@@ -49,5 +41,17 @@ public class FileCache {
             return Environment.getExternalStorageDirectory().getPath();
         }
         return null;
+    }
+
+    public static String getRootDirectory(Context context) {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            final String cacheDir = "/Android/data/" + context.getPackageName();
+            return Environment.getExternalStorageDirectory() + cacheDir;
+        } else {
+            String path = null;
+            File cacheDir = context.getCacheDir();
+            if (cacheDir.exists()) path = cacheDir.getAbsolutePath();
+            return path;
+        }
     }
 }

@@ -17,11 +17,23 @@
 package com.chenjishi.u148.volley.toolbox;
 
 import android.os.SystemClock;
+
 import com.chenjishi.u148.volley.Cache;
 import com.chenjishi.u148.volley.VolleyLog;
 
-import java.io.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Cache implementation that caches files directly onto the hard disk in the specified

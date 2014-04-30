@@ -8,6 +8,10 @@ package com.chenjishi.u148.util;
  * To change this template use File | Settings | File Templates.
  */
 public class Constants {
+    public static final String KEY_FEED = "feed";
+    public static final String KEY_FEED_LIST = "feed_list";
+    public static final String KEY_FEED_INDEX = "index";
+
     public static final int MODE_DAY = 0;
     public static final int MODE_NIGHT = 1;
 

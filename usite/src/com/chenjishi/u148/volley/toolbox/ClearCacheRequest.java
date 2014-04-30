@@ -16,13 +16,13 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-
-import android.os.Handler;
-import android.os.Looper;
 import com.chenjishi.u148.volley.Cache;
 import com.chenjishi.u148.volley.NetworkResponse;
 import com.chenjishi.u148.volley.Request;
 import com.chenjishi.u148.volley.Response;
+
+import android.os.Handler;
+import android.os.Looper;
 
 /**
  * A synthetic request used for clearing the cache.

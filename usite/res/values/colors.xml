@@ -23,5 +23,6 @@
     <color name="menu_text_color_selected">#FFF9F9F9</color>
     <color name="gray_bg">#FF3B3B3B</color>
 
-
+    <color name="gray_3">#1C1C1C</color>
+    <color name="gray_4">#303030</color>
 </resources>

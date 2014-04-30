@@ -18,17 +18,28 @@ package com.chenjishi.u148.volley.toolbox;
 
 import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.Request.Method;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpTrace;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +94,7 @@ public class HttpClientStack implements HttpStack {
     /* protected */ static HttpUriRequest createHttpRequest(Request<?> request,
             Map<String, String> additionalHeaders) throws AuthFailureError {
         switch (request.getMethod()) {
-            case Request.Method.DEPRECATED_GET_OR_POST: {
+            case Method.DEPRECATED_GET_OR_POST: {
                 // This is the deprecated way that needs to be handled for backwards compatibility.
                 // If the request's post body is null, then the assumption is that the request is
                 // GET.  Otherwise, it is assumed that the request is a POST.
@@ -99,21 +110,33 @@ public class HttpClientStack implements HttpStack {
                     return new HttpGet(request.getUrl());
                 }
             }
-            case Request.Method.GET:
+            case Method.GET:
                 return new HttpGet(request.getUrl());
-            case Request.Method.DELETE:
+            case Method.DELETE:
                 return new HttpDelete(request.getUrl());
-            case Request.Method.POST: {
+            case Method.POST: {
                 HttpPost postRequest = new HttpPost(request.getUrl());
                 postRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
                 setEntityIfNonEmptyBody(postRequest, request);
                 return postRequest;
             }
-            case Request.Method.PUT: {
+            case Method.PUT: {
                 HttpPut putRequest = new HttpPut(request.getUrl());
                 putRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
                 setEntityIfNonEmptyBody(putRequest, request);
                 return putRequest;
+            }
+            case Method.HEAD:
+                return new HttpHead(request.getUrl());
+            case Method.OPTIONS:
+                return new HttpOptions(request.getUrl());
+            case Method.TRACE:
+                return new HttpTrace(request.getUrl());
+            case Method.PATCH: {
+                HttpPatch patchRequest = new HttpPatch(request.getUrl());
+                patchRequest.addHeader(HEADER_CONTENT_TYPE, request.getBodyContentType());
+                setEntityIfNonEmptyBody(patchRequest, request);
+                return patchRequest;
             }
             default:
                 throw new IllegalStateException("Unknown request method.");
@@ -136,5 +159,36 @@ public class HttpClientStack implements HttpStack {
      */
     protected void onPrepareRequest(HttpUriRequest request) throws IOException {
         // Nothing.
+    }
+
+    /**
+     * The HttpPatch class does not exist in the Android framework, so this has been defined here.
+     */
+    public static final class HttpPatch extends HttpEntityEnclosingRequestBase {
+
+        public final static String METHOD_NAME = "PATCH";
+
+        public HttpPatch() {
+            super();
+        }
+
+        public HttpPatch(final URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        /**
+         * @throws IllegalArgumentException if the uri is invalid.
+         */
+        public HttpPatch(final String uri) {
+            super();
+            setURI(URI.create(uri));
+        }
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
+        }
+
     }
 }

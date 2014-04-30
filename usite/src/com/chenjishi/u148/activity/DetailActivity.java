@@ -8,11 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.view.MotionEventCompat;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
+import android.view.*;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -28,10 +26,7 @@ import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
-import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.ShareUtils;
-import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.ArticleWebView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
@@ -57,13 +52,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
-        Response.Listener<Article>, Response.ErrorListener, InterstitialAdListener {
+        Response.Listener<Article>, Response.ErrorListener, InterstitialAdListener, JSCallback {
     private final static String REQUEST_URL = "http://www.u148.net/json/article/%1$s";
     private ArticleWebView mWebView;
-    private JavascriptBridge mJsBridge;
     private View mEmptyView;
 
-    private TextView favoriteBtn;
+    private ImageButton favoriteBtn;
 
     private MusicService mMusicService;
 
@@ -79,10 +73,19 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     private boolean isFavorite = false;
     private boolean favorited = false;
 
+    private int mSwipeMinDistance;
+    private int mSwipeThresholdVelocity;
+    private boolean mIsSwiped;
+
+    private float mInitialMotionX;
+    private float mInitialMotionY;
+    private VelocityTracker mVelocityTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.detail);
+        getWindow().setBackgroundDrawable(null);
+        setContentView(R.layout.activity_detail, R.layout.details_title_layout);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -92,6 +95,12 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             finish();
         }
 
+        final ViewConfiguration vc = ViewConfiguration.get(this);
+        mSwipeMinDistance = vc.getScaledPagingTouchSlop() * 2;
+        mSwipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
+
+        mSwipeMinDistance = 2 * mSwipeMinDistance;
+
         Map<String, String> categoryMap;
         categoryMap = new HashMap<String, String>();
         int[] ids = getResources().getIntArray(R.array.category_id);
@@ -100,7 +109,7 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             categoryMap.put(String.valueOf(ids[i]), names[i]);
         }
 
-        mEmptyView = findViewById(R.id.empty_layout);
+        mEmptyView = findViewById(R.id.empty_view);
 
         mDatabase = DBHelper.getInstance(this);
         String title = categoryMap.get(String.valueOf(mFeed.category));
@@ -109,14 +118,12 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         }
         setTitle(title);
 
-        favoriteBtn = (TextView) findViewById(R.id.btn_favorite);
+        favoriteBtn = (ImageButton) findViewById(R.id.btn_favorite);
 
         isFavorite = favorited = mDatabase.exist(mFeed.id);
 
-        mWebView = (ArticleWebView) findViewById(R.id.webview_content);
-
-        mJsBridge = new JavascriptBridge(this);
-        mWebView.addJavascriptInterface(mJsBridge, "U148");
+        mWebView = (ArticleWebView) findViewById(R.id.webview);
+        mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
         HttpUtils.ArticleRequest(String.format(REQUEST_URL, mFeed.id), this, this);
     }
@@ -163,6 +170,10 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     @Override
     public void onMusicStartParse() {
+        setupMusicPanel();
+    }
+
+    void setupMusicPanel() {
         if (null == mMusicPanel) {
             mMusicPanel = LayoutInflater.from(this).inflate(R.layout.music_pane_layout, null);
 
@@ -171,8 +182,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
             mMusicProgress = (ProgressBar) mMusicPanel.findViewById(R.id.pb_music_loading);
             mPlayBtn = (ImageButton) mMusicPanel.findViewById(R.id.btn_play);
         }
-
-        getWindow().getDecorView();
 
         mSongText.setText(getString(R.string.content_loading));
         mArtistText.setVisibility(View.GONE);
@@ -275,9 +284,13 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     };
 
     public void onCommentClicked(View v) {
+        startCommentActivity();
+    }
+
+    private void startCommentActivity() {
         Intent intent = new Intent(this, CommentActivity.class);
         intent.putExtra("article_id", mFeed.id);
-        startActivity(intent);
+        IntentUtils.startPreviewActivity(this, intent);
     }
 
     public void onFavoriteClicked(View v) {
@@ -289,11 +302,11 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         }
 
         if (isFavorite) {
-            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite, 0, 0, 0);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite);
             Utils.showToast(R.string.favorite_cancel);
             isFavorite = false;
         } else {
-            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_full, 0, 0, 0);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
             Utils.showToast(R.string.favorite_success);
             isFavorite = true;
         }
@@ -328,7 +341,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         if (null != response && !TextUtils.isEmpty(response.content)) {
             mArticle = response;
             renderPage();
-            findViewById(R.id.article_layout).setVisibility(View.VISIBLE);
         } else {
             Utils.setErrorView(mEmptyView, R.string.parse_error);
         }
@@ -364,6 +376,9 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
         mWebView.setWebChromeClient(new MyWebChromeClient());
+
+        mEmptyView.setVisibility(View.GONE);
+        mWebView.setVisibility(View.VISIBLE);
     }
 
     class MyWebChromeClient extends WebChromeClient {
@@ -460,92 +475,116 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         });
     }
 
-    class JavascriptBridge {
-        private Context mContext;
+    @Override
+    public void onImageClicked(String url) {
+        Intent intent = new Intent(this, ImageActivity.class);
+        intent.putExtra("imgsrc", url);
+        intent.putStringArrayListExtra("images", mArticle.imageList);
+        startActivity(intent);
+    }
 
-        public JavascriptBridge(Context context) {
-            mContext = context;
-        }
+    @Override
+    public void onMusicClicked(String url) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra("url", url);
+        startService(intent);
+    }
 
-        @JavascriptInterface
-        public void initTheme() {
-            int mode = PrefsUtil.getThemeMode();
-            if (mode == Constants.MODE_NIGHT) {
-                mWebView.loadUrl("javascript:setScreenMode('night')");
-            } else {
-                mWebView.loadUrl("javascript:setScreenMode('day')");
+    @Override
+    public void onVideoClicked(String url) {
+        Intent intent = new Intent(this, VideoActivity.class);
+        intent.putExtra("url", url);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onThemeChange() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int mode = PrefsUtil.getThemeMode();
+                if (mode == Constants.MODE_NIGHT) {
+                    mWebView.loadUrl("javascript:setScreenMode('night')");
+                } else {
+                    mWebView.loadUrl("javascript:setScreenMode('day')");
+                }
             }
-        }
-
-        @JavascriptInterface
-        public void onImageClick(String src) {
-            Intent intent = new Intent(mContext, ImageActivity.class);
-            intent.putExtra("imgsrc", src);
-            intent.putStringArrayListExtra("images", mArticle.imageList);
-            mContext.startActivity(intent);
-        }
-
-        @JavascriptInterface
-        public void onVideoClick(String src) {
-            if (TextUtils.isEmpty(src)) return;
-
-            Intent intent = new Intent();
-            if (src.contains("xiami")) {
-                intent.setClass(mContext, MusicService.class);
-                intent.putExtra("url", src);
-                startService(intent);
-            } else {
-                intent.setClass(mContext, VideoActivity.class);
-                intent.putExtra("url", src);
-                mContext.startActivity(intent);
-            }
-        }
-
-        @JavascriptInterface
-        public void onCommentClicked() {
-            Intent intent = new Intent(mContext, CommentActivity.class);
-            intent.putExtra("article_id", mFeed.id);
-            mContext.startActivity(intent);
-        }
+        });
     }
 
     @Override
     protected void applyTheme() {
         super.applyTheme();
 
-        final View splitBottom = findViewById(R.id.split_h1);
-        final View BottomLayout = findViewById(R.id.bottom_layout);
-        final View split1 = findViewById(R.id.split_v_1);
-        final View split2 = findViewById(R.id.split_v_2);
-        final TextView commentBtn = (TextView) findViewById(R.id.btn_comment);
-        final TextView shareBtn = (TextView) findViewById(R.id.btn_share);
+        final ImageButton commentBtn = (ImageButton) findViewById(R.id.btn_comments);
+        final ImageButton shareBtn = (ImageButton) findViewById(R.id.btn_share);
 
-        if (Constants.MODE_NIGHT == theme) {
-            splitBottom.setBackgroundColor(0xFF303030);
-            BottomLayout.setBackgroundColor(0xFF1C1C1C);
-
-            split1.setBackgroundColor(0xFF303030);
-            split2.setBackgroundColor(0xFF303030);
-            commentBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
-            commentBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_comment_night, 0, 0, 0);
-            final int resId = isFavorite ? R.drawable.ic_favorite_full : R.drawable.ic_favorite_night;
-            favoriteBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
-            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0);
-            shareBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
-            shareBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_share_night, 0, 0, 0);
+        if (Constants.MODE_NIGHT == mTheme) {
+            commentBtn.setImageResource(R.drawable.ic_comment_night);
+            shareBtn.setImageResource(R.drawable.ic_share_night);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite_night);
         } else {
-            splitBottom.setBackgroundColor(0xFFEEEEEE);
-            BottomLayout.setBackgroundColor(0xFFF9F9F9);
-
-            split1.setBackgroundColor(0xFFEEEEEE);
-            split2.setBackgroundColor(0xFFEEEEEE);
-            commentBtn.setTextColor(getResources().getColor(R.color.gray_2));
-            commentBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_comment, 0, 0, 0);
-            favoriteBtn.setTextColor(getResources().getColor(R.color.gray_2));
-            final int resId = isFavorite ? R.drawable.ic_favorite_full : R.drawable.ic_favorite;
-            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(resId, 0, 0, 0);
-            shareBtn.setTextColor(getResources().getColor(R.color.gray_2));
-            shareBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_social_share, 0, 0, 0);
+            commentBtn.setImageResource(R.drawable.ic_comment);
+            shareBtn.setImageResource(R.drawable.ic_social_share);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                mIsSwiped = false;
+                if (null == mVelocityTracker) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    mVelocityTracker.clear();
+                }
+                mVelocityTracker.addMovement(ev);
+
+                final float x = ev.getX();
+                final float y = ev.getY();
+                mInitialMotionX = x;
+                mInitialMotionY = y;
+                break;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                final float x = ev.getX();
+                final float y = ev.getY();
+                final float diffX = x - mInitialMotionX;
+                final float adx = Math.abs(diffX);
+                final float ady = Math.abs(y - mInitialMotionY);
+
+                if (null != mVelocityTracker && !mIsSwiped) {
+                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+
+                    final float xVelocity = Math.abs(mVelocityTracker.getXVelocity());
+                    if (adx > ady && adx > mSwipeMinDistance && xVelocity > mSwipeThresholdVelocity) {
+                        mIsSwiped = true;
+                        if (diffX > 0) {
+                            finish();
+                        } else {
+                            startCommentActivity();
+                        }
+                        return true;
+                    }
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+            case MotionEvent.ACTION_UP: {
+                if (mIsSwiped) {
+                    mVelocityTracker.clear();
+                    return true;
+                } else {
+                    return super.dispatchTouchEvent(ev);
+                }
+            }
+        }
+
+        return super.dispatchTouchEvent(ev);
     }
 }

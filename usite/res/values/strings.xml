@@ -7,6 +7,8 @@
     <string name="slogan">分享&#160;•&#160;情怀&#160;•&#160;超越，不仅仅是娱乐&#160;!</string>
     <string name="app_audio">音频</string>
     <string name="app_text">文字</string>
+    <string name="app_market">集市</string>
+    <string name="app_bottle">漂流</string>
     <string name="app_latest">最新文章</string>
     <string name="app_miscell">杂粹</string>
     <string name="loading">载入中&#8230;</string>
@@ -90,4 +92,6 @@
 
     <string name="pub_time">%1$s&#160;&#160;%2$s</string>
     <string name="pub_reviews">%1$d人看过&#160;&#160;%2$d评论</string>
+    <string name="netop_network_error">网络无法访问，请您检查手机的网络设置。</string>
+
 </resources>

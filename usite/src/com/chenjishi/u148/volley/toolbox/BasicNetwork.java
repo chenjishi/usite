@@ -17,8 +17,26 @@
 package com.chenjishi.u148.volley.toolbox;
 
 import android.os.SystemClock;
-import com.chenjishi.u148.volley.*;
-import org.apache.http.*;
+
+import android.util.Log;
+import com.chenjishi.u148.volley.AuthFailureError;
+import com.chenjishi.u148.volley.Cache;
+import com.chenjishi.u148.volley.Network;
+import com.chenjishi.u148.volley.NetworkError;
+import com.chenjishi.u148.volley.NetworkResponse;
+import com.chenjishi.u148.volley.NoConnectionError;
+import com.chenjishi.u148.volley.Request;
+import com.chenjishi.u148.volley.RetryPolicy;
+import com.chenjishi.u148.volley.ServerError;
+import com.chenjishi.u148.volley.TimeoutError;
+import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.volley.VolleyLog;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.impl.cookie.DateUtils;
 
@@ -55,7 +73,7 @@ public class BasicNetwork implements Network {
 
     /**
      * @param httpStack HTTP stack to be used
-     * @param pool a buffer pool that improves GC performance in copy operations
+     * @param pool      a buffer pool that improves GC performance in copy operations
      */
     public BasicNetwork(HttpStack httpStack, ByteArrayPool pool) {
         mHttpStack = httpStack;
@@ -81,15 +99,24 @@ public class BasicNetwork implements Network {
                 // Handle cache validation.
                 if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                     return new NetworkResponse(HttpStatus.SC_NOT_MODIFIED,
-                            request.getCacheEntry().data, responseHeaders, true);
+                            request.getCacheEntry() == null ? null : request.getCacheEntry().data,
+                            responseHeaders, true);
                 }
 
-                responseContents = entityToBytes(httpResponse.getEntity());
+                // Some responses such as 204s do not have content.  We must check.
+                if (httpResponse.getEntity() != null) {
+                    responseContents = entityToBytes(httpResponse.getEntity());
+                } else {
+                    // Add 0 byte response as a way of honestly representing a
+                    // no-content request.
+                    responseContents = new byte[0];
+                }
+
                 // if the request is slow, log it.
                 long requestLifetime = SystemClock.elapsedRealtime() - requestStart;
                 logSlowRequests(requestLifetime, request, responseContents, statusLine);
 
-                if (statusCode != HttpStatus.SC_OK && statusCode != HttpStatus.SC_NO_CONTENT) {
+                if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
                 }
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false);
@@ -105,7 +132,14 @@ public class BasicNetwork implements Network {
                 if (httpResponse != null) {
                     statusCode = httpResponse.getStatusLine().getStatusCode();
                 } else {
-                    throw new NoConnectionError(e);
+                    /** added by chenjishi, when no network, we show the cache */
+                    Cache.Entry entry = request.getCacheEntry();
+                    if (null != entry && null != entry.data) {
+                        byte[] contents = entry.data;
+                        return new NetworkResponse(200, contents, new HashMap<String, String>(), false);
+                    } else {
+                        throw new NoConnectionError(e);
+                    }
                 }
                 VolleyLog.e("Unexpected response code %d for %s", statusCode, request.getUrl());
                 if (responseContents != null) {
@@ -130,22 +164,24 @@ public class BasicNetwork implements Network {
      * Logs requests that took over SLOW_REQUEST_THRESHOLD_MS to complete.
      */
     private void logSlowRequests(long requestLifetime, Request<?> request,
-            byte[] responseContents, StatusLine statusLine) {
+                                 byte[] responseContents, StatusLine statusLine) {
         if (DEBUG || requestLifetime > SLOW_REQUEST_THRESHOLD_MS) {
             VolleyLog.d("HTTP response for request=<%s> [lifetime=%d], [size=%s], " +
-                    "[rc=%d], [retryCount=%s]", request, requestLifetime,
+                            "[rc=%d], [retryCount=%s]", request, requestLifetime,
                     responseContents != null ? responseContents.length : "null",
-                    statusLine.getStatusCode(), request.getRetryPolicy().getCurrentRetryCount());
+                    statusLine.getStatusCode(), request.getRetryPolicy().getCurrentRetryCount()
+            );
         }
     }
 
     /**
      * Attempts to prepare the request for a retry. If there are no more attempts remaining in the
      * request's retry policy, a timeout exception is thrown.
+     *
      * @param request The request to use.
      */
     private static void attemptRetryOnException(String logPrefix, Request<?> request,
-            VolleyError exception) throws VolleyError {
+                                                VolleyError exception) throws VolleyError {
         RetryPolicy retryPolicy = request.getRetryPolicy();
         int oldTimeout = request.getTimeoutMs();
 
@@ -180,7 +216,9 @@ public class BasicNetwork implements Network {
         VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", what, (now - start), url);
     }
 
-    /** Reads the contents of HttpEntity into a byte[]. */
+    /**
+     * Reads the contents of HttpEntity into a byte[].
+     */
     private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
         PoolingByteArrayOutputStream bytes =
                 new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());

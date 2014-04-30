@@ -17,6 +17,7 @@ import com.chenjishi.u148.model.FeedItem;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.IntentUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.DeletePopupWindow;
 import com.chenjishi.u148.volley.Response;
@@ -148,7 +149,6 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         HttpUtils.post(url, params, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.i("test", "response " + response);
             }
         }, this);
     }
@@ -163,9 +163,9 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         feed.create_time = favoriteItem.create_time;
         feed.category = favoriteItem.category;
 
-        Intent intent = new Intent(this, DetailActivity.class);
+        Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra("feed", feed);
-        startActivity(intent);
+        IntentUtils.startPreviewActivity(this, intent);
     }
 
     class FavoriteAdapter extends BaseAdapter {

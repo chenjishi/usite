@@ -16,17 +16,21 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-
+import android.util.Log;
 import com.chenjishi.u148.volley.AuthFailureError;
 import com.chenjishi.u148.volley.Request;
-import org.apache.http.*;
+import com.chenjishi.u148.volley.Request.Method;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * An {@link HttpStack} based on {@link java.net.HttpURLConnection}.
@@ -173,7 +180,7 @@ public class HurlStack implements HttpStack {
     /* package */ static void setConnectionParametersForRequest(HttpURLConnection connection,
             Request<?> request) throws IOException, AuthFailureError {
         switch (request.getMethod()) {
-            case Request.Method.DEPRECATED_GET_OR_POST:
+            case Method.DEPRECATED_GET_OR_POST:
                 // This is the deprecated way that needs to be handled for backwards compatibility.
                 // If the request's post body is null, then the assumption is that the request is
                 // GET.  Otherwise, it is assumed that the request is a POST.
@@ -191,21 +198,34 @@ public class HurlStack implements HttpStack {
                     out.close();
                 }
                 break;
-            case Request.Method.GET:
+            case Method.GET:
                 // Not necessary to set the request method because connection defaults to GET but
                 // being explicit here.
                 connection.setRequestMethod("GET");
                 break;
-            case Request.Method.DELETE:
+            case Method.DELETE:
                 connection.setRequestMethod("DELETE");
                 break;
-            case Request.Method.POST:
+            case Method.POST:
                 connection.setRequestMethod("POST");
                 addBodyIfExists(connection, request);
                 break;
-            case Request.Method.PUT:
+            case Method.PUT:
                 connection.setRequestMethod("PUT");
                 addBodyIfExists(connection, request);
+                break;
+            case Method.HEAD:
+                connection.setRequestMethod("HEAD");
+                break;
+            case Method.OPTIONS:
+                connection.setRequestMethod("OPTIONS");
+                break;
+            case Method.TRACE:
+                connection.setRequestMethod("TRACE");
+                break;
+            case Method.PATCH:
+                addBodyIfExists(connection, request);
+                connection.setRequestMethod("PATCH");
                 break;
             default:
                 throw new IllegalStateException("Unknown method type.");

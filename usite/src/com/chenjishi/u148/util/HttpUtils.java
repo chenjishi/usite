@@ -63,6 +63,8 @@ public class HttpUtils {
                                       Response.Listener<Article> listener,
                                       Response.ErrorListener errorListener) {
         RequestQueue queue = getRequestQueue();
+        ArticleRequest request = new ArticleRequest(url, listener, errorListener);
+        request.setShouldCache(true);
         queue.add(new ArticleRequest(url, listener, errorListener));
     }
 

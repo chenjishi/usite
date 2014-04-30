@@ -1,13 +1,23 @@
 package com.chenjishi.u148.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
+import android.widget.RemoteViews;
+import com.chenjishi.u148.R;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -27,6 +37,8 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+    private static final int NOTIFY_ID = 10010;
+    private static final String NOTIFICATION_CLOSE_ACTION = "NotificationCloseBroadCast";
     private MediaPlayer mPlayer;
     private String mUrl;
 
@@ -40,6 +52,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private final MusicBinder mBinder = new MusicBinder();
 
+    private RemoteViews mRemoteViews;
+    private NotificationManager mNotificationMgr;
+    private NotificationCloseBroadCast mBroadCast;
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -49,10 +65,16 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onCreate() {
         super.onCreate();
 
+        mRemoteViews = new RemoteViews(getPackageName(), R.layout.notification_view);
+        mNotificationMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
         mPlayer = new MediaPlayer();
         mPlayer.setOnPreparedListener(this);
         mPlayer.setOnCompletionListener(this);
         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        mBroadCast = new NotificationCloseBroadCast();
+        registerReceiver(mBroadCast, new IntentFilter(NOTIFICATION_CLOSE_ACTION));
     }
 
     @Override
@@ -98,7 +120,11 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public boolean isPlaying() {
-        return mPlayer.isPlaying();
+        if (null != mPlayer) {
+            return mPlayer.isPlaying();
+        } else {
+            return false;
+        }
     }
 
     public void registerListener(MusicPlayListener listener) {
@@ -118,16 +144,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
             mPlayer.release();
             mPlayer = null;
         }
+        unregisterReceiver(mBroadCast);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         mListener.onMusicCompleted();
+        stopForeground(true);
+        stopSelf();
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         if (null != mListener) mListener.onMusicPrepared(songName, artistName);
+        showNotify();
     }
 
     public class MusicBinder extends Binder {
@@ -246,5 +276,37 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }
 
         return loc_9;
+    }
+
+    void showNotify() {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+
+        mRemoteViews.setTextViewText(R.id.tv_name, songName);
+        mRemoteViews.setTextViewText(R.id.tv_artist, artistName);
+        mRemoteViews.setImageViewResource(R.id.iv_album, R.drawable.ic_notify_album);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                0,
+                new Intent(NOTIFICATION_CLOSE_ACTION),
+                0);
+        mRemoteViews.setOnClickPendingIntent(R.id.btn_close, pendingIntent);
+
+        mBuilder.setSmallIcon(R.drawable.ic_notify)
+                .setContent(mRemoteViews)
+                .setWhen(System.currentTimeMillis());
+
+        final Notification notification = mBuilder.build();
+        mNotificationMgr.notify(NOTIFY_ID, notification);
+        startForeground(NOTIFY_ID, notification);
+    }
+
+    private class NotificationCloseBroadCast extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mNotificationMgr.cancelAll();
+            stopForeground(true);
+            stopSelf();
+        }
     }
 }

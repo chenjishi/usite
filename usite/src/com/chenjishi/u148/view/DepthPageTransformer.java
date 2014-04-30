@@ -13,7 +13,6 @@ public class DepthPageTransformer implements ViewPager.PageTransformer {
     @Override
     public void transformPage(View view, float v) {
         int pageWidth = view.getWidth();
-
         if (v < -1) {
             view.setAlpha(0);
         } else if (v <= 0) {
@@ -23,13 +22,12 @@ public class DepthPageTransformer implements ViewPager.PageTransformer {
             view.setScaleY(1);
         } else if (v <= 1) {
             view.setAlpha(1 - v);
-
             view.setTranslationX(pageWidth * -v);
 
-            float scaleFactor = MIN_SCALE
-                    + (1 - MIN_SCALE) * (1 - Math.abs(v));
-            view.setScaleX(scaleFactor);
-            view.setScaleY(scaleFactor);
+//                float scaleFactor = MIN_SCALE
+//                        + (1 - MIN_SCALE) * (1 - Math.abs(v));
+//                view.setScaleX(scaleFactor);
+//                view.setScaleY(scaleFactor);
         } else {
             view.setAlpha(0);
         }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,7 @@ import java.util.regex.Pattern;
  * Time: 下午12:35
  * To change this template use File | Settings | File Templates.
  */
-public class CommentActivity extends BaseActivity implements Response.Listener<Comment>,
+public class CommentActivity extends SlidingActivity implements Response.Listener<Comment>,
         Response.ErrorListener, View.OnClickListener, LoginDialog.OnLoginListener, AdapterView.OnItemClickListener {
     private String articleId;
     private String mContent;
@@ -60,6 +61,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("test", "### Comment onCreate ");
         setContentView(R.layout.comment);
         setTitle(R.string.comment);
 
@@ -283,7 +285,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
                 holder.replyLayout = (LinearLayout) convertView.findViewById(R.id.reply_layout);
                 holder.splitLine = convertView.findViewById(R.id.split_v);
 
-                if (Constants.MODE_NIGHT == theme) {
+                if (Constants.MODE_NIGHT == mTheme) {
                     holder.userText.setTextColor(getResources().getColor(R.color.action_bar_bg_night));
                     holder.contentText.setTextColor(getResources().getColor(R.color.text_color_weak));
                     holder.replyText.setTextColor(getResources().getColor(R.color.text_color_summary));
@@ -309,7 +311,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
             imageLoader.get(user.icon, ImageLoader.getImageListener(holder.avatarImage,
                     R.drawable.user_default, R.drawable.user_default));
 
-            String formattedString = user.nickname + " " + (Constants.MODE_NIGHT == theme
+            String formattedString = user.nickname + " " + (Constants.MODE_NIGHT == mTheme
                     ? "<font color='#666666'>" : "<font color='#999999'>") + format.format(date) + "</font>";
             holder.userText.setText(Html.fromHtml(formattedString));
 
@@ -356,7 +358,7 @@ public class CommentActivity extends BaseActivity implements Response.Listener<C
         final RelativeLayout replyView = (RelativeLayout) findViewById(R.id.comment_layout);
         final View split = findViewById(R.id.split_h_comment);
 
-        if (Constants.MODE_NIGHT == theme) {
+        if (Constants.MODE_NIGHT == mTheme) {
             sendBtn.setBackgroundResource(R.drawable.btn_gray_night);
             sendBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
             replyView.setBackgroundColor(0xFF1C1C1C);

@@ -15,23 +15,25 @@
 
     <integer-array name="category_id">
         <item>0</item>
-        <item>2</item>
         <item>3</item>
-        <item>5</item>
         <item>6</item>
         <item>7</item>
-        <item>4</item>
+        <item>9</item>
         <item>8</item>
+        <item>4</item>
+        <item>2</item>
+        <item>5</item>
     </integer-array>
 
     <string-array name="category_name">
         <item>首页</item>
-        <item>影像</item>
         <item>图画</item>
-        <item>音频</item>
         <item>文字</item>
         <item>杂粹</item>
-        <item>游戏</item>
+        <item>集市</item>
         <item>漂流</item>
+        <item>游戏</item>
+        <item>影像</item>
+        <item>音频</item>
     </string-array>
 </resources>

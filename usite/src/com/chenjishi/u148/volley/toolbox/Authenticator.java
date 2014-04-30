@@ -16,7 +16,6 @@
 
 package com.chenjishi.u148.volley.toolbox;
 
-
 import com.chenjishi.u148.volley.AuthFailureError;
 
 /**

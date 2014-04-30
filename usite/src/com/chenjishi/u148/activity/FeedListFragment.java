@@ -113,16 +113,16 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FeedItem feed = feedList.get(position - 1);
+        final int index = position - 1;
+        final FeedItem feed = feedList.get(index);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("author", feed.usr.nickname);
         params.put("title", feed.title);
         FlurryAgent.logEvent("read_article", params);
 
-        Intent intent = new Intent(getActivity(), DetailActivity.class);
-        intent.putExtra("feed", feed);
-
+        final Intent intent = new Intent(getActivity(), DetailActivity.class);
+        intent.putExtra(Constants.KEY_FEED, feed);
         startActivity(intent);
     }
 
@@ -133,11 +133,6 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
     }
 
     private void loadData() {
-        if (!Utils.didNetworkConnected(getActivity())) {
-            Utils.setErrorView(emptyView, getString(R.string.net_error));
-            return;
-        }
-
         final String url = String.format(REQUEST_URL, category, currentPage);
         HttpUtils.get(url, Feed.class, this, this);
     }
@@ -162,7 +157,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
 
     @Override
     public void onResponse(Feed response) {
-        if (null != response && response.code == 0) {
+        if (null != response && null != response.data.data && response.data.data.size() > 0) {
             if (1 == currentPage) feedList.clear();
             dataLoaded = true;
 

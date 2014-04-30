@@ -19,11 +19,11 @@ import android.widget.RelativeLayout;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.sina.RequestListener;
-import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.ShareUtils;
 import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.view.DepthPageTransformer;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.VolleyError;
@@ -101,6 +101,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
         mToolBar = (RelativeLayout) findViewById(R.id.tool_bar);
         mViewPager = (ViewPager) findViewById(R.id.pager_photo);
+        mViewPager.setPageTransformer(true, new DepthPageTransformer());
         mViewPager.setAdapter(new PhotoPagerAdapter(this));
         mViewPager.setOnPageChangeListener(this);
     }

@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -18,7 +17,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
@@ -26,11 +24,14 @@ import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.service.DownloadAPKThread;
-import com.chenjishi.u148.service.MusicService;
-import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.view.*;
+import com.chenjishi.u148.util.IntentUtils;
+import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.view.AboutDialog;
+import com.chenjishi.u148.view.ExitDialog;
+import com.chenjishi.u148.view.FireworksView;
+import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
@@ -67,9 +68,8 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
-        /**
-         * we want to show Ad in detail page, so make it false
-         */
+        getWindow().setBackgroundDrawable(null);
+        /** we want to show Ad in detail page, so make it false */
         PrefsUtil.setAdShowed(false);
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
@@ -90,15 +90,6 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         mViewPager.setAdapter(mTabAdapter);
         mViewPager.setOnPageChangeListener(this);
         mViewPager.setCurrentItem(0);
-
-        /**
-         * apply depth page animation
-         */
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//            mViewPager.setPageTransformer(true, new DepthPageTransformer());
-//            mViewPager.setPageMargin((int) (density * 8.f));
-//            mViewPager.setPageMarginDrawable(R.drawable.shadow_right);
-//        }
 
         mRadioGroup.check(R.id.radio_home);
         applyTheme(PrefsUtil.getThemeMode());
@@ -312,7 +303,6 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     @Override
     protected void onStop() {
         super.onStop();
-        stopService(new Intent(this, MusicService.class));
         FlurryAgent.onEndSession(this);
     }
 
@@ -389,14 +379,13 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     }
 
     private void initMenuList() {
-        ListView listView = (ListView) findViewById(R.id.list_menu);
+        final ListView listView = (ListView) findViewById(R.id.list_menu);
         mMenuAdapter = new MenuAdapter();
         listView.setAdapter(mMenuAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                drawerLayout.closeDrawer(Gravity.LEFT);
                 Intent intent;
                 switch (position) {
                     case 0:
@@ -405,22 +394,27 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                             startActivityForResult(intent, REQUEST_CODE_REGISTER);
                         } else {
                             Utils.showToast("您已经登录");
+                            drawerLayout.closeDrawer(Gravity.LEFT);
                         }
                         break;
                     case 1:
-                        startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                        intent = new Intent(HomeActivity.this, SettingsActivity.class);
+                        IntentUtils.startPreviewActivity(HomeActivity.this, intent);
                         break;
                     case 2:
                         PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
                                 ? Constants.MODE_NIGHT : Constants.MODE_DAY);
                         mMenuAdapter.notifyDataSetChanged();
                         applyTheme(PrefsUtil.getThemeMode());
+                        drawerLayout.closeDrawer(Gravity.LEFT);
                         break;
                     case 3:
                         if (Utils.isLogin()) {
-                            startActivity(new Intent(HomeActivity.this, FavoriteActivity.class));
+                            intent = new Intent(HomeActivity.this, FavoriteActivity.class);
+                            IntentUtils.startPreviewActivity(HomeActivity.this, intent);
                         } else {
                             new LoginDialog(HomeActivity.this, HomeActivity.this).show();
+                            drawerLayout.closeDrawer(Gravity.LEFT);
                         }
                         break;
                     case 4:
@@ -431,6 +425,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                         } catch (ActivityNotFoundException e) {
                             Utils.showToast(R.string.google_play_unavailable);
                         }
+                        drawerLayout.closeDrawer(Gravity.LEFT);
                         break;
                     case 5:
                         AboutDialog dialog = new AboutDialog(HomeActivity.this, new AboutDialog.AboutDialogListener() {
@@ -440,6 +435,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                             }
                         });
                         dialog.show();
+                        drawerLayout.closeDrawer(Gravity.LEFT);
                         break;
                 }
             }

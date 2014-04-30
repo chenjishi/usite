@@ -6,5 +6,11 @@
     <item type="id" name="ptr_text" />
     <item type="id" name="ptr_progress" />
     <item type="id" name="empty_view" />
+    <item type="id" name="iv_album" />
+    <item type="id" name="tv_name" />
+    <item type="id" name="tv_artist" />
+    <item type="id" name="btn_close" />
+    <item type="id" name="webview" />
+    <item type="id" name="viewPager" />
     <item name="content_layout" type="id"/>
 </resources>

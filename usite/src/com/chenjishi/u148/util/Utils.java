@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -134,6 +135,8 @@ public class Utils {
     }
 
     public static String readFromAssets(Context context, String name) {
+        if (null == context) return null;
+
         InputStream is;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
