@@ -17,3 +17,7 @@ local.properties
 
 # Mac folder file
 *.DS_Store
+
+# IntelliJ IDEA files
+*.iml
+.idea/
