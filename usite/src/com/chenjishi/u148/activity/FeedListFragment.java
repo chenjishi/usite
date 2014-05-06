@@ -165,18 +165,20 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
             final int size = feedItems.size();
             if (size > 0) {
                 for (FeedItem item : feedItems) {
-                    /**
-                     * filter the Game category
-                     */
+//                     filter the Game category
                     if (item.category != 4) {
                         feedList.add(item);
                     }
                 }
                 listAdapter.notifyDataSetChanged();
 
-                footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                footView.setVisibility(View.VISIBLE);
+                if (size < 12) {
+                    footView.setVisibility(View.GONE);
+                } else {
+                    footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
+                    footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
+                    footView.setVisibility(View.VISIBLE);
+                }
             } else {
                 footView.setVisibility(View.GONE);
             }

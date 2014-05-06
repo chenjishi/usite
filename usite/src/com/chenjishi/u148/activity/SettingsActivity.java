@@ -19,7 +19,7 @@ import com.chenjishi.u148.util.Utils;
 /**
  * Created by chenjishi on 14-1-11.
  */
-public class SettingsActivity extends BaseActivity {
+public class SettingsActivity extends SlidingActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

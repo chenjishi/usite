@@ -3,7 +3,6 @@ package com.chenjishi.u148.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,7 @@ import java.util.*;
 /**
  * Created by chenjishi on 14-2-22.
  */
-public class FavoriteActivity extends BaseActivity implements Response.Listener<Favorite>,
+public class FavoriteActivity extends SlidingActivity implements Response.Listener<Favorite>,
         Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener {
     private FavoriteAdapter mAdapter;
@@ -163,7 +162,7 @@ public class FavoriteActivity extends BaseActivity implements Response.Listener<
         feed.create_time = favoriteItem.create_time;
         feed.category = favoriteItem.category;
 
-        Intent intent = new Intent(this, DetailsActivity.class);
+        Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("feed", feed);
         IntentUtils.startPreviewActivity(this, intent);
     }

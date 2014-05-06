@@ -47,6 +47,27 @@
             android:onClick="onFavoriteClicked"
             android:src="@drawable/ic_favorite"
             style="@style/ActionBarButtonStyle"/>
+    <RelativeLayout
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/home_up_bg"
+            android:clickable="true"
+            android:onClick="onCommentClicked"
+            android:layout_toLeftOf="@id/btn_favorite">
+        <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_comment"
+                android:layout_centerInParent="true"/>
+        <TextView
+                android:id="@+id/comment_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                android:textColor="#CCC"
+                android:textSize="12sp"/>
+    </RelativeLayout>
 
     <ImageButton
             android:id="@+id/btn_comments"

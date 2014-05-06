@@ -152,7 +152,7 @@ public class FireworksView extends SurfaceView implements SurfaceHolder.Callback
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             int xPos = canvas.getWidth() / 2;
             int yPos = (int) ((canvas.getHeight() / 2) - (textPaint.descent() + textPaint.ascent()) / 2);
-            canvas.drawText("This Is For Ivy Yuan", xPos, yPos, textPaint);
+            canvas.drawText("This Is For YEHAN ZHOU", xPos, yPos, textPaint);
             canvas.drawText("The Girl I Met Who Brights My Life", xPos, yPos + 46.0f, textPaint);
             fireworks.doDraw(canvas, paint);
         }
