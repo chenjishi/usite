@@ -380,7 +380,7 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
     protected void applyTheme() {
         super.applyTheme();
 
-        ImageButton commentBtn = (ImageButton) findViewById(R.id.btn_comments);
+        ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
         ImageButton shareBtn = (ImageButton) findViewById(R.id.btn_share);
 
         if (Constants.MODE_NIGHT == mTheme) {

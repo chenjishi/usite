@@ -28,6 +28,7 @@ import com.chenjishi.u148.service.MusicService;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.ArticleWebView;
+import com.chenjishi.u148.view.CircleView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -384,9 +385,9 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         if (commentNum > 0) {
             if (commentNum >= 100) commentNum = 99;
 
-            TextView textView = (TextView) findViewById(R.id.comment_count);
-            textView.setText(String.valueOf(commentNum));
-            textView.setVisibility(View.VISIBLE);
+            CircleView view = (CircleView) findViewById(R.id.comment_count);
+            view.setNumber(commentNum);
+            view.setVisibility(View.VISIBLE);
         }
     }
 
@@ -525,20 +526,20 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     protected void applyTheme() {
         super.applyTheme();
 
-        ImageButton commentBtn = (ImageButton) findViewById(R.id.btn_comments);
+        ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
         ImageButton shareBtn = (ImageButton) findViewById(R.id.btn_share);
-        TextView textView = (TextView) findViewById(R.id.comment_count);
+//        TextView textView = (TextView) findViewById(R.id.comment_count);
 
         if (Constants.MODE_NIGHT == mTheme) {
             commentBtn.setImageResource(R.drawable.ic_comment_night);
             shareBtn.setImageResource(R.drawable.ic_share_night);
             favoriteBtn.setImageResource(R.drawable.ic_favorite_night);
-            textView.setTextColor(0xFF666666);
+//            textView.setTextColor(0xFF666666);
         } else {
             commentBtn.setImageResource(R.drawable.ic_comment);
             shareBtn.setImageResource(R.drawable.ic_social_share);
             favoriteBtn.setImageResource(R.drawable.ic_favorite);
-            textView.setTextColor(0xFF999999);
+//            textView.setTextColor(0xFFFFFFFF);
         }
     }
 

@@ -55,26 +55,20 @@
             android:onClick="onCommentClicked"
             android:layout_toLeftOf="@id/btn_favorite">
         <ImageView
+                android:id="@+id/ic_comment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_comment"
                 android:layout_centerInParent="true"/>
-        <TextView
+        <com.chenjishi.u148.view.CircleView
                 android:id="@+id/comment_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
                 android:visibility="gone"
-                android:textColor="#CCC"
-                android:textSize="12sp"/>
+                android:layout_toRightOf="@id/ic_comment"
+                android:layout_marginLeft="-2dp"
+                android:layout_marginTop="8dp"/>
     </RelativeLayout>
-
-    <ImageButton
-            android:id="@+id/btn_comments"
-            android:layout_toLeftOf="@id/btn_favorite"
-            android:onClick="onCommentClicked"
-            android:src="@drawable/ic_comment"
-            style="@style/ActionBarButtonStyle"/>
     <View
             android:id="@+id/split_h"
             android:layout_width="match_parent"
