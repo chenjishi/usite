@@ -15,8 +15,6 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.*;
-import com.baidu.mobads.InterstitialAd;
-import com.baidu.mobads.InterstitialAdListener;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.DBHelper;
 import com.chenjishi.u148.base.PrefsUtil;
@@ -52,8 +50,8 @@ import java.util.Map;
  * Time: 下午7:56
  * To change this template use File | Settings | File Templates.
  */
-public class DetailActivity extends BaseActivity implements MusicPlayListener, ShareDialog.OnShareListener,
-        Response.Listener<Article>, Response.ErrorListener, InterstitialAdListener, JSCallback {
+public class DetailActivity extends BaseActivity implements MusicPlayListener, Response.Listener<Article>,
+        Response.ErrorListener, JSCallback {
     private final static String REQUEST_URL = "http://www.u148.net/json/article/%1$s";
     private ArticleWebView mWebView;
     private View mEmptyView;
@@ -127,40 +125,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
         mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
         HttpUtils.ArticleRequest(String.format(REQUEST_URL, mFeed.id), this, this);
-    }
-
-    private InterstitialAd interstitialAd;
-
-    private void initAd() {
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setListener(this);
-        interstitialAd.loadAd();
-    }
-
-    @Override
-    public void onAdReady() {
-        interstitialAd.showAd(this);
-        PrefsUtil.setAdShowed(true);
-    }
-
-    @Override
-    public void onAdPresent() {
-
-    }
-
-    @Override
-    public void onAdClick(InterstitialAd interstitialAd) {
-
-    }
-
-    @Override
-    public void onAdDismissed() {
-
-    }
-
-    @Override
-    public void onAdFailed(String s) {
-
     }
 
     private View mMusicPanel;
@@ -314,9 +278,24 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
     }
 
     public void onShareClicked(View v) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(Constants.PARAM_TITLE, mFeed.title);
+        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
+
         if (null == mShareDialog) {
-            mShareDialog = new ShareDialog(this, this);
+            mShareDialog = new ShareDialog(this);
         }
+
+        final ArrayList<String> imageList = mArticle.imageList;
+        String imageUrl;
+        if (null != imageList && imageList.size() > 0) {
+            imageUrl = imageList.get(0);
+        } else {
+            imageUrl = mFeed.pic_mid;
+        }
+
+        mShareDialog.setShareFeed(mFeed);
+        mShareDialog.setShareImageUrl(imageUrl);
         mShareDialog.show();
     }
 
@@ -400,9 +379,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
                 if (offset > 0) {
                     mWebView.scrollTo(0, offset);
                 }
-
-                boolean adShowed = PrefsUtil.isAdShowed();
-                if (!adShowed) initAd();
             }
         }
 
@@ -412,77 +388,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 //            result.cancel();
             return true;
         }
-    }
-
-    @Override
-    public void onShare(final int type) {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(Constants.PARAM_TITLE, mFeed.title);
-        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
-
-        final String title = String.format(getString(R.string.share_title), mFeed.title);
-        final String desc = mFeed.summary;
-
-        if (type == ShareUtils.SHARE_WEIBO) {
-            shareToWeibo(title);
-            mShareDialog.dismiss();
-            return;
-        }
-
-        final ArrayList<String> imageList = mArticle.imageList;
-        final String url = "http://www.u148.net/article/" + mFeed.id + ".html";
-        if (null != imageList && imageList.size() > 0) {
-            ImageRequest request = new ImageRequest(imageList.get(0), new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-
-                    if (null != response) {
-                        ShareUtils.shareWebpage(DetailActivity.this, url, type, title, desc, response);
-                    } else {
-                        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-                        ShareUtils.shareWebpage(DetailActivity.this, url, type, title, desc, icon);
-                    }
-                }
-            }, 0, 0, null, null);
-
-            HttpUtils.getRequestQueue().add(request);
-        } else {
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-            ShareUtils.shareWebpage(this, url, type, title, desc, icon);
-        }
-
-        mShareDialog.dismiss();
-    }
-
-    private void shareToWeibo(String title) {
-        final ArrayList<String> imageList = mArticle.imageList;
-        String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
-        ShareUtils.shareToWeibo(this, title + "http://www.u148.net/article/" + mFeed.id + ".html", null, imageUrl, new RequestListener() {
-            @Override
-            public void onComplete(String response) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showToast(R.string.share_success);
-                    }
-                });
-            }
-
-            @Override
-            public void onComplete4binary(ByteArrayOutputStream responseOS) {
-
-            }
-
-            @Override
-            public void onIOException(IOException e) {
-
-            }
-
-            @Override
-            public void onError(WeiboException e) {
-
-            }
-        });
     }
 
     @Override
@@ -502,9 +407,6 @@ public class DetailActivity extends BaseActivity implements MusicPlayListener, S
 
     @Override
     public void onVideoClicked(String url) {
-        Intent intent = new Intent(this, VideoActivity.class);
-        intent.putExtra("url", url);
-        startActivity(intent);
     }
 
     @Override

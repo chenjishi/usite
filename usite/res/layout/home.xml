@@ -49,43 +49,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-            <RadioGroup
-                    android:id="@+id/radio_group"
+            <com.chenjishi.u148.view.TabPageIndicator
+                    android:id="@+id/pager_tab_strip"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:background="#E5E5E5"
-                    android:weightSum="6"
-                    android:orientation="horizontal">
-                <RadioButton
-                        android:id="@+id/radio_home"
-                        style="@style/TabStyle"
-                        android:text="@string/app_home"/>
-                <RadioButton
-                        android:id="@+id/radio_video"
-                        style="@style/TabStyle"
-                        android:text="@string/app_image"/>
-                <RadioButton
-                        android:id="@+id/radio_image"
-                        style="@style/TabStyle"
-                        android:text="@string/app_text"/>
-                <RadioButton
-                        android:id="@+id/radio_audio"
-                        style="@style/TabStyle"
-                        android:text="@string/app_miscell"/>
-                <RadioButton
-                        android:id="@+id/radio_text"
-                        style="@style/TabStyle"
-                        android:text="@string/app_market"/>
-                <RadioButton
-                        android:id="@+id/radio_miscell"
-                        style="@style/TabStyle"
-                        android:text="@string/app_bottle"/>
-            </RadioGroup>
+                    android:background="#E5E5E5"/>
             <android.support.v4.view.ViewPager
                     android:id="@+id/view_pager"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"/>
+                    android:layout_height="match_parent"/>
         </LinearLayout>
         <ListView
                 android:id="@+id/list_menu"

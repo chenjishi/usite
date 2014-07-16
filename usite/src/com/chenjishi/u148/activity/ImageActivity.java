@@ -17,11 +17,8 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.FileCache;
-import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.ShareUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.DepthPageTransformer;
 import com.chenjishi.u148.view.ShareDialog;
@@ -29,12 +26,8 @@ import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
-import com.sina.weibo.sdk.exception.WeiboException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -46,7 +39,7 @@ import java.util.HashMap;
  * To change this template use File | Settings | File Templates.
  */
 public class ImageActivity extends BaseActivity implements GestureDetector.OnGestureListener,
-        ViewPager.OnPageChangeListener, ShareDialog.OnShareListener {
+        ViewPager.OnPageChangeListener {
     private ArrayList<String> mImageList = new ArrayList<String>();
 
     private int mCurrentIndex;
@@ -124,92 +117,16 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
     public void onShareButtonClicked(View v) {
         if (null == shareDialog) {
-            shareDialog = new ShareDialog(this, this);
+            shareDialog = new ShareDialog(this);
         }
 
+        String imageUrl = mImageList.get(mCurrentIndex);
+        shareDialog.setShareImageUrl(imageUrl);
         shareDialog.show();
-    }
-
-    @Override
-    public void onShare(final int type) {
-        final String url = null != mImageList ? mImageList.get(mCurrentIndex) : "";
 
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put(Constants.PARAM_URL, url);
+        params.put(Constants.PARAM_URL, imageUrl);
         FlurryAgent.logEvent(Constants.EVENT_IMAGE_SHARE, params);
-
-        if (!TextUtils.isEmpty(url)) {
-            imageLoader.get(url, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    Bitmap bitmap = response.getBitmap();
-                    if (null != bitmap) {
-                        String path = FileCache.getTempCacheDir();
-                        if (!new File(path).exists()) FileCache.mkDirs(path);
-
-                        try {
-                            File imageFile = new File(path, "temp");
-                            imageFile.createNewFile();
-
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
-
-                            byte[] bitmapdata = bos.toByteArray();
-                            FileOutputStream fos = new FileOutputStream(imageFile);
-                            fos.write(bitmapdata);
-                        } catch (IOException e) {
-                        }
-
-                        if (type == ShareUtils.SHARE_WEIBO) {
-                            String filePath = path + "temp";
-                            shareToWeibo(filePath);
-                        } else {
-                            ShareUtils.shareImage(ImageActivity.this, url, type, bitmap);
-                        }
-                    } else {
-                        Utils.showToast(R.string.share_error);
-                    }
-                }
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Utils.showToast(R.string.share_error);
-                }
-            });
-        } else {
-            Utils.showToast(R.string.share_error);
-        }
-
-        shareDialog.dismiss();
-    }
-
-    private void shareToWeibo(String imagePath) {
-        ShareUtils.shareToWeibo(this, getString(R.string.share_image_tip), imagePath, null, new RequestListener() {
-            @Override
-            public void onComplete(String response) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showToast(R.string.share_success);
-                    }
-                });
-            }
-
-            @Override
-            public void onComplete4binary(ByteArrayOutputStream responseOS) {
-
-            }
-
-            @Override
-            public void onIOException(IOException e) {
-
-            }
-
-            @Override
-            public void onError(WeiboException e) {
-
-            }
-        });
     }
 
     @Override

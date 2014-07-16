@@ -9,16 +9,6 @@
     <style name="SlideAppTheme" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowAnimationStyle">@style/ActivityTransitions</item>
     </style>
-    <style name="TabStyle">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:background">@drawable/abs__tab_indicator_ab_holo</item>
-        <item name="android:button">@null</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/tab_text_color</item>
-    </style>
     <style name="FullHeightDialog" parent="@android:style/Theme.Dialog">
         <item name="android:backgroundDimAmount">0.6</item>
         <item name="android:windowBackground">@android:color/transparent</item>

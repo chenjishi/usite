@@ -2,10 +2,7 @@ package com.chenjishi.u148.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.*;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -57,10 +54,15 @@ public class SettingsActivity extends SlidingActivity {
     }
 
     public void onFeedbackClicked(View v) {
+        StringBuilder builder = new StringBuilder(getString(R.string.feedback2));
+        builder.append("(版本:").append(Utils.getVersionName(this));
+        builder.append(" 机型:").append(Utils.getDeviceName());
+        builder.append(" 系统:").append(Build.VERSION.RELEASE);
+        builder.append(")");
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"chenjishi313@gmail.com", "webmaster@u148.net"});
-        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.feedback2));
+        intent.putExtra(Intent.EXTRA_SUBJECT, builder.toString());
 
         startActivity(Intent.createChooser(intent, getString(R.string.email_choose)));
     }

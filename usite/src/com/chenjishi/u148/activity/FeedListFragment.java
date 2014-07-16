@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,6 @@ import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.FeedItem;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshBase;
-import com.chenjishi.u148.pulltorefresh.PullToRefreshListView;
 import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -38,12 +37,12 @@ import java.util.Map;
  * Time: 下午3:20
  * To change this template use File | Settings | File Templates.
  */
-public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRefreshListener, AdapterView.OnItemClickListener,
-        Response.Listener<Feed>, Response.ErrorListener, View.OnClickListener {
+public class FeedListFragment extends Fragment implements AdapterView.OnItemClickListener,
+        Response.Listener<Feed>, Response.ErrorListener, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
     private static final String REQUEST_URL = "http://www.u148.net/json/%1$d/%2$d";
     private static final int MSG_LOAD_OK = 1;
 
-    private PullToRefreshListView pullToRefresh;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private FeedListAdapter listAdapter;
     private View footView;
     private View emptyView;
@@ -68,8 +67,8 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_item, container, false);
 
-        pullToRefresh = (PullToRefreshListView) view.findViewById(R.id.lv_feeds);
-        ListView listView = pullToRefresh.getRefreshableView();
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        ListView listView = (ListView) view.findViewById(R.id.list_feed);
 
         emptyView = view.findViewById(R.id.empty_view);
         footView = inflater.inflate(R.layout.load_more, null);
@@ -96,7 +95,9 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(this);
 
-        pullToRefresh.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorScheme(R.color.color1, R.color.color2,
+                R.color.color3, R.color.color4);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
         return view;
     }
@@ -113,8 +114,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final int index = position - 1;
-        final FeedItem feed = feedList.get(index);
+        final FeedItem feed = feedList.get(position);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("author", feed.usr.nickname);
@@ -127,7 +127,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
     }
 
     @Override
-    public void onRefresh(PullToRefreshBase refreshView) {
+    public void onRefresh() {
         currentPage = 1;
         loadData();
     }
@@ -141,6 +141,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (!dataLoaded) {
+            swipeRefreshLayout.setRefreshing(true);
             footView.setVisibility(View.GONE);
             loadData();
         }
@@ -152,7 +153,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
         Utils.setErrorView(emptyView, getString(R.string.net_error));
 
         footView.setVisibility(View.GONE);
-        pullToRefresh.onRefreshComplete();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
             Utils.setErrorView(emptyView, getString(R.string.parse_error));
             footView.setVisibility(View.GONE);
         }
-        pullToRefresh.onRefreshComplete();
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     protected void loadCacheData() {
@@ -230,7 +231,7 @@ public class FeedListFragment extends Fragment implements PullToRefreshBase.OnRe
             }
 
             footView.setVisibility(View.GONE);
-            pullToRefresh.onRefreshComplete();
+            swipeRefreshLayout.setRefreshing(false);
         }
     };
 

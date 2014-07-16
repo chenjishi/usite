@@ -1,45 +1,37 @@
 package com.chenjishi.u148.activity;
 
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.app.DownloadManager;
+import android.content.*;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.text.TextUtils;
 import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.model.UpdateInfo;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.service.DownloadAPKThread;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.IntentUtils;
 import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.view.AboutDialog;
-import com.chenjishi.u148.view.ExitDialog;
-import com.chenjishi.u148.view.FireworksView;
-import com.chenjishi.u148.view.LoginDialog;
+import com.chenjishi.u148.view.*;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,21 +40,47 @@ import java.io.File;
  * Time: 下午4:05
  * To change this template use File | Settings | File Templates.
  */
-public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheckedChangeListener,
-        ViewPager.OnPageChangeListener, DrawerLayout.DrawerListener, LoginDialog.OnLoginListener,
-        Response.Listener<String>, Response.ErrorListener {
+public class HomeActivity extends FragmentActivity implements DrawerLayout.DrawerListener,
+        LoginDialog.OnLoginListener {
     public static final int REQUEST_CODE_REGISTER = 101;
     public static final int RESULT_CODE_REGISTER = 102;
-    private ViewPager mViewPager;
-    private RadioGroup mRadioGroup;
     private TabsAdapter mTabAdapter;
     private MenuAdapter mMenuAdapter;
+    private TabPageIndicator mTabIndicator;
 
     private DrawerLayout drawerLayout;
     private TextView mDrawerIcon;
 
     private int maxIconIndent;
     private float density;
+
+    private long mDownloadId;
+    private boolean mDownloadReceiverRegistered = false;
+
+    private BroadcastReceiver mDownloadCompleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
+            if (id != mDownloadId) return;
+
+            DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(id);
+            Cursor cursor = downloadManager.query(query);
+
+            if (!cursor.moveToFirst()) return;
+
+            int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            if (DownloadManager.STATUS_SUCCESSFUL != cursor.getInt(statusIndex)) {
+                return;
+            }
+
+            int uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+            String apkUriString = cursor.getString(uriIndex);
+
+            installApk(apkUriString);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,26 +90,26 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         /** we want to show Ad in detail page, so make it false */
         PrefsUtil.setAdShowed(false);
 
-        mViewPager = (ViewPager) findViewById(R.id.view_pager);
-        mRadioGroup = (RadioGroup) findViewById(R.id.radio_group);
-        mRadioGroup.setOnCheckedChangeListener(this);
+        //maximum 8dp for the indent of drawer icon
+        density = getResources().getDisplayMetrics().density;
+        maxIconIndent = (int) (density * 8.0f);
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        mTabIndicator = (TabPageIndicator) findViewById(R.id.pager_tab_strip);
 
         mDrawerIcon = (TextView) findViewById(R.id.ic_drawer);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         drawerLayout.setDrawerListener(this);
 
-        //maximum 8dp for the indent of drawer icon
-        density = getResources().getDisplayMetrics().density;
-        maxIconIndent = (int) (density * 8.0f);
-
         initMenuList();
 
         mTabAdapter = new TabsAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mTabAdapter);
-        mViewPager.setOnPageChangeListener(this);
-        mViewPager.setCurrentItem(0);
+        viewPager.setAdapter(mTabAdapter);
+        viewPager.setCurrentItem(0);
 
-        mRadioGroup.check(R.id.radio_home);
+        mTabIndicator.setViewPager(viewPager);
+
+
         applyTheme(PrefsUtil.getThemeMode());
 
         ImageButton button = (ImageButton) findViewById(R.id.btn_avatar);
@@ -115,51 +133,64 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         if (!Utils.isWifiConnected(this)) return;
 
         long lastCheckTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_CHECK_UPDATE_TIME, -1L);
-        if (lastCheckTime == -1 || System.currentTimeMillis() >= lastCheckTime) {
-            HttpUtils.get("http://www.u148.net/json/version", this, this);
-            PrefsUtil.saveLongPreference(PrefsUtil.KEY_CHECK_UPDATE_TIME, System.currentTimeMillis() + 24 * 60 * 60 * 1000L);
+        long currentTime = System.currentTimeMillis();
+        if (lastCheckTime == -1 || currentTime >= lastCheckTime) {
+            HttpUtils.get("http://www.u148.net/json/version", UpdateInfo.class, new Response.Listener<UpdateInfo>() {
+                @Override
+                public void onResponse(UpdateInfo response) {
+                    if (null == response || null == response.data) return;
+
+                    UpdateInfo.UpdateData data = response.data;
+
+                    int currentCode = Utils.getVersionCode(HomeActivity.this);
+                    if (data.versionCode > currentCode) {
+                        downloadApk(data.url);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+
+            PrefsUtil.saveLongPreference(PrefsUtil.KEY_CHECK_UPDATE_TIME, currentTime + 24 * 60 * 60 * 1000L);
         }
     }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
-
-    }
-
-    @Override
-    public void onResponse(String response) {
-        if (TextUtils.isEmpty(response)) return;
-
-        try {
-            JSONObject jObj = new JSONObject(response);
-            final JSONObject dataObj = jObj.getJSONObject("data");
-
-            final int versionCode = dataObj.optInt("versionCode", -1);
-            final int currentCode = Utils.getVersionCode(HomeActivity.this);
-
-            if (versionCode > currentCode) {
-                downloadApk(dataObj);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void downloadApk(final JSONObject dataObj) {
+    private void downloadApk(final String url) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(getString(R.string.new_version_tip))
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        final String apkUrl = dataObj.optString("url", "");
-                        final String path = FileCache.getTempCacheDir();
-                        if (!new File(path).exists()) FileCache.mkDirs(path);
-
-                        new DownloadAPKThread(apkUrl, FileCache.getTempCacheDir(), "u148.apk").start();
+                        startDownload(url);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
         builder.show();
+    }
+
+    private void startDownload(String url) {
+        IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        registerReceiver(mDownloadCompleteReceiver, intentFilter);
+        mDownloadReceiverRegistered = true;
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
+                .setTitle(getString(R.string.app_name))
+                .setDescription(getString(R.string.updating_app))
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "u148.apk");
+        mDownloadId = downloadManager.enqueue(request);
+    }
+
+    private void installApk(String uri) {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setDataAndType(Uri.parse(uri), "application/vnd.android.package-archive");
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
     }
 
     private void setUserIcon() {
@@ -234,67 +265,6 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     }
 
     @Override
-    public void onPageScrolled(int i, float v, int i2) {
-    }
-
-    @Override
-    public void onPageSelected(int i) {
-        int id = -1;
-        switch (i) {
-            case 0:
-                id = R.id.radio_home;
-                break;
-            case 1:
-                id = R.id.radio_video;
-                break;
-            case 2:
-                id = R.id.radio_image;
-                break;
-            case 3:
-                id = R.id.radio_audio;
-                break;
-            case 4:
-                id = R.id.radio_text;
-                break;
-            case 5:
-                id = R.id.radio_miscell;
-                break;
-        }
-
-        mRadioGroup.check(id);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int i) {
-    }
-
-    @Override
-    public void onCheckedChanged(RadioGroup group, int checkedId) {
-        int index = 1;
-        switch (checkedId) {
-            case R.id.radio_home:
-                index = 0;
-                break;
-            case R.id.radio_video:
-                index = 1;
-                break;
-            case R.id.radio_image:
-                index = 2;
-                break;
-            case R.id.radio_audio:
-                index = 3;
-                break;
-            case R.id.radio_text:
-                index = 4;
-                break;
-            case R.id.radio_miscell:
-                index = 5;
-                break;
-        }
-        mViewPager.setCurrentItem(index);
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, "YYHS4STVXPMH6Y9GJ8WD");
@@ -332,11 +302,14 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        if (mDownloadReceiverRegistered) {
+            unregisterReceiver(mDownloadCompleteReceiver);
+        }
         if (null != mPlayer) {
             mPlayer.release();
             mPlayer = null;
         }
+        super.onDestroy();
     }
 
     public void onDrawerButtonClicked(View v) {
@@ -494,7 +467,7 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
                     final UserInfo userInfo = PrefsUtil.getUser();
                     final ImageLoader imageLoader = HttpUtils.getImageLoader();
                     layoutParams = new RelativeLayout.LayoutParams((int) (32. * density),
-                            (int)(32. * density));
+                            (int) (32. * density));
                     layoutParams.setMargins(0, 0, (int) (8. * density), 0);
 
                     holder.titleText.setText(userInfo.nickname);
@@ -528,11 +501,19 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
-        private int[] categoryIds;
+        private int[] categoryIds = {0, 3, 6, 7, 5, 8, 9};
+        private int[] mTitleIds = {
+                R.string.app_home,
+                R.string.app_image,
+                R.string.app_text,
+                R.string.app_miscell,
+                R.string.app_audio,
+                R.string.app_bottle,
+                R.string.app_market
+        };
 
         public TabsAdapter(FragmentManager fm) {
             super(fm);
-            categoryIds = getResources().getIntArray(R.array.category_id);
         }
 
         @Override
@@ -543,13 +524,18 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         }
 
         @Override
+        public CharSequence getPageTitle(int position) {
+            return getResources().getString(mTitleIds[position]);
+        }
+
+        @Override
         public int getItemPosition(Object object) {
             return POSITION_NONE;
         }
 
         @Override
         public int getCount() {
-            return 6;
+            return categoryIds.length;
         }
     }
 
@@ -557,13 +543,8 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
         final FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
         final RelativeLayout titleView = (RelativeLayout) findViewById(R.id.title_bar);
         final TextView leftBtn = (TextView) findViewById(R.id.ic_drawer);
-        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radio_group);
-        final RadioButton rb1 = (RadioButton) findViewById(R.id.radio_home);
-        final RadioButton rb2 = (RadioButton) findViewById(R.id.radio_video);
-        final RadioButton rb3 = (RadioButton) findViewById(R.id.radio_image);
-        final RadioButton rb4 = (RadioButton) findViewById(R.id.radio_audio);
-        final RadioButton rb5 = (RadioButton) findViewById(R.id.radio_text);
-        final RadioButton rb6 = (RadioButton) findViewById(R.id.radio_miscell);
+
+        mTabIndicator.setTheme(theme);
         final View split = findViewById(R.id.split_h);
 
         if (Constants.MODE_NIGHT == theme) {
@@ -571,42 +552,12 @@ public class HomeActivity extends FragmentActivity implements RadioGroup.OnCheck
             titleView.setBackgroundColor(getResources().getColor(R.color.action_bar_bg_night));
             leftBtn.setTextColor(0xFFBBBBBB);
             leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer_night, 0, 0, 0);
-            radioGroup.setBackgroundColor(0xFF1C1C1C);
-            rb1.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-            rb2.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-            rb3.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-            rb4.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-            rb5.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-            rb6.setTextColor(getResources().getColorStateList(R.color.tab_text_color_night));
-
-            rb1.setBackgroundResource(R.drawable.tab_indicator_night);
-            rb2.setBackgroundResource(R.drawable.tab_indicator_night);
-            rb3.setBackgroundResource(R.drawable.tab_indicator_night);
-            rb4.setBackgroundResource(R.drawable.tab_indicator_night);
-            rb5.setBackgroundResource(R.drawable.tab_indicator_night);
-            rb6.setBackgroundResource(R.drawable.tab_indicator_night);
-
             split.setBackgroundColor(getResources().getColor(R.color.text_color_regular));
         } else {
             rootView.setBackgroundColor(getResources().getColor(R.color.background));
             titleView.setBackgroundColor(0xFFff9900);
             leftBtn.setTextColor(0xFFFFFFFF);
             leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer, 0, 0, 0);
-            radioGroup.setBackgroundColor(0xFFE5E5E5);
-            rb1.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-            rb2.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-            rb3.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-            rb4.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-            rb5.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-            rb6.setTextColor(getResources().getColorStateList(R.color.tab_text_color));
-
-            rb1.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-            rb2.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-            rb3.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-            rb4.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-            rb5.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-            rb6.setBackgroundResource(R.drawable.abs__tab_indicator_ab_holo);
-
             split.setBackgroundColor(0xFFE6E6E6);
         }
 

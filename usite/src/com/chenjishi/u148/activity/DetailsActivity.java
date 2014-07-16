@@ -46,7 +46,7 @@ import static com.chenjishi.u148.util.Constants.*;
  * Created by chenjishi on 14-4-25.
  */
 public class DetailsActivity extends BaseActivity implements OnMusicClickListener, ViewPager.OnPageChangeListener,
-        ShareDialog.OnShareListener, MusicPlayListener {
+        MusicPlayListener {
     private final static String TAG = "DetailActivity";
 
     private ArrayList<FeedItem> mFeedList;
@@ -127,83 +127,16 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
     private ShareDialog mShareDialog;
 
     public void onShareClicked(View v) {
-        if (null == mShareDialog) {
-            mShareDialog = new ShareDialog(this, this);
-        }
-        mShareDialog.show();
-    }
-
-    @Override
-    public void onShare(final int type) {
         final FeedItem feed = mFeedList.get(mCurrentIndex);
 
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(Constants.PARAM_TITLE, feed.title);
-        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
-
-        final String title = String.format(getString(R.string.share_title), feed.title);
-        final String desc = feed.summary;
-        final String url = "http://www.u148.net/article/" + feed.id + ".html";
-
-        if (type == ShareUtils.SHARE_WEIBO) {
-            shareToWeibo(title + url);
-            mShareDialog.dismiss();
-            return;
+        if (null == mShareDialog) {
+            mShareDialog = new ShareDialog(this);
         }
 
-        final ArrayList<String> imageList = getImageList();
-        if (null != imageList && imageList.size() > 0) {
-            ImageRequest request = new ImageRequest(imageList.get(0), new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-
-                    if (null != response) {
-                        ShareUtils.shareWebpage(DetailsActivity.this, url, type, title, desc, response);
-                    } else {
-                        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-                        ShareUtils.shareWebpage(DetailsActivity.this, url, type, title, desc, icon);
-                    }
-                }
-            }, 0, 0, null, null);
-
-            HttpUtils.getRequestQueue().add(request);
-        } else {
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
-            ShareUtils.shareWebpage(this, url, type, title, desc, icon);
-        }
-
-        mShareDialog.dismiss();
-    }
-
-    private void shareToWeibo(String content) {
-        final ArrayList<String> imageList = getImageList();
-        String imageUrl = null != imageList && imageList.size() > 0 ? imageList.get(0) : "no picture";
-        ShareUtils.shareToWeibo(this, content, null, imageUrl, new RequestListener() {
-            @Override
-            public void onComplete(String response) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showToast(R.string.share_success);
-                    }
-                });
-            }
-
-            @Override
-            public void onComplete4binary(ByteArrayOutputStream responseOS) {
-
-            }
-
-            @Override
-            public void onIOException(IOException e) {
-
-            }
-
-            @Override
-            public void onError(WeiboException e) {
-
-            }
-        });
+        mShareDialog.setShareFeed(feed);
+        mShareDialog.setShareImageUrl(feed.pic_mid);
+        mShareDialog.show();
+        mShareDialog.show();
     }
 
     private ArrayList<String> getImageList() {

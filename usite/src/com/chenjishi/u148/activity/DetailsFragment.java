@@ -152,9 +152,6 @@ public class DetailsFragment extends Fragment implements Response.Listener<Artic
 
     @Override
     public void onVideoClicked(String url) {
-        Intent intent = new Intent(getActivity(), VideoActivity.class);
-        intent.putExtra("url", url);
-        startActivity(intent);
     }
 
     @Override

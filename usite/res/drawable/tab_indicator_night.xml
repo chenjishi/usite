@@ -18,5 +18,6 @@
     <item android:state_checked="true" android:drawable="@drawable/tab_indicator_focus_night"/>
     <item android:state_focused="true" android:drawable="@drawable/tab_indicator_focus_night"/>
     <item android:state_pressed="true" android:drawable="@drawable/tab_indicator_focus_night"/>
+    <item android:state_selected="true" android:drawable="@drawable/tab_indicator_focus_night"/>
     <item android:drawable="@color/transparent"/>
 </selector>

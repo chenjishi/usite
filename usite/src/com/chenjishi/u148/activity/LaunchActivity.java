@@ -7,21 +7,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
-import android.widget.LinearLayout;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.DBHelper;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.HttpUtils;
 
 import java.io.File;
 
 public class LaunchActivity extends Activity {
     private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
-    private static final long TWO_HOURS = 2 * 60 * 60 * 1000;
     private Context context;
 
     @Override

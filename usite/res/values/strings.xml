@@ -69,7 +69,7 @@
     <string name="share_file_error">分享失败, 文件不存在</string>
     <string name="share_error">分享失败</string>
     <string name="share_success">分享成功</string>
-    <string name="share_image_tip">我在有意思吧分享了一张图片http://www.appchina.com/app/com.chenjishi.u148/</string>
+    <string name="share_image_tip">我在有意思吧分享了一张图片</string>
     <string name="video_share">有意思吧视频分享-%1$s%2$s</string>
 
     <string name="comment">评论</string>
@@ -94,4 +94,7 @@
     <string name="pub_reviews">%1$d人看过&#160;&#160;%2$d评论</string>
     <string name="netop_network_error">网络无法访问，请您检查手机的网络设置。</string>
 
+    <string name="weibo_share_success">新浪微博分享成功!</string>
+    <string name="weibo_share_fail">新浪微博分享失败!</string>
+    <string name="share_image_fail">图片分享失败，请稍后再试</string>
 </resources>
