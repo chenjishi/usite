@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import com.chenjishi.u148.model.QQAuthToken;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
@@ -16,6 +17,7 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefsUtil {
+
     private static Application mContext = App.getInstance();
 
     private static final long VERSION_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
@@ -48,6 +50,9 @@ public class PrefsUtil {
 
     private static final String KEY_AD_SHOWED = "key_ad_showed";
     private static final String KEY_THEME_MODE = "theme_mode";
+    private static final String QQ_ACCESS_TOKEN = "qq_access_token";
+    private static final String QQ_OPEN_ID = "qq_open_id";
+    private static final String QQ_EXPIRES_IN = "qq_expires_in";
 
     public static int getThemeMode() {
         return getIntPreference(KEY_THEME_MODE, Constants.MODE_DAY);
@@ -104,6 +109,25 @@ public class PrefsUtil {
         }
     }
 
+    public static QQAuthToken getQQAuthToken() {
+        SharedPreferences preferences = getSharedPrefs();
+        QQAuthToken authToken = new QQAuthToken();
+
+        authToken.access_token = preferences.getString(QQ_ACCESS_TOKEN, "");
+        authToken.open_id = preferences.getString(QQ_OPEN_ID, "");
+        authToken.expires_in = preferences.getLong(QQ_EXPIRES_IN, -1L);
+
+        return authToken;
+    }
+
+    public static void putQQAuthToken(QQAuthToken token) {
+        SharedPreferences.Editor editor = getSharedPrefs().edit();
+        editor.putString(QQ_ACCESS_TOKEN, token.access_token);
+        editor.putString(QQ_OPEN_ID, token.open_id);
+        editor.putLong(QQ_EXPIRES_IN, System.currentTimeMillis() + token.expires_in * 1000);
+        editor.commit();
+    }
+
     public static void setClearCacheTime(long t) {
         saveLongPreference(KEY_CACHE_CLEAR_TIME, t);
     }
@@ -126,6 +150,10 @@ public class PrefsUtil {
         token.setToken(prfs.getString(KEY_ACESS_TOKEN, ""));
         token.setExpiresTime(prfs.getLong(KEY_EXPIRE_IN, 0L));
         return token;
+    }
+
+    private static SharedPreferences getSharedPrefs() {
+        return App.getInstance().getSharedPreferences(CONFIG_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     private static int getIntPreference(String key, int defaultVal) {

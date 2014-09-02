@@ -22,6 +22,7 @@ import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.chenjishi.u148.volley.toolbox.NetworkImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,6 +34,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.chenjishi.u148.util.Constants.API_COMMENTS_GET;
+import static com.chenjishi.u148.util.Constants.API_COMMENT_POST;
 
 /**
  * Created with IntelliJ IDEA.
@@ -135,7 +139,7 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
     }
 
     private void loadData() {
-        final String url = String.format("http://www.u148.net/json/get_comment/%1$s/%2$d", articleId, currentPage);
+        final String url = String.format(API_COMMENTS_GET, articleId, currentPage);
         HttpUtils.get(url, Comment.class, this, this);
     }
 
@@ -165,7 +169,6 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
     private void sendComment(final String content, String id) {
         if (content.equals(mContent)) return;
 
-        final String url = "http://www.u148.net/json/comment";
         final UserInfo user = PrefsUtil.getUser();
         final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("评论提交中...");
@@ -179,7 +182,7 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
             params.put("review_id", id);
         }
 
-        HttpUtils.post(url, params, new Response.Listener<String>() {
+        HttpUtils.post(API_COMMENT_POST, params, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         pd.dismiss();
@@ -244,7 +247,8 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
     }
 
     private class CommentAdapter extends BaseAdapter {
-        LayoutInflater inflater;
+        private final ImageLoader mImageLoader = HttpUtils.getImageLoader();
+        private LayoutInflater inflater;
         Format format;
         Date date;
 
@@ -274,9 +278,9 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
             ViewHolder holder;
             if (null == convertView) {
                 convertView = inflater.inflate(R.layout.comment_item, parent, false);
-
                 holder = new ViewHolder();
-                holder.avatarImage = (ImageView) convertView.findViewById(R.id.avatar);
+
+                holder.iconView = (NetworkImageView) convertView.findViewById(R.id.avatar);
                 holder.userText = (TextView) convertView.findViewById(R.id.user_name);
                 holder.contentText = (TextView) convertView.findViewById(R.id.content);
                 holder.replyText = (TextView) convertView.findViewById(R.id.reply);
@@ -305,9 +309,8 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
             final UserInfo user = comment.usr;
             date.setTime(t);
 
-            ImageLoader imageLoader = HttpUtils.getImageLoader();
-            imageLoader.get(user.icon, ImageLoader.getImageListener(holder.avatarImage,
-                    R.drawable.user_default, R.drawable.user_default));
+            holder.iconView.setImageUrl(user.icon, mImageLoader);
+            holder.iconView.setDefaultImageResId(R.drawable.user_default);
 
             String formattedString = user.nickname + " " + (Constants.MODE_NIGHT == mTheme
                     ? "<font color='#666666'>" : "<font color='#999999'>") + format.format(date) + "</font>";
@@ -339,13 +342,13 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
         }
     }
 
-    static class ViewHolder {
-        ImageView avatarImage;
-        TextView userText;
-        TextView contentText;
-        TextView replyText;
-        LinearLayout replyLayout;
-        View splitLine;
+    private static class ViewHolder {
+        public NetworkImageView iconView;
+        private TextView userText;
+        private TextView contentText;
+        private TextView replyText;
+        private LinearLayout replyLayout;
+        private View splitLine;
     }
 
     @Override

@@ -4,8 +4,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
-import com.chenjishi.u148.model.FeedItem;
+import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.UserInfo;
 
 import java.util.ArrayList;
@@ -131,7 +132,38 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public void insert(FeedItem feed) {
+    public Feed getFavoriteById(String id) {
+        if (TextUtils.isEmpty(id)) return null;
+
+        Feed feed = null;
+        final String sql = "SELECT * FROM " + TB_NAME_FAVORITE + " WHERE " + COL_ID + " = " + id;
+        Cursor cursor = null;
+        try {
+            cursor = mDb.rawQuery(sql, null);
+            if (cursor.moveToNext()) {
+                feed = new Feed();
+                feed.id = cursor.getString(0);
+                feed.uid = cursor.getString(1);
+                feed.category = cursor.getInt(2);
+                feed.title = cursor.getString(3);
+                feed.summary = cursor.getString(4);
+                feed.pic_mid = cursor.getString(5);
+                feed.create_time = cursor.getLong(6);
+
+                UserInfo usr = new UserInfo();
+                usr.alias = cursor.getString(7);
+                usr.nickname = cursor.getString(8);
+                usr.icon = cursor.getString(9);
+                feed.usr = usr;
+            }
+        } finally {
+            if (null != cursor) cursor.close();
+        }
+
+        return feed;
+    }
+
+    public void insert(Feed feed) {
         if (null == feed) return;
 
         final UserInfo usr = feed.usr;
@@ -171,7 +203,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public ArrayList<FeedItem> loadAll() {
+    public ArrayList<Feed> loadAll() {
         final String sql = "SELECT " + COL_ID + ", " +
                 COL_UID + ", " +
                 COL_CATEGORY + ", " +
@@ -184,7 +216,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_USER_ICON + ", " +
                 COL_CONTENT + " FROM " +
                 TB_NAME_FAVORITE;
-        ArrayList<FeedItem> feedItems = null;
+        ArrayList<Feed> feedItems = null;
         Cursor c = null;
 
         try {
@@ -192,10 +224,10 @@ public class DBHelper extends SQLiteOpenHelper {
             final int count = c.getCount();
 
             if (count > 0) {
-                feedItems = new ArrayList<FeedItem>();
+                feedItems = new ArrayList<Feed>();
 
                 while (c.moveToNext()) {
-                    FeedItem feed = new FeedItem();
+                    Feed feed = new Feed();
                     feed.id = c.getString(0);
                     feed.uid = c.getString(1);
                     feed.category = c.getInt(2);

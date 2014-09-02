@@ -9,7 +9,7 @@
                 android:paddingTop="12dp"
                 android:paddingRight="8dp"
                 android:paddingBottom="12dp">
-    <ImageView
+    <com.chenjishi.u148.volley.toolbox.NetworkImageView
             android:id="@+id/feed_image"
             android:layout_width="70dp"
             android:layout_height="76dp"

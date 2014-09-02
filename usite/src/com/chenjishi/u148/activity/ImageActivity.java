@@ -121,7 +121,9 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
         }
 
         String imageUrl = mImageList.get(mCurrentIndex);
-        shareDialog.setShareImageUrl(imageUrl);
+        ArrayList<String> imageList = new ArrayList<String>();
+        imageList.add(imageUrl);
+        shareDialog.setImageList(imageList);
         shareDialog.show();
 
         HashMap<String, String> params = new HashMap<String, String>();

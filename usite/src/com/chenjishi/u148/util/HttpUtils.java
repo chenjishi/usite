@@ -5,6 +5,8 @@ import android.content.Context;
 import com.chenjishi.u148.model.Article;
 import com.chenjishi.u148.volley.*;
 import com.chenjishi.u148.volley.toolbox.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.Map;
 
@@ -100,5 +102,28 @@ public class HttpUtils {
         RequestQueue queue = getRequestQueue();
         GsonRequest<T> request = new GsonRequest<T>(url, clazz, listener, errorListener);
         queue.add(request);
+    }
+
+    public static String getCache(String url) {
+        RequestQueue queue = getRequestQueue();
+        Cache.Entry cache = queue.getCache().get(url);
+
+        if (null != cache) {
+            return new String(cache.data);
+        }
+
+        return null;
+    }
+
+    public static <T> T getCache(String url, Class<T> clazz) {
+        RequestQueue queue = getRequestQueue();
+        Cache.Entry cache = queue.getCache().get(url);
+
+        if (null != cache) {
+            Gson gson = new GsonBuilder().create();
+            return gson.fromJson(new String(cache.data), clazz);
+        }
+
+        return null;
     }
 }

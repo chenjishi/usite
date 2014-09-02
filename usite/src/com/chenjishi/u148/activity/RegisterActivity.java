@@ -3,7 +3,6 @@ package com.chenjishi.u148.activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import com.chenjishi.u148.R;
@@ -20,11 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.chenjishi.u148.util.Constants.API_REGISTER;
+
 /**
  * Created by chenjishi on 14-3-4.
  */
 public class RegisterActivity extends BaseActivity implements Response.Listener<String>, Response.ErrorListener {
-    private static final String REQUEST_URL = "http://www.u148.net/json/register";
     private EditText mEmailEdit;
     private EditText mPasswordEdit;
     private EditText mNickNameEdit;
@@ -50,7 +50,6 @@ public class RegisterActivity extends BaseActivity implements Response.Listener<
 
     @Override
     public void onResponse(String response) {
-        Log.i("test", "response " + response);
         if (!TextUtils.isEmpty(response)) {
             try {
                 JSONObject jObj = new JSONObject(response);
@@ -134,12 +133,13 @@ public class RegisterActivity extends BaseActivity implements Response.Listener<
         params.put("email", email);
         params.put("password", password);
         params.put("nickname", nickName);
+        params.put("client", "android");
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("正在注册...");
         mProgress.setCancelable(false);
         mProgress.show();
-        HttpUtils.post(REQUEST_URL, params, this, this);
+        HttpUtils.post(API_REGISTER, params, this, this);
     }
 
     boolean emailValid(String email) {

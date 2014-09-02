@@ -3,10 +3,7 @@ package com.chenjishi.u148.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
@@ -51,6 +48,12 @@ public class LaunchActivity extends Activity {
             File tempFile = new File(FileCache.getTempCacheDir());
             if (tempFile.exists()) {
                 FileUtils.delete(tempFile);
+            }
+
+            String upgradeApkPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/u148.apk";
+            File apkFile = new File(upgradeApkPath);
+            if (apkFile.exists()) {
+                FileUtils.delete(apkFile);
             }
 
             return true;

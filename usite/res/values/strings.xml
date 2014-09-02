@@ -57,7 +57,9 @@
 
     <string name="share_weibo">新浪微博</string>
     <string name="share_session">微信好友</string>
-    <string name="share_friend">微信朋友圈</string>
+    <string name="share_friend">朋友圈</string>
+    <string name="qqzone">QQ空间</string>
+    <string name="qq_friends">QQ好友</string>
     <string name="app_author">作者：CountryHouses</string>
     <string name="copyright">©2007 - 2019 Www.U148.Net</string>
     <string name="close_dialog">关闭窗口</string>

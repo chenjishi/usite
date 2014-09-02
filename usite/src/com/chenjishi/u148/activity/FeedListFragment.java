@@ -2,33 +2,33 @@ package com.chenjishi.u148.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.model.FeedItem;
-import com.chenjishi.u148.util.*;
+import com.chenjishi.u148.model.FeedDoc;
+import com.chenjishi.u148.util.Constants;
+import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.chenjishi.u148.volley.toolbox.NetworkImageView;
 import com.flurry.android.FlurryAgent;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.chenjishi.u148.util.Constants.API_FEED_LIST;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,18 +38,13 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedListFragment extends Fragment implements AdapterView.OnItemClickListener,
-        Response.Listener<Feed>, Response.ErrorListener, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
-    private static final String REQUEST_URL = "http://www.u148.net/json/%1$d/%2$d";
-    private static final int MSG_LOAD_OK = 1;
-
+        Response.Listener<FeedDoc>, Response.ErrorListener, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
     private SwipeRefreshLayout swipeRefreshLayout;
     private FeedListAdapter listAdapter;
     private View footView;
     private View emptyView;
 
-    private ArrayList<FeedItem> feedList = new ArrayList<FeedItem>();
-
-    protected int currentPage = 1;
+    protected int page = 1;
     private int category;
     private boolean dataLoaded;
 
@@ -107,34 +102,34 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         if (v.getId() == R.id.btn_load) {
             footView.findViewById(R.id.btn_load).setVisibility(View.GONE);
             footView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
-            currentPage++;
-            loadData();
+            page++;
+            request();
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final FeedItem feed = feedList.get(position);
+        final Feed feed = listAdapter.getItem(position);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("author", feed.usr.nickname);
         params.put("title", feed.title);
         FlurryAgent.logEvent("read_article", params);
 
-        final Intent intent = new Intent(getActivity(), DetailActivity.class);
+        final Intent intent = new Intent(getActivity(), DetailsActivity.class);
         intent.putExtra(Constants.KEY_FEED, feed);
         startActivity(intent);
     }
 
     @Override
     public void onRefresh() {
-        currentPage = 1;
-        loadData();
+        page = 1;
+        request();
     }
 
-    private void loadData() {
-        final String url = String.format(REQUEST_URL, category, currentPage);
-        HttpUtils.get(url, Feed.class, this, this);
+    private void request() {
+        String url = String.format(API_FEED_LIST, category, page);
+        HttpUtils.get(url, FeedDoc.class, this, this);
     }
 
     @Override
@@ -143,13 +138,12 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         if (!dataLoaded) {
             swipeRefreshLayout.setRefreshing(true);
             footView.setVisibility(View.GONE);
-            loadData();
+            request();
         }
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        loadCacheData();
         Utils.setErrorView(emptyView, getString(R.string.net_error));
 
         footView.setVisibility(View.GONE);
@@ -157,22 +151,17 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     }
 
     @Override
-    public void onResponse(Feed response) {
-        if (null != response && null != response.data.data && response.data.data.size() > 0) {
-            if (1 == currentPage) feedList.clear();
+    public void onResponse(FeedDoc response) {
+        if (null != response && null != response.data) {
+            if (1 == page) listAdapter.clearData();
+
             dataLoaded = true;
 
-            final ArrayList<FeedItem> feedItems = response.data.data;
-            final int size = feedItems.size();
-            if (size > 0) {
-                for (FeedItem item : feedItems) {
-//                     filter the Game category
-                    if (item.category != 4) {
-                        feedList.add(item);
-                    }
-                }
-                listAdapter.notifyDataSetChanged();
+            final List<Feed> feedList = response.data.data;
+            if (null != feedList && feedList.size() > 0) {
+                listAdapter.addData(feedList);
 
+                int size = feedList.size();
                 if (size < 12) {
                     footView.setVisibility(View.GONE);
                 } else {
@@ -183,89 +172,53 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
             } else {
                 footView.setVisibility(View.GONE);
             }
-
         } else {
             Utils.setErrorView(emptyView, getString(R.string.parse_error));
             footView.setVisibility(View.GONE);
         }
+
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    protected void loadCacheData() {
-        final String dir = FileCache.getDataCacheDir(getActivity());
-        final String url = String.format(REQUEST_URL, category, currentPage);
-        final String path = dir + StringUtil.getMD5Str(url);
-
-        File cacheFile = new File(path);
-        if (!cacheFile.exists()) return;
-
-        final String data = FileUtils.readFromFile(path);
-        if (TextUtils.isEmpty(data)) return;
-
-        new Thread() {
-            @Override
-            public void run() {
-                final Gson mGson = new GsonBuilder().create();
-                Feed feed = mGson.fromJson(data, Feed.class);
-                if (null == feed) return;
-
-                ArrayList<FeedItem> feedItems = feed.data.data;
-                if (null != feedItems && feedItems.size() > 0) {
-                    feedList.addAll(feedItems);
-                    mHandler.sendEmptyMessage(MSG_LOAD_OK);
-                }
-            }
-        }.start();
-    }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what != MSG_LOAD_OK) return;
-
-            if (feedList.size() > 0) {
-                dataLoaded = true;
-                listAdapter.notifyDataSetChanged();
-            } else {
-                //todo
-            }
-
-            footView.setVisibility(View.GONE);
-            swipeRefreshLayout.setRefreshing(false);
-        }
-    };
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mHandler.removeCallbacksAndMessages(null);
-    }
-
-    class FeedListAdapter extends BaseAdapter {
-        LayoutInflater inflater;
-        Map<String, String> categoryMap;
-        float density;
+    private static class FeedListAdapter extends BaseAdapter {
+        private List<Feed> mFeedList = new ArrayList<Feed>();
+        private LayoutInflater mInflater;
+        private Resources mResources;
+        private Map<String, String> mCategoryMap;
+        private float mDensity;
+        private final ImageLoader mImageLoader = HttpUtils.getImageLoader();
 
         public FeedListAdapter(Context context) {
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            categoryMap = new HashMap<String, String>();
-            density = getResources().getDisplayMetrics().density;
+            mResources = context.getResources();
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mCategoryMap = new HashMap<String, String>();
+            mDensity = mResources.getDisplayMetrics().density;
 
-            int[] ids = context.getResources().getIntArray(R.array.category_id);
-            String[] names = context.getResources().getStringArray(R.array.category_name);
+            int[] ids = mResources.getIntArray(R.array.category_id);
+            String[] names = mResources.getStringArray(R.array.category_name);
             for (int i = 0; i < ids.length; i++) {
-                categoryMap.put(String.valueOf(ids[i]), names[i]);
+                mCategoryMap.put(String.valueOf(ids[i]), names[i]);
             }
+        }
+
+        public void clearData() {
+            if (mFeedList.size() > 0) mFeedList.clear();
+            notifyDataSetChanged();
+        }
+
+        public void addData(List<Feed> dataList) {
+            mFeedList.addAll(dataList);
+            notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            return feedList.size();
+            return mFeedList.size();
         }
 
         @Override
-        public FeedItem getItem(int position) {
-            return feedList.get(position);
+        public Feed getItem(int position) {
+            return mFeedList.get(position);
         }
 
         @Override
@@ -278,11 +231,11 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
             ViewHolder holder;
 
             if (null == convertView) {
-                convertView = inflater.inflate(R.layout.feed_list_item, parent, false);
+                convertView = mInflater.inflate(R.layout.feed_list_item, parent, false);
                 holder = new ViewHolder();
 
                 holder.cellLayout = (RelativeLayout) convertView.findViewById(R.id.cell_layout);
-                holder.thumb = (ImageView) convertView.findViewById(R.id.feed_image);
+                holder.thumb = (NetworkImageView) convertView.findViewById(R.id.feed_image);
                 holder.category = (TextView) convertView.findViewById(R.id.feed_type);
                 holder.title = (TextView) convertView.findViewById(R.id.feed_title);
                 holder.viewsText = (TextView) convertView.findViewById(R.id.tv_views);
@@ -291,17 +244,17 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
                 final int theme = PrefsUtil.getThemeMode();
                 if (Constants.MODE_NIGHT == theme) {
-                    holder.category.setTextColor(getResources().getColor(R.color.action_bar_bg_night));
-                    holder.title.setTextColor(getResources().getColor(R.color.text_color_weak));
-                    holder.content.setTextColor(getResources().getColor(R.color.text_color_summary));
-                    holder.viewsText.setTextColor(getResources().getColor(R.color.text_color_summary));
-                    holder.commentText.setTextColor(getResources().getColor(R.color.text_color_summary));
+                    holder.category.setTextColor(mResources.getColor(R.color.action_bar_bg_night));
+                    holder.title.setTextColor(mResources.getColor(R.color.text_color_weak));
+                    holder.content.setTextColor(mResources.getColor(R.color.text_color_summary));
+                    holder.viewsText.setTextColor(mResources.getColor(R.color.text_color_summary));
+                    holder.commentText.setTextColor(mResources.getColor(R.color.text_color_summary));
                 } else {
-                    holder.category.setTextColor(getResources().getColor(R.color.action_bar_bg));
-                    holder.title.setTextColor(getResources().getColor(R.color.text_color_regular));
-                    holder.content.setTextColor(getResources().getColor(R.color.text_color_weak));
-                    holder.viewsText.setTextColor(getResources().getColor(R.color.text_color_weak));
-                    holder.commentText.setTextColor(getResources().getColor(R.color.text_color_weak));
+                    holder.category.setTextColor(mResources.getColor(R.color.action_bar_bg));
+                    holder.title.setTextColor(mResources.getColor(R.color.text_color_regular));
+                    holder.content.setTextColor(mResources.getColor(R.color.text_color_weak));
+                    holder.viewsText.setTextColor(mResources.getColor(R.color.text_color_weak));
+                    holder.commentText.setTextColor(mResources.getColor(R.color.text_color_weak));
                 }
 
                 convertView.setTag(holder);
@@ -313,36 +266,35 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
              * here we make the first cell's top padding larger
              */
             int paddingTop = 12;
-            int paddingLeft = (int) (8 * density);
-            int padingBottom = (int) (12 * density);
+            int paddingLeft = (int) (8 * mDensity);
+            int padingBottom = (int) (12 * mDensity);
             if (0 == position) {
                 paddingTop = 20;
             }
 
-            holder.cellLayout.setPadding(paddingLeft, (int) (paddingTop * density), paddingLeft, padingBottom);
+            holder.cellLayout.setPadding(paddingLeft, (int) (paddingTop * mDensity), paddingLeft, padingBottom);
 
-            final FeedItem feed = getItem(position);
+            final Feed feed = getItem(position);
 
-            holder.category.setText("[" + categoryMap.get(feed.category + "") + "]");
+            holder.thumb.setImageUrl(feed.pic_mid, mImageLoader);
+            holder.thumb.setDefaultImageResId(R.drawable.pictrue_bg);
+            holder.category.setText("[" + mCategoryMap.get(feed.category + "") + "]");
             holder.title.setText(feed.title);
-            holder.viewsText.setText(String.format(getString(R.string.views), feed.count_browse));
-            holder.commentText.setText(String.format(getString(R.string.comment_count), feed.count_review));
+            holder.viewsText.setText(String.format(mResources.getString(R.string.views), feed.count_browse));
+            holder.commentText.setText(String.format(mResources.getString(R.string.comment_count), feed.count_review));
             holder.content.setText(feed.summary);
-
-            HttpUtils.getImageLoader().get(feed.pic_mid, ImageLoader.getImageListener(holder.thumb,
-                    R.drawable.pictrue_bg, R.drawable.pictrue_bg));
 
             return convertView;
         }
     }
 
-    static class ViewHolder {
-        RelativeLayout cellLayout;
-        ImageView thumb;
-        TextView category;
-        TextView title;
-        TextView viewsText;
-        TextView commentText;
-        TextView content;
+    private static class ViewHolder {
+        public RelativeLayout cellLayout;
+        public NetworkImageView thumb;
+        public TextView category;
+        public TextView title;
+        public TextView viewsText;
+        public TextView commentText;
+        public TextView content;
     }
 }

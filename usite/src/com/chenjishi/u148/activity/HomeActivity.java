@@ -17,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
@@ -32,6 +33,8 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.flurry.android.FlurryAgent;
+
+import static com.chenjishi.u148.util.Constants.API_UPGRADE;
 
 /**
  * Created with IntelliJ IDEA.
@@ -135,7 +138,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         long lastCheckTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_CHECK_UPDATE_TIME, -1L);
         long currentTime = System.currentTimeMillis();
         if (lastCheckTime == -1 || currentTime >= lastCheckTime) {
-            HttpUtils.get("http://www.u148.net/json/version", UpdateInfo.class, new Response.Listener<UpdateInfo>() {
+            HttpUtils.get(API_UPGRADE, UpdateInfo.class, new Response.Listener<UpdateInfo>() {
                 @Override
                 public void onResponse(UpdateInfo response) {
                     if (null == response || null == response.data) return;

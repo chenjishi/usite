@@ -1,5 +1,6 @@
 package com.chenjishi.u148.view;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,7 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.model.FeedItem;
+import com.chenjishi.u148.model.Feed;
+import com.chenjishi.u148.model.QQAuthToken;
 import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.sina.StatusesAPI;
 import com.chenjishi.u148.util.FileUtils;
@@ -28,10 +30,18 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuth;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
 import com.sina.weibo.sdk.exception.WeiboException;
+import com.tencent.connect.share.QQShare;
+import com.tencent.connect.share.QzoneShare;
 import com.tencent.mm.sdk.openapi.*;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by chenjishi on 14-6-17.
@@ -42,6 +52,7 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
 
     private static final String WX_APP_ID = "wxf862baa09e0df157";
     private static final String WB_APP_ID = "1792649719";
+    private static final String QQ_APP_ID = "1101214227";
 
     private static final String ARTICLE_URL = "http://www.u148.net/article/%1$s.html";
     private static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";
@@ -52,13 +63,17 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
     private static final int SHARE_TO_SESSION = 100;
     private static final int SHARE_TO_FRIENDS = 101;
     private static final int SHARE_TO_WEIBO = 102;
+    private static final int SHARE_TO_QZONE = 103;
+    private static final int SHARE_TO_QQ = 104;
 
     private Context mContext;
 
     private IWXAPI mWXAPI;
-    private FeedItem mFeed;
+    private Feed mFeed;
 
-    private String mImageUrl;
+    private ArrayList<String> mImageList;
+
+    private Tencent mTencent;
 
     public ShareDialog(Context context) {
         super(context, R.style.FullHeightDialog);
@@ -70,17 +85,21 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
         mWXAPI = WXAPIFactory.createWXAPI(context, WX_APP_ID);
         mWXAPI.registerApp(WX_APP_ID);
 
+        mTencent = Tencent.createInstance(QQ_APP_ID, context.getApplicationContext());
+
         int paddingTop = Utils.dp2px(context, 12.f);
         LinearLayout container = new LinearLayout(context);
         container.setBackgroundColor(0xFFFFFFFF);
         container.setOrientation(LinearLayout.HORIZONTAL);
-        container.setWeightSum(3.f);
+        container.setWeightSum(5.f);
         container.setPadding(0, paddingTop, 0, paddingTop);
         container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        int[] iconIds = {R.drawable.ic_session, R.drawable.ic_friend, R.drawable.ic_weibo};
-        int[] nameIds = {R.string.share_session, R.string.share_friend, R.string.share_weibo};
+        int[] iconIds = {R.drawable.ic_session, R.drawable.ic_friend, R.drawable.ic_weibo,
+                R.drawable.ic_qqzone, R.drawable.ic_qq};
+        int[] nameIds = {R.string.share_session, R.string.share_friend, R.string.share_weibo,
+                R.string.qqzone, R.string.qq_friends};
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -112,16 +131,16 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
         getWindow().setAttributes(layoutParams);
     }
 
-    public void setShareFeed(FeedItem feed) {
+    public void setShareFeed(Feed feed) {
         mFeed = feed;
     }
 
-    public void setShareImageUrl(String imageUrl) {
-        mImageUrl = imageUrl;
+    public void setImageList(ArrayList<String> imageList) {
+        mImageList = imageList;
     }
 
     private void shareToWX(final int type) {
-        HttpUtils.getImageLoader().get(mImageUrl, new ImageLoader.ImageListener() {
+        HttpUtils.getImageLoader().get(mImageList.get(0), new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 Bitmap bitmap = response.getBitmap();
@@ -137,6 +156,99 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
             @Override
             public void onErrorResponse(VolleyError error) {
                 Utils.showToast(R.string.share_image_fail);
+            }
+        });
+    }
+
+    private void shareToQzone() {
+        QQAuthToken authToken = PrefsUtil.getQQAuthToken();
+
+        if (authToken.invalid()) {
+            mTencent.setOpenId(authToken.open_id);
+            long expireTime = (authToken.expires_in - System.currentTimeMillis()) / 1000;
+            mTencent.setAccessToken(authToken.access_token, String.valueOf(expireTime));
+            sendToQzone();
+        } else {
+            mTencent.login((Activity) mContext, "all", new IUiListener() {
+                @Override
+                public void onComplete(Object o) {
+                    String result = o.toString();
+                    if (!TextUtils.isEmpty(result)) {
+                        saveQQToken(result);
+                        sendToQzone();
+                    } else {
+                        Utils.showToast("QQ登陆失败，请稍后再试");
+                    }
+                }
+
+                @Override
+                public void onError(UiError uiError) {
+                }
+
+                @Override
+                public void onCancel() {
+                }
+            });
+        }
+    }
+
+    private void saveQQToken(String json) {
+        QQAuthToken authToken = new QQAuthToken();
+
+        try {
+            JSONObject jObj = new JSONObject(json);
+            authToken.open_id = jObj.optString("openid", "");
+            authToken.access_token = jObj.optString("access_token", "");
+            authToken.expires_in = jObj.optLong("expires_in", 0);
+
+            PrefsUtil.putQQAuthToken(authToken);
+        } catch (JSONException e) {
+        }
+    }
+
+    private void sendToQQFriends() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+        bundle.putString(QQShare.SHARE_TO_QQ_TITLE, mFeed.title);
+        bundle.putString(QQShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
+        bundle.putString(QQShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
+        bundle.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, mImageList.get(0));
+
+        mTencent.shareToQQ((Activity) mContext, bundle, new IUiListener() {
+            @Override
+            public void onComplete(Object o) {
+            }
+
+            @Override
+            public void onError(UiError uiError) {
+            }
+
+            @Override
+            public void onCancel() {
+            }
+        });
+
+    }
+
+    private void sendToQzone() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
+        bundle.putString(QzoneShare.SHARE_TO_QQ_TITLE, mFeed.title);
+        bundle.putString(QzoneShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
+        bundle.putString(QzoneShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
+        bundle.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, mImageList);
+
+        mTencent.shareToQzone((Activity) mContext, bundle, new IUiListener() {
+            @Override
+            public void onComplete(Object o) {
+            }
+
+            @Override
+            public void onError(UiError uiError) {
+            }
+
+            @Override
+            public void onCancel() {
             }
         });
     }
@@ -204,8 +316,9 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
     private void updateStatus(String content, Oauth2AccessToken token) {
         StatusesAPI api = new StatusesAPI(token);
 
-        if (!TextUtils.isEmpty(mImageUrl)) {
-            api.uploadUrlText(content, mImageUrl, null, null, null, this);
+        String imageUrl = mImageList.get(0);
+        if (!TextUtils.isEmpty(imageUrl)) {
+            api.uploadUrlText(content, imageUrl, null, null, null, this);
         } else {
             api.update(content, null, null, this);
         }
@@ -268,6 +381,12 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
                 break;
             case SHARE_TO_WEIBO:
                 shareToWB();
+                break;
+            case SHARE_TO_QZONE:
+                sendToQzone();
+                break;
+            case SHARE_TO_QQ:
+                sendToQQFriends();
                 break;
         }
 

@@ -12,7 +12,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Favorite;
 import com.chenjishi.u148.model.FavoriteItem;
-import com.chenjishi.u148.model.FeedItem;
+import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
@@ -23,7 +23,12 @@ import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+
+import static com.chenjishi.u148.util.Constants.API_DELETE_FAVORITE;
+import static com.chenjishi.u148.util.Constants.API_FAVORITE_GET;
 
 /**
  * Created by chenjishi on 14-2-22.
@@ -75,10 +80,8 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
     }
 
     void loadData() {
-        final String url = "http://www.u148.net/json/get_favourite/0/%1$d?token=%2$s";
         final UserInfo user = PrefsUtil.getUser();
-
-        HttpUtils.get(String.format(url, currentPage, user.token), Favorite.class, this, this);
+        HttpUtils.get(String.format(API_FAVORITE_GET, currentPage, user.token), Favorite.class, this, this);
     }
 
     @Override
@@ -101,6 +104,7 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
                     footView.setVisibility(View.VISIBLE);
                 }
             } else {
+                Utils.setErrorView(emptyView, "您暂时还没有收藏任何文章哦~");
                 footView.setVisibility(View.GONE);
             }
         } else {
@@ -139,13 +143,10 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
         return true;
     }
 
-    void deleteFavorite(String id) {
-        final String url = "http://www.u148.net/json/del_favourite";
+    private void deleteFavorite(String id) {
         final UserInfo user = PrefsUtil.getUser();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("id", id);
-        params.put("token", user.token);
-        HttpUtils.post(url, params, new Response.Listener<String>() {
+        String url = String.format(API_DELETE_FAVORITE, id, user.token);
+        HttpUtils.get(url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
             }
@@ -156,13 +157,13 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final FavoriteItem favoriteItem = favoriteList.get(position);
 
-        FeedItem feed = new FeedItem();
+        Feed feed = new Feed();
         feed.id = favoriteItem.aid;
         feed.title = favoriteItem.title;
         feed.create_time = favoriteItem.create_time;
         feed.category = favoriteItem.category;
 
-        Intent intent = new Intent(this, DetailActivity.class);
+        Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra("feed", feed);
         IntentUtils.startPreviewActivity(this, intent);
     }

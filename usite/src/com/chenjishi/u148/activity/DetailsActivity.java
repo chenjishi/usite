@@ -4,152 +4,118 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.MotionEventCompat;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Log;
+import android.view.*;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.DBHelper;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.model.FeedItem;
+import com.chenjishi.u148.model.Article;
+import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.service.MusicPlayListener;
 import com.chenjishi.u148.service.MusicService;
-import com.chenjishi.u148.sina.RequestListener;
 import com.chenjishi.u148.util.*;
-import com.chenjishi.u148.view.DepthPageTransformer;
+import com.chenjishi.u148.view.ArticleWebView;
+import com.chenjishi.u148.view.CircleView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.ImageRequest;
 import com.flurry.android.FlurryAgent;
-import com.sina.weibo.sdk.exception.WeiboException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.chenjishi.u148.util.Constants.*;
+import static com.chenjishi.u148.util.Constants.API_ADD_FAVORITE;
+import static com.chenjishi.u148.util.Constants.API_ARTICLE;
 
 /**
- * Created by chenjishi on 14-4-25.
+ * Created with IntelliJ IDEA.
+ * User: chenjishi
+ * Date: 12-11-4
+ * Time: 下午7:56
+ * To change this template use File | Settings | File Templates.
  */
-public class DetailsActivity extends BaseActivity implements OnMusicClickListener, ViewPager.OnPageChangeListener,
-        MusicPlayListener {
-    private final static String TAG = "DetailActivity";
-
-    private ArrayList<FeedItem> mFeedList;
-
-    private ViewPager mViewPager;
-    private FeedPagerAdapter mPagerAdapter;
+public class DetailsActivity extends BaseActivity implements MusicPlayListener, Response.Listener<Article>,
+        Response.ErrorListener, JSCallback {
+    private ArticleWebView mWebView;
+    private View mEmptyView;
 
     private ImageButton favoriteBtn;
-    private boolean isFavorite;
-    private boolean favorited;
+
+    private MusicService mMusicService;
+
+    private Article mArticle;
+    private Feed mFeed;
 
     private DBHelper mDatabase;
 
-    private int mCurrentIndex;
-
-    private Map<Integer, String> mCategoryMap;
-
-    private MusicService mMusicService;
     private boolean mBounded = false;
+
+    private ShareDialog mShareDialog;
+
+    private int mSwipeMinDistance;
+    private int mSwipeThresholdVelocity;
+    private boolean mIsSwiped;
+
+    private float mInitialMotionX;
+    private float mInitialMotionY;
+    private VelocityTracker mVelocityTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(null);
-        setContentView(R.layout.activity_details, R.layout.details_title_layout);
+        setContentView(R.layout.activity_detail, R.layout.details_title_layout);
 
         Bundle bundle = getIntent().getExtras();
-        mFeedList = bundle.getParcelableArrayList(KEY_FEED_LIST);
-        mCurrentIndex = bundle.getInt(KEY_FEED_INDEX, 0);
 
-        mDatabase = DBHelper.getInstance(this);
+        if (null != bundle) {
+            mFeed = bundle.getParcelable("feed");
+        } else {
+            finish();
+        }
 
-        favoriteBtn = (ImageButton) findViewById(R.id.btn_favorite);
+        final ViewConfiguration vc = ViewConfiguration.get(this);
+        mSwipeMinDistance = vc.getScaledPagingTouchSlop() * 2;
+        mSwipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
 
-        mViewPager = (ViewPager) findViewById(R.id.viewPager);
-        mPagerAdapter = new FeedPagerAdapter(getSupportFragmentManager());
+        mSwipeMinDistance = 2 * mSwipeMinDistance;
 
-        mViewPager.setAdapter(mPagerAdapter);
-        mViewPager.setOnPageChangeListener(this);
-        mViewPager.setCurrentItem(mCurrentIndex);
-        mViewPager.setOffscreenPageLimit(3);
-        mViewPager.setPageTransformer(true, new DepthPageTransformer());
-
-        mCategoryMap = new HashMap<Integer, String>();
+        Map<String, String> categoryMap;
+        categoryMap = new HashMap<String, String>();
         int[] ids = getResources().getIntArray(R.array.category_id);
         String[] names = getResources().getStringArray(R.array.category_name);
         for (int i = 0; i < ids.length; i++) {
-            mCategoryMap.put(ids[i], names[i]);
+            categoryMap.put(String.valueOf(ids[i]), names[i]);
         }
 
-        final FeedItem feed = mFeedList.get(mCurrentIndex);
-        String title = mCategoryMap.get(feed.category);
+        mEmptyView = findViewById(R.id.empty_view);
 
-        int resId;
-        int theme = PrefsUtil.getThemeMode();
-        isFavorite = favorited = mDatabase.exist(feed.id);
-        if (theme == Constants.MODE_DAY) {
-            resId = isFavorite ? R.drawable.ic_favorite_full : R.drawable.ic_favorite;
-        } else {
-            resId = isFavorite ? R.drawable.ic_favorite_full : R.drawable.ic_favorite_night;
-        }
-        favoriteBtn.setImageResource(resId);
-
-        if (null == feed.usr) {
+        mDatabase = DBHelper.getInstance(this);
+        String title = categoryMap.get(String.valueOf(mFeed.category));
+        if (null == mFeed.usr) {
             title = "返回";
         }
         setTitle(title);
-    }
 
-    public void onCommentClicked(View v) {
-        final FeedItem feed = mFeedList.get(mCurrentIndex);
-        Intent intent = new Intent(this, CommentActivity.class);
-        intent.putExtra("article_id", feed.id);
+        favoriteBtn = (ImageButton) findViewById(R.id.btn_favorite);
 
-        IntentUtils.startPreviewActivity(this, intent);
-    }
+        mWebView = (ArticleWebView) findViewById(R.id.webview);
+        mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
-    private ShareDialog mShareDialog;
-
-    public void onShareClicked(View v) {
-        final FeedItem feed = mFeedList.get(mCurrentIndex);
-
-        if (null == mShareDialog) {
-            mShareDialog = new ShareDialog(this);
-        }
-
-        mShareDialog.setShareFeed(feed);
-        mShareDialog.setShareImageUrl(feed.pic_mid);
-        mShareDialog.show();
-        mShareDialog.show();
-    }
-
-    private ArrayList<String> getImageList() {
-        final int index = mViewPager.getCurrentItem();
-        final DetailsFragment fragment = mPagerAdapter.getActiveFragment(mViewPager, index);
-        return fragment.getImageList();
-    }
-
-    @Override
-    public void onMusicClicked(String url) {
-        Intent intent = new Intent(this, MusicService.class);
-        intent.putExtra("url", url);
-        startService(intent);
+        HttpUtils.ArticleRequest(String.format(API_ARTICLE, mFeed.id), this, this);
     }
 
     private View mMusicPanel;
@@ -158,7 +124,12 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
     private ProgressBar mMusicProgress;
     private ImageButton mPlayBtn;
 
-    private void setupMusicPanel() {
+    @Override
+    public void onMusicStartParse() {
+        setupMusicPanel();
+    }
+
+    void setupMusicPanel() {
         if (null == mMusicPanel) {
             mMusicPanel = LayoutInflater.from(this).inflate(R.layout.music_pane_layout, null);
 
@@ -184,11 +155,6 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
     }
 
     @Override
-    public void onMusicStartParse() {
-        setupMusicPanel();
-    }
-
-    @Override
     public void onMusicPrepared(String song, String artist) {
         mSongText.setText(song);
         mArtistText.setText(artist);
@@ -209,122 +175,6 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
 
     @Override
     public void onMusicParseError() {
-
-    }
-
-    @Override
-    public void onPageScrolled(int i, float v, int i2) {
-
-    }
-
-    @Override
-    public void onPageSelected(int i) {
-        mCurrentIndex = i;
-
-        final FeedItem feed = mFeedList.get(mCurrentIndex);
-        if (null != mCategoryMap) {
-            setTitle(mCategoryMap.get(feed.category));
-        }
-
-        final boolean isFavorite = mDatabase.exist(feed.id);
-        favoriteBtn.setImageResource(isFavorite ? R.drawable.ic_favorite_full : R.drawable.ic_favorite);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int i) {
-
-    }
-
-    private class FeedPagerAdapter extends FragmentStatePagerAdapter {
-        public FeedPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            final FeedItem feed = mFeedList.get(i);
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(KEY_FEED, feed);
-            return Fragment.instantiate(DetailsActivity.this, DetailsFragment.class.getName(), bundle);
-        }
-
-        @Override
-        public int getCount() {
-            return null != mFeedList ? mFeedList.size() : 0;
-        }
-
-        public DetailsFragment getActiveFragment(ViewPager container, int position) {
-            return (DetailsFragment) instantiateItem(container, position);
-        }
-    }
-
-    public void onFavoriteClicked(View v) {
-        final UserInfo user = PrefsUtil.getUser();
-
-        if (null == user || TextUtils.isEmpty(user.token)) {
-            Utils.showToast("请先登录再收藏");
-            return;
-        }
-
-        if (isFavorite) {
-            favoriteBtn.setImageResource(R.drawable.ic_favorite);
-            Utils.showToast(R.string.favorite_cancel);
-            isFavorite = false;
-        } else {
-            favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
-            Utils.showToast(R.string.favorite_success);
-            isFavorite = true;
-        }
-
-        favorite();
-    }
-
-    private void favorite() {
-        if (isFavorite == favorited) return;
-
-        final FeedItem feed = mFeedList.get(mCurrentIndex);
-
-        String url;
-        if (isFavorite) {
-            url = "http://www.u148.net/json/favourite";
-            mDatabase.insert(feed);
-        } else {
-            url = "http://www.u148.net/json/del_favourite";
-            mDatabase.delete(feed.id);
-        }
-
-        final UserInfo user = PrefsUtil.getUser();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("id", feed.id);
-        params.put("token", user.token);
-        HttpUtils.post(url, params, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-    }
-
-    @Override
-    protected void applyTheme() {
-        super.applyTheme();
-
-        ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
-        ImageButton shareBtn = (ImageButton) findViewById(R.id.btn_share);
-
-        if (Constants.MODE_NIGHT == mTheme) {
-            commentBtn.setImageResource(R.drawable.ic_comment_night);
-            shareBtn.setImageResource(R.drawable.ic_share_night);
-            favoriteBtn.setImageResource(R.drawable.ic_favorite_night);
-        } else {
-            commentBtn.setImageResource(R.drawable.ic_comment);
-            shareBtn.setImageResource(R.drawable.ic_social_share);
-            favoriteBtn.setImageResource(R.drawable.ic_favorite);
-        }
     }
 
     @Override
@@ -346,6 +196,7 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
                 ((ViewGroup) mMusicPanel.getParent()).removeView(mMusicPanel);
             }
         }
+        mDatabase.updateArticleOffset(mFeed.id, mWebView.getScrollY());
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -364,6 +215,60 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
         }
     };
 
+    public void onCommentClicked(View v) {
+        startCommentActivity();
+    }
+
+    private void startCommentActivity() {
+        Intent intent = new Intent(this, CommentActivity.class);
+        intent.putExtra("article_id", mFeed.id);
+        IntentUtils.startPreviewActivity(this, intent);
+    }
+
+    public void onFavoriteClicked(View v) {
+        final UserInfo user = PrefsUtil.getUser();
+
+        if (null == user || TextUtils.isEmpty(user.token)) {
+            Utils.showToast("请先登录再收藏");
+            return;
+        }
+
+        Feed feed = mDatabase.getFavoriteById(mFeed.id);
+        if (null != feed && !TextUtils.isEmpty(feed.id)) {
+            Utils.showToast("已收藏");
+            return;
+        }
+
+        String requestUrl = String.format(API_ADD_FAVORITE, mFeed.id, user.token);
+        HttpUtils.get(requestUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
+                mDatabase.insert(mFeed);
+                Utils.showToast(R.string.favorite_success);
+            }
+        }, this);
+    }
+
+    public void onShareClicked(View v) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(Constants.PARAM_TITLE, mFeed.title);
+        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
+
+        if (null == mShareDialog) {
+            mShareDialog = new ShareDialog(this);
+        }
+
+        final ArrayList<String> imageList = mArticle.imageList;
+        if (null == imageList || imageList.size() == 0) {
+            imageList.add(mFeed.pic_mid);
+        }
+
+        mShareDialog.setShareFeed(mFeed);
+        mShareDialog.setImageList(imageList);
+        mShareDialog.show();
+    }
+
     public void onButtonClicked(View v) {
         switch (v.getId()) {
             case R.id.btn_play:
@@ -374,5 +279,199 @@ public class DetailsActivity extends BaseActivity implements OnMusicClickListene
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        Utils.setErrorView(mEmptyView, "网络错误");
+    }
+
+    @Override
+    public void onResponse(Article response) {
+        if (null != response && !TextUtils.isEmpty(response.content)) {
+            mArticle = response;
+            renderPage();
+        } else {
+            Utils.setErrorView(mEmptyView, R.string.parse_error);
+        }
+    }
+
+    private void renderPage() {
+        String template = Utils.readFromAssets(this, "usite.html");
+        template = template.replace("{TITLE}", mFeed.title);
+
+        final UserInfo usr = mFeed.usr;
+        if (null != usr) {
+            long t = mFeed.create_time * 1000L;
+            Date date = new Date(t);
+            Format format = new SimpleDateFormat("yyyy-MM-dd");
+            String pubTime = String.format(getString(R.string.pub_time),
+                    mFeed.usr.nickname, format.format(date));
+            template = template.replace("{U_AUTHOR}", pubTime);
+            String reviews = String.format(getString(R.string.pub_reviews), mFeed.count_browse,
+                    mFeed.count_review);
+            template = template.replace("{U_COMMENT}", reviews);
+        } else {
+            template = template.replace("{U_AUTHOR}", "");
+            template = template.replace("{U_COMMENT}", "");
+        }
+        template = template.replace("{CONTENT}", mArticle.content);
+
+        final int mode = PrefsUtil.getThemeMode();
+        if (Constants.MODE_NIGHT == mode) {
+            template = template.replace("{SCREEN_MODE}", "night");
+        } else {
+            template = template.replace("{SCREEN_MODE}", "");
+        }
+
+        mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
+        mWebView.setWebChromeClient(new MyWebChromeClient());
+
+        mEmptyView.setVisibility(View.GONE);
+        mWebView.setVisibility(View.VISIBLE);
+
+        int commentNum = mFeed.count_review;
+        if (commentNum > 0) {
+            if (commentNum >= 100) commentNum = 99;
+
+            CircleView view = (CircleView) findViewById(R.id.comment_count);
+            view.setNumber(commentNum);
+            view.setVisibility(View.VISIBLE);
+        }
+    }
+
+    class MyWebChromeClient extends WebChromeClient {
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            if (newProgress == 100) {
+                final int offset = mDatabase.getOffsetById(mFeed.id);
+                if (offset > 0) {
+                    mWebView.scrollTo(0, offset);
+                }
+            }
+        }
+
+        @Override
+        public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+//            Toast.makeText(DetailActivity.this, message, Toast.LENGTH_SHORT).show();
+//            result.cancel();
+            return true;
+        }
+    }
+
+    @Override
+    public void onImageClicked(String url) {
+        Intent intent = new Intent(this, ImageActivity.class);
+        intent.putExtra("imgsrc", url);
+        intent.putStringArrayListExtra("images", mArticle.imageList);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onMusicClicked(String url) {
+        Intent intent = new Intent(this, MusicService.class);
+        intent.putExtra("url", url);
+        startService(intent);
+    }
+
+    @Override
+    public void onVideoClicked(String url) {
+    }
+
+    @Override
+    public void onThemeChange() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int mode = PrefsUtil.getThemeMode();
+                if (mode == Constants.MODE_NIGHT) {
+                    mWebView.loadUrl("javascript:setScreenMode('night')");
+                } else {
+                    mWebView.loadUrl("javascript:setScreenMode('day')");
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void applyTheme() {
+        super.applyTheme();
+
+        ImageView commentBtn = (ImageView) findViewById(R.id.ic_comment);
+        ImageButton shareBtn = (ImageButton) findViewById(R.id.btn_share);
+
+        if (Constants.MODE_NIGHT == mTheme) {
+            commentBtn.setImageResource(R.drawable.ic_comment_night);
+            shareBtn.setImageResource(R.drawable.ic_share_night);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite_night);
+        } else {
+            commentBtn.setImageResource(R.drawable.ic_comment);
+            shareBtn.setImageResource(R.drawable.ic_social_share);
+            favoriteBtn.setImageResource(R.drawable.ic_favorite);
+        }
+
+        Feed feed = mDatabase.getFavoriteById(mFeed.id);
+        if (null != feed && !TextUtils.isEmpty(feed.id)) {
+            favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
+        }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                mIsSwiped = false;
+                if (null == mVelocityTracker) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    mVelocityTracker.clear();
+                }
+                mVelocityTracker.addMovement(ev);
+
+                final float x = ev.getX();
+                final float y = ev.getY();
+                mInitialMotionX = x;
+                mInitialMotionY = y;
+                break;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                final float x = ev.getX();
+                final float y = ev.getY();
+                final float diffX = x - mInitialMotionX;
+                final float adx = Math.abs(diffX);
+                final float ady = Math.abs(y - mInitialMotionY);
+
+                if (null != mVelocityTracker && !mIsSwiped) {
+                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+
+                    final float xVelocity = Math.abs(mVelocityTracker.getXVelocity());
+                    if (adx > ady && adx > mSwipeMinDistance && xVelocity > mSwipeThresholdVelocity) {
+                        mIsSwiped = true;
+                        if (diffX > 0) {
+//                            finish();
+                        } else {
+                            startCommentActivity();
+                        }
+                        return true;
+                    }
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+            case MotionEvent.ACTION_UP: {
+                if (mIsSwiped) {
+                    mVelocityTracker.clear();
+                    return true;
+                } else {
+                    return super.dispatchTouchEvent(ev);
+                }
+            }
+        }
+
+        return super.dispatchTouchEvent(ev);
     }
 }

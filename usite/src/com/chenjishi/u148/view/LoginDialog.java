@@ -11,8 +11,8 @@ import android.widget.EditText;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import org.json.JSONException;
@@ -20,6 +20,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.chenjishi.u148.util.Constants.API_LOGIN;
 
 /**
  * Created by chenjishi on 13-12-20.
@@ -56,7 +58,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Respons
             params.put("email", str1);
             params.put("password", str2);
 
-            HttpUtils.post("http://www.u148.net/json/login", params, this, this);
+            HttpUtils.post(API_LOGIN, params, this, this);
         } else {
             dismiss();
         }
