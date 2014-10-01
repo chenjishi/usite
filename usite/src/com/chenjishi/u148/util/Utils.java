@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,6 +36,20 @@ public class Utils {
     public static int dp2px(Context context, float dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return (int) (density * dp + .5f);
+    }
+
+    private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
+
+    public static int generateViewId() {
+        for (; ; ) {
+            final int result = sNextGeneratedId.get();
+            int newValue = result + 1;
+            if (newValue > 0x00FFFFFF)
+                newValue = 1;
+            if (sNextGeneratedId.compareAndSet(result, newValue)) {
+                return result;
+            }
+        }
     }
 
     public static String getDeviceName() {

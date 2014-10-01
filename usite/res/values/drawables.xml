@@ -8,4 +8,5 @@
     <drawable name="press_color">#DDD</drawable>
     <drawable name="gray">#FF3B3B3B</drawable>
     <drawable name="black_40_transparent">#2D3B3B3B</drawable>
+    <drawable name="menu_item_pressed_color">#33272A2C</drawable>
 </resources>

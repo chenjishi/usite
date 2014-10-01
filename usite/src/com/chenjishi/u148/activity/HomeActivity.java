@@ -17,7 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
@@ -32,8 +32,11 @@ import com.chenjishi.u148.view.*;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.chenjishi.u148.volley.toolbox.NetworkImageView;
 import com.flurry.android.FlurryAgent;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.chenjishi.u148.util.Constants.API_UPGRADE;
 
 /**
@@ -44,15 +47,23 @@ import static com.chenjishi.u148.util.Constants.API_UPGRADE;
  * To change this template use File | Settings | File Templates.
  */
 public class HomeActivity extends FragmentActivity implements DrawerLayout.DrawerListener,
-        LoginDialog.OnLoginListener {
+        LoginDialog.OnLoginListener, AdapterView.OnItemClickListener, View.OnClickListener {
     public static final int REQUEST_CODE_REGISTER = 101;
     public static final int RESULT_CODE_REGISTER = 102;
+
+    private static final int BUTTON_TAG_LOGIN = 1111;
+    private static final int BUTTON_TAG_REGIST = 1112;
+
     private TabsAdapter mTabAdapter;
     private MenuAdapter mMenuAdapter;
     private TabPageIndicator mTabIndicator;
 
     private DrawerLayout drawerLayout;
     private TextView mDrawerIcon;
+
+    private LinearLayout mButtonLayout;
+    private TextView mNameText;
+    private NetworkImageView mIconView;
 
     private int maxIconIndent;
     private float density;
@@ -104,7 +115,16 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         drawerLayout.setDrawerListener(this);
 
-        initMenuList();
+        ListView listView = (ListView) findViewById(R.id.list_menu);
+        View headView = getHeadView();
+        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        headView.setLayoutParams(lp);
+        listView.addHeaderView(headView, null, false);
+        mMenuAdapter = new MenuAdapter(this);
+        listView.setAdapter(mMenuAdapter);
+        listView.setOnItemClickListener(this);
+
+        refreshMenu();
 
         mTabAdapter = new TabsAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mTabAdapter);
@@ -230,7 +250,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
     @Override
     public void onLoginSuccess() {
         setUserIcon();
-        mMenuAdapter.notifyDataSetChanged();
+        refreshMenu();
         Utils.showToast(getString(R.string.login_success));
     }
 
@@ -304,6 +324,12 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        refreshMenu();
+    }
+
+    @Override
     protected void onDestroy() {
         if (mDownloadReceiverRegistered) {
             unregisterReceiver(mDownloadCompleteReceiver);
@@ -354,92 +380,207 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         mPlayer.start();
     }
 
-    private void initMenuList() {
-        final ListView listView = (ListView) findViewById(R.id.list_menu);
-        mMenuAdapter = new MenuAdapter();
-        listView.setAdapter(mMenuAdapter);
+    private void refreshMenu() {
+        String[] titles;
+        int[] icons;
+        boolean isLogin = Utils.isLogin();
+        int mode = PrefsUtil.getThemeMode();
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent;
-                switch (position) {
-                    case 0:
-                        if (!Utils.isLogin()) {
-                            intent = new Intent(HomeActivity.this, RegisterActivity.class);
-                            startActivityForResult(intent, REQUEST_CODE_REGISTER);
-                        } else {
-                            Utils.showToast("您已经登录");
-                            drawerLayout.closeDrawer(Gravity.LEFT);
-                        }
-                        break;
-                    case 1:
-                        intent = new Intent(HomeActivity.this, SettingsActivity.class);
-                        IntentUtils.startPreviewActivity(HomeActivity.this, intent);
-                        break;
-                    case 2:
-                        PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
-                                ? Constants.MODE_NIGHT : Constants.MODE_DAY);
-                        mMenuAdapter.notifyDataSetChanged();
-                        applyTheme(PrefsUtil.getThemeMode());
-                        drawerLayout.closeDrawer(Gravity.LEFT);
-                        break;
-                    case 3:
-                        if (Utils.isLogin()) {
-                            intent = new Intent(HomeActivity.this, FavoriteActivity.class);
-                            IntentUtils.startPreviewActivity(HomeActivity.this, intent);
-                        } else {
-                            new LoginDialog(HomeActivity.this, HomeActivity.this).show();
-                            drawerLayout.closeDrawer(Gravity.LEFT);
-                        }
-                        break;
-                    case 4:
-                        Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                        intent = new Intent(Intent.ACTION_VIEW, uri);
-                        try {
-                            startActivity(intent);
-                        } catch (ActivityNotFoundException e) {
-                            Utils.showToast(R.string.google_play_unavailable);
-                        }
-                        drawerLayout.closeDrawer(Gravity.LEFT);
-                        break;
-                    case 5:
-                        AboutDialog dialog = new AboutDialog(HomeActivity.this, new AboutDialog.AboutDialogListener() {
-                            @Override
-                            public void onVersionClicked() {
-                                easterEgg();
-                            }
-                        });
-                        dialog.show();
-                        drawerLayout.closeDrawer(Gravity.LEFT);
-                        break;
-                }
-            }
-        });
-    }
+        String modeText = mode == Constants.MODE_DAY ? "夜间" : "日间";
 
-    private class MenuAdapter extends BaseAdapter {
-        private String[] menuItems;
-        private int[] iconIds;
+        if (isLogin) {
+            titles = new String[]{"设置", modeText, "收藏", "点赞", "关于", "退出"};
+            icons = new int[]{R.drawable.ic_settings,
+                    R.drawable.ic_bulb,
+                    R.drawable.ic_favorite_menu,
+                    R.drawable.ic_star,
+                    R.drawable.ic_info,
+                    R.drawable.ic_menu4};
+            UserInfo userInfo = PrefsUtil.getUser();
 
-        public MenuAdapter() {
-            menuItems = getResources().getStringArray(R.array.menu_item);
-            iconIds = new int[]{R.drawable.user_default,
-                    R.drawable.ic_settings,
+            mIconView.setImageUrl(userInfo.icon, HttpUtils.getImageLoader());
+            mNameText.setText(userInfo.nickname);
+
+            mButtonLayout.setVisibility(View.GONE);
+            mNameText.setVisibility(View.VISIBLE);
+        } else {
+            titles = new String[]{"设置", modeText, "收藏", "点赞", "关于"};
+            icons = new int[]{R.drawable.ic_settings,
                     R.drawable.ic_bulb,
                     R.drawable.ic_favorite_menu,
                     R.drawable.ic_star,
                     R.drawable.ic_info};
+
+            mIconView.setBackgroundResource(R.drawable.head);
+            mIconView.setImageResource(R.drawable.head);
+            mNameText.setVisibility(View.GONE);
+            mButtonLayout.setVisibility(View.VISIBLE);
+        }
+
+        mMenuAdapter.refreshData(titles, icons);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int tag = (Integer) v.getTag();
+
+        if (tag == BUTTON_TAG_LOGIN) {
+            new LoginDialog(this, this).show();
+        }
+
+        if (tag == BUTTON_TAG_REGIST) {
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivityForResult(intent, REQUEST_CODE_REGISTER);
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent;
+        switch (position) {
+            case 1:
+                intent = new Intent(this, SettingsActivity.class);
+                IntentUtils.startPreviewActivity(this, intent);
+                break;
+            case 2:
+                PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
+                        ? Constants.MODE_NIGHT : Constants.MODE_DAY);
+                refreshMenu();
+                applyTheme(PrefsUtil.getThemeMode());
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                break;
+            case 3:
+                if (Utils.isLogin()) {
+                    intent = new Intent(this, FavoriteActivity.class);
+                    IntentUtils.startPreviewActivity(this, intent);
+                } else {
+                    new LoginDialog(this, this).show();
+                    drawerLayout.closeDrawer(Gravity.LEFT);
+                }
+                break;
+            case 4:
+                Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                intent = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Utils.showToast(R.string.google_play_unavailable);
+                }
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                break;
+            case 5:
+                AboutDialog dialog = new AboutDialog(this, new AboutDialog.AboutDialogListener() {
+                    @Override
+                    public void onVersionClicked() {
+                        easterEgg();
+                    }
+                });
+                dialog.show();
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                break;
+            case 6:
+                new ExitDialog(this, new ExitDialog.OnLogoutListener() {
+                    @Override
+                    public void logout() {
+                        PrefsUtil.setUser(null);
+                        setUserIcon();
+                        Utils.showToast(R.string.logout_success);
+                        refreshMenu();
+                    }
+                }).show();
+                drawerLayout.closeDrawer(Gravity.LEFT);
+                break;
+        }
+    }
+
+    private View getHeadView() {
+        RelativeLayout container = new RelativeLayout(this);
+        container.setPadding(0, dp2px(16), 0, dp2px(16));
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dp2px(32), dp2px(32));
+        lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        int id1 = Utils.generateViewId();
+        mIconView = new NetworkImageView(this);
+        mIconView.setBackgroundResource(R.drawable.head);
+        mIconView.setId(id1);
+        mIconView.setLayoutParams(lp);
+        container.addView(mIconView);
+
+        RelativeLayout.LayoutParams lp1 = new RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        lp1.topMargin = dp2px(12);
+        lp1.addRule(RelativeLayout.BELOW, id1);
+        lp1.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        mButtonLayout = new LinearLayout(this);
+        mButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
+        mButtonLayout.setLayoutParams(lp1);
+        container.addView(mButtonLayout);
+
+        mNameText = new TextView(this);
+        mNameText.setTextColor(0xFF3C645A);
+        mNameText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.f);
+        mNameText.setLayoutParams(lp1);
+        mNameText.setGravity(Gravity.CENTER);
+        mNameText.setVisibility(View.GONE);
+        container.addView(mNameText);
+
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        lp2.rightMargin = dp2px(12);
+        Button loginBtn = new Button(this);
+        loginBtn.setBackgroundResource(R.drawable.login_btn);
+        loginBtn.setText("登陆");
+        loginBtn.setTextColor(getResources().getColorStateList(R.color.button_text_color));
+        loginBtn.setPadding(dp2px(8), dp2px(4), dp2px(8), dp2px(4));
+        loginBtn.setGravity(Gravity.CENTER);
+        loginBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.f);
+        loginBtn.setLayoutParams(lp2);
+        loginBtn.setOnClickListener(this);
+        loginBtn.setTag(BUTTON_TAG_LOGIN);
+        mButtonLayout.addView(loginBtn);
+
+        Button registBtn = new Button(this);
+        registBtn.setText("注册");
+        registBtn.setTextColor(getResources().getColorStateList(R.color.button_text_color));
+        registBtn.setPadding(dp2px(8), dp2px(4), dp2px(8), dp2px(4));
+        registBtn.setGravity(Gravity.CENTER);
+        registBtn.setBackgroundResource(R.drawable.login_btn);
+        registBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.f);
+        registBtn.setLayoutParams(new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+        registBtn.setOnClickListener(this);
+        registBtn.setTag(BUTTON_TAG_REGIST);
+        mButtonLayout.addView(registBtn);
+
+        return container;
+    }
+
+    private int dp2px(float dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return (int) (density * dp + .5f);
+    }
+
+    private static class MenuAdapter extends BaseAdapter {
+        private LayoutInflater mInflater;
+        private String[] mTitles;
+        private int[] mIcons;
+
+        public MenuAdapter(Context context) {
+            mInflater = LayoutInflater.from(context);
+        }
+
+        public void refreshData(String[] titles, int[] icons) {
+            mTitles = titles;
+            mIcons = icons;
+
+            notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            return menuItems.length;
+            return null == mTitles ? 0 : mTitles.length;
         }
 
         @Override
         public String getItem(int position) {
-            return menuItems[position];
+            return null == mTitles ? null : mTitles[position];
         }
 
         @Override
@@ -449,58 +590,19 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
+            View itemView;
 
             if (null == convertView) {
-                convertView = LayoutInflater.from(HomeActivity.this).inflate(R.layout.menu_cell, parent, false);
-                holder = new ViewHolder();
-
-                holder.iconImage = (ImageView) convertView.findViewById(R.id.iv_icon);
-                holder.titleText = (TextView) convertView.findViewById(R.id.tv_title);
-
-                convertView.setTag(holder);
-            }
-
-            holder = (ViewHolder) convertView.getTag();
-
-            if (0 == position) {
-                final boolean isLogin = Utils.isLogin();
-                RelativeLayout.LayoutParams layoutParams;
-                if (isLogin) {
-                    final UserInfo userInfo = PrefsUtil.getUser();
-                    final ImageLoader imageLoader = HttpUtils.getImageLoader();
-                    layoutParams = new RelativeLayout.LayoutParams((int) (32. * density),
-                            (int) (32. * density));
-                    layoutParams.setMargins(0, 0, (int) (8. * density), 0);
-
-                    holder.titleText.setText(userInfo.nickname);
-                    holder.iconImage.setLayoutParams(layoutParams);
-                    imageLoader.get(userInfo.icon, ImageLoader.getImageListener(holder.iconImage, R.drawable.ic_avatar_2,
-                            R.drawable.ic_avatar_2));
-                } else {
-                    layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT);
-                    layoutParams.setMargins(0, 0, (int) (density * 8.), 0);
-                    holder.titleText.setText(getItem(position));
-                    holder.iconImage.setLayoutParams(layoutParams);
-                    holder.iconImage.setImageResource(R.drawable.ic_avatar_2);
-                }
-            } else if (2 == position) {
-                final int mode = PrefsUtil.getThemeMode();
-                holder.titleText.setText(mode == Constants.MODE_DAY ? "夜间" : "日间");
-                holder.iconImage.setImageResource(iconIds[position]);
+                itemView = mInflater.inflate(R.layout.menu_cell, parent, false);
             } else {
-                holder.titleText.setText(getItem(position));
-                holder.iconImage.setImageResource(iconIds[position]);
+                itemView = convertView;
             }
 
-            return convertView;
-        }
-    }
+            ((TextView) itemView.findViewById(R.id.tv_title)).setText(getItem(position));
+            ((ImageView) itemView.findViewById(R.id.iv_icon)).setImageResource(mIcons[position]);
 
-    private static class ViewHolder {
-        ImageView iconImage;
-        TextView titleText;
+            return itemView;
+        }
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
