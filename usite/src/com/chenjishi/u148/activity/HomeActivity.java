@@ -606,15 +606,17 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
     }
 
     private class TabsAdapter extends FragmentPagerAdapter {
-        private int[] categoryIds = {0, 3, 6, 7, 5, 8, 9};
+        private int[] categoryIds = {0, 3, 6, 5, 10, 7, 2, 9, 8};
         private int[] mTitleIds = {
                 R.string.app_home,
                 R.string.app_image,
                 R.string.app_text,
-                R.string.app_miscell,
                 R.string.app_audio,
+                R.string.app_story,
+                R.string.app_miscell,
+                R.string.app_video,
+                R.string.app_market,
                 R.string.app_bottle,
-                R.string.app_market
         };
 
         public TabsAdapter(FragmentManager fm) {

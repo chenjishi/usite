@@ -6,6 +6,8 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -184,20 +186,23 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         private List<Feed> mFeedList = new ArrayList<Feed>();
         private LayoutInflater mInflater;
         private Resources mResources;
-        private Map<String, String> mCategoryMap;
+        private SparseArray<String> mCategoryArray;
         private float mDensity;
         private final ImageLoader mImageLoader = HttpUtils.getImageLoader();
 
         public FeedListAdapter(Context context) {
             mResources = context.getResources();
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            mCategoryMap = new HashMap<String, String>();
+            mInflater = LayoutInflater.from(context);
             mDensity = mResources.getDisplayMetrics().density;
 
             int[] ids = mResources.getIntArray(R.array.category_id);
             String[] names = mResources.getStringArray(R.array.category_name);
-            for (int i = 0; i < ids.length; i++) {
-                mCategoryMap.put(String.valueOf(ids[i]), names[i]);
+
+            int len = ids.length;
+            mCategoryArray = new SparseArray<String>(len);
+
+            for (int i = 0; i < len; i++) {
+                mCategoryArray.put(ids[i], names[i]);
             }
         }
 
@@ -278,7 +283,7 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
             holder.thumb.setImageUrl(feed.pic_mid, mImageLoader);
             holder.thumb.setDefaultImageResId(R.drawable.pictrue_bg);
-            holder.category.setText("[" + mCategoryMap.get(feed.category + "") + "]");
+            holder.category.setText("[" + mCategoryArray.get(feed.category) + "]");
             holder.title.setText(feed.title);
             holder.viewsText.setText(String.format(mResources.getString(R.string.views), feed.count_browse));
             holder.commentText.setText(String.format(mResources.getString(R.string.comment_count), feed.count_review));

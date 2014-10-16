@@ -177,7 +177,8 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
         Map<String, String> params = new HashMap<String, String>();
         params.put("id", articleId);
         params.put("token", user.token);
-        params.put("content", content + " (来自Android客户端)");
+        params.put("client", "android");
+        params.put("content", content);
         if (!TextUtils.isEmpty(id)) {
             params.put("review_id", id);
         }
