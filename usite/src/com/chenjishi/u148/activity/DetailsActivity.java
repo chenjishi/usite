@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.MotionEventCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.*;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;

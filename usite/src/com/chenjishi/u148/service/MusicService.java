@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.RemoteViews;
 import com.chenjishi.u148.R;
 import org.jsoup.Jsoup;
@@ -303,7 +302,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private class NotificationCloseBroadCast extends BroadcastReceiver {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, final Intent intent) {
             mNotificationMgr.cancelAll();
             stopForeground(true);
             stopSelf();

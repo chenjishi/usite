@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -28,8 +29,10 @@ public class ArticleWebView extends WebView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && canvas.isHardwareAccelerated()) {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (canvas.isHardwareAccelerated()) {
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            }
         }
         super.onDraw(canvas);
     }
