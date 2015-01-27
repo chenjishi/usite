@@ -2,12 +2,12 @@ package com.chenjishi.u148.view;
 
 import android.content.Context;
 import android.graphics.*;
+import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.WindowManager;
 import com.chenjishi.u148.R;
+import com.chenjishi.u148.base.PrefsUtil;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,6 +19,8 @@ import com.chenjishi.u148.R;
 public class FireworksView extends SurfaceView implements SurfaceHolder.Callback {
     private GameThread thread;
     private float desity;
+    private String mTitle;
+    private String mDesc;
 
     enum AnimateState {
         asReady, asRunning, asPause
@@ -42,11 +44,22 @@ public class FireworksView extends SurfaceView implements SurfaceHolder.Callback
         holder.addCallback(this);
         setFocusable(true);
 
-        DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(metrics);
+        desity = context.getResources().getDisplayMetrics().density;
 
-        desity = metrics.density;
+        mTitle = PrefsUtil.getSurpriseTitle();
+        if (TextUtils.isEmpty(mTitle)) {
+            mTitle = "Wow, You Find This!";
+        }
+
+        mDesc = PrefsUtil.getSurpriseDesc();
+        if (TextUtils.isEmpty(mDesc)) {
+            mDesc = "Very Appreciated you like it";
+        }
+    }
+
+    public void setTitle(String title, String desc) {
+        mTitle = title;
+        mDesc = desc;
     }
 
     @Override
@@ -152,8 +165,8 @@ public class FireworksView extends SurfaceView implements SurfaceHolder.Callback
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             int xPos = canvas.getWidth() / 2;
             int yPos = (int) ((canvas.getHeight() / 2) - (textPaint.descent() + textPaint.ascent()) / 2);
-            canvas.drawText("This Is For CHEN YINGNA", xPos, yPos, textPaint);
-            canvas.drawText("The Girl I Met Who Brights My Life", xPos, yPos + 46.0f, textPaint);
+            canvas.drawText(mTitle, xPos, yPos, textPaint);
+            canvas.drawText(mDesc, xPos, yPos + 46.0f, textPaint);
             fireworks.doDraw(canvas, paint);
         }
 

@@ -69,4 +69,7 @@
         <item name="android:contentDescription">@null</item>
         <item name="android:clickable">true</item>
     </style>
+    <style name="FullScreenStyle" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@null</item>
+    </style>
 </resources>

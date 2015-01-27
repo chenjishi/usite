@@ -53,6 +53,8 @@ public class PrefsUtil {
     private static final String QQ_ACCESS_TOKEN = "qq_access_token";
     private static final String QQ_OPEN_ID = "qq_open_id";
     private static final String QQ_EXPIRES_IN = "qq_expires_in";
+    private static final String SURPRISE_TITLE = "surprise_title";
+    private static final String SURPRISE_DESC = "surprise_desc";
 
     public static int getThemeMode() {
         return getIntPreference(KEY_THEME_MODE, Constants.MODE_DAY);
@@ -126,6 +128,22 @@ public class PrefsUtil {
         editor.putString(QQ_OPEN_ID, token.open_id);
         editor.putLong(QQ_EXPIRES_IN, System.currentTimeMillis() + token.expires_in * 1000);
         editor.commit();
+    }
+
+    public static void saveSurpriseTitle(String title) {
+        saveStringPreference(SURPRISE_TITLE, title);
+    }
+
+    public static void saveSurpriseDesc(String desc) {
+        saveStringPreference(SURPRISE_DESC, desc);
+    }
+
+    public static String getSurpriseTitle() {
+        return getStringPreference(SURPRISE_TITLE);
+    }
+
+    public static String getSurpriseDesc() {
+        return getStringPreference(SURPRISE_DESC);
     }
 
     public static void setClearCacheTime(long t) {

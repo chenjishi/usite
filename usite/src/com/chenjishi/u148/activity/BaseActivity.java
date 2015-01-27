@@ -114,7 +114,7 @@ public class BaseActivity extends FragmentActivity {
                 titleView.setBackgroundColor(0xFFE5E5E5);
                 titleText.setTextColor(0xFF666666);
                 divider.setBackgroundColor(0xFFCACACA);
-                backBtn.setImageResource(R.drawable.ic_back);
+                backBtn.setImageResource(R.drawable.ic_back_to);
             }
         }
     }

@@ -6,9 +6,9 @@ import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -18,17 +18,25 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.easter.FireworksActivity;
+import com.chenjishi.u148.easter.SurpriseActivity;
 import com.chenjishi.u148.model.UpdateInfo;
 import com.chenjishi.u148.model.UserInfo;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.IntentUtils;
 import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.view.*;
+import com.chenjishi.u148.view.AboutDialog;
+import com.chenjishi.u148.view.ExitDialog;
+import com.chenjishi.u148.view.LoginDialog;
+import com.chenjishi.u148.view.TabPageIndicator;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
@@ -334,10 +342,6 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         if (mDownloadReceiverRegistered) {
             unregisterReceiver(mDownloadCompleteReceiver);
         }
-        if (null != mPlayer) {
-            mPlayer.release();
-            mPlayer = null;
-        }
         super.onDestroy();
     }
 
@@ -366,18 +370,14 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         }
     }
 
-    private MediaPlayer mPlayer;
-
     private void easterEgg() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
-        final FireworksView fireworksView = new FireworksView(this);
-        rootView.addView(fireworksView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        mPlayer = MediaPlayer.create(this, R.raw.fireworks);
-        mPlayer.setLooping(true);
-        mPlayer.start();
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT >= 11) {
+            intent.setClass(this, SurpriseActivity.class);
+        } else {
+            intent.setClass(this, FireworksActivity.class);
+        }
+        startActivity(intent);
     }
 
     private void refreshMenu() {

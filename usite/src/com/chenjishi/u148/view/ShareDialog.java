@@ -127,6 +127,7 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         layoutParams.width = context.getResources().getDisplayMetrics().widthPixels;
+        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.BOTTOM;
         getWindow().setAttributes(layoutParams);
     }
