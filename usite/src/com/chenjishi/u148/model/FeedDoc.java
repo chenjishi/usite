@@ -11,10 +11,6 @@ public class FeedDoc {
 
     public static class FeedData {
 
-        public int pageNo;
-
-        public int pageSize;
-
         public List<Feed> data;
     }
 }

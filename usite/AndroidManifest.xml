@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.chenjishi.u148"
-          android:versionCode="41"
-          android:versionName="1.4.9">
+          android:versionCode="42"
+          android:versionName="1.5">
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="17"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -72,6 +72,9 @@
                   android:screenOrientation="portrait"/>
         <activity android:name=".easter.FireworksActivity"
                   android:theme="@style/FullScreenStyle"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".activity.SearchActivity"
+                  android:theme="@style/SlideAppTheme"
                   android:screenOrientation="portrait"/>
         <service android:name=".service.MusicService" android:exported="false"/>
     </application>

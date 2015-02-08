@@ -52,6 +52,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
     private boolean showToolBar = false;
 
+    @SuppressWarnings("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

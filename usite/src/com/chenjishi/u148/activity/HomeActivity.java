@@ -39,7 +39,6 @@ import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.view.TabPageIndicator;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.chenjishi.u148.volley.toolbox.NetworkImageView;
 import com.flurry.android.FlurryAgent;
 
@@ -143,20 +142,6 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
 
         applyTheme(PrefsUtil.getThemeMode());
 
-        ImageButton button = (ImageButton) findViewById(R.id.btn_avatar);
-
-        float density = getResources().getDisplayMetrics().density;
-
-        int reqWidth = (int) (32 * density * 0.88);
-
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_avatar);
-        Bitmap scaledBitmap = ThumbnailUtils.extractThumbnail(bitmap, reqWidth, reqWidth);
-
-        Bitmap circleBitmap = Utils.circleToBitmap(scaledBitmap);
-
-        button.setImageBitmap(circleBitmap);
-
-        setUserIcon();
         checkUpdate();
     }
 
@@ -224,40 +209,12 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         startActivity(i);
     }
 
-    private void setUserIcon() {
-        final ImageButton button = (ImageButton) findViewById(R.id.btn_avatar);
-        final float density = getResources().getDisplayMetrics().density;
-        final int reqWidth = (int) (32 * density * 0.88);
-
-        if (Utils.isLogin()) {
-            UserInfo user = PrefsUtil.getUser();
-
-            HttpUtils.getImageLoader().get(user.icon, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    Bitmap bitmap = response.getBitmap();
-
-                    if (null != bitmap) {
-                        button.setImageBitmap(bitmap);
-                    } else {
-                        button.setImageBitmap(getDefaultIcon(reqWidth));
-                    }
-                }
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    button.setImageBitmap(getDefaultIcon(reqWidth));
-
-                }
-            }, reqWidth, reqWidth, true);
-        } else {
-            button.setImageBitmap(getDefaultIcon((int) (32 * density)));
-        }
+    public void onSearchClicked(View v) {
+        startActivity(new Intent(this, SearchActivity.class));
     }
 
     @Override
     public void onLoginSuccess() {
-        setUserIcon();
         refreshMenu();
         Utils.showToast(getString(R.string.login_success));
     }
@@ -350,23 +307,6 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
             drawerLayout.closeDrawer(Gravity.LEFT);
         } else {
             drawerLayout.openDrawer(Gravity.LEFT);
-        }
-    }
-
-    public void onLoginButtonClicked(View v) {
-        if (Utils.isLogin()) {
-            final ExitDialog dialog = new ExitDialog(this, new ExitDialog.OnLogoutListener() {
-                @Override
-                public void logout() {
-                    PrefsUtil.setUser(null);
-                    setUserIcon();
-                    Utils.showToast(R.string.logout_success);
-                    mMenuAdapter.notifyDataSetChanged();
-                }
-            });
-            dialog.show();
-        } else {
-            new LoginDialog(this, this).show();
         }
     }
 
@@ -483,7 +423,6 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
                     @Override
                     public void logout() {
                         PrefsUtil.setUser(null);
-                        setUserIcon();
                         Utils.showToast(R.string.logout_success);
                         refreshMenu();
                     }
@@ -650,6 +589,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         final FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
         final RelativeLayout titleView = (RelativeLayout) findViewById(R.id.title_bar);
         final TextView leftBtn = (TextView) findViewById(R.id.ic_drawer);
+        final ImageButton rightBtn = (ImageButton) findViewById(R.id.btn_avatar);
 
         mTabIndicator.setTheme(theme);
         final View split = findViewById(R.id.split_h);
@@ -660,12 +600,14 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
             leftBtn.setTextColor(0xFFBBBBBB);
             leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer_night, 0, 0, 0);
             split.setBackgroundColor(getResources().getColor(R.color.text_color_regular));
+            rightBtn.setImageResource(R.drawable.ic_action_search_night);
         } else {
             rootView.setBackgroundColor(getResources().getColor(R.color.background));
             titleView.setBackgroundColor(0xFFff9900);
             leftBtn.setTextColor(0xFFFFFFFF);
             leftBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_navigation_drawer, 0, 0, 0);
             split.setBackgroundColor(0xFFE6E6E6);
+            rightBtn.setImageResource(R.drawable.ic_action_search);
         }
 
         mTabAdapter.notifyDataSetChanged();
@@ -679,7 +621,6 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
              */
             if (resultCode == RESULT_CODE_REGISTER) {
                 mMenuAdapter.notifyDataSetChanged();
-                setUserIcon();
             }
         }
     }

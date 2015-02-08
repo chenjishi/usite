@@ -8,6 +8,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.FileUtils;
+import com.flurry.android.FlurryAgent;
 
 import java.io.File;
 
@@ -28,7 +29,14 @@ public class LaunchActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        FlurryAgent.onStartSession(this, "YYHS4STVXPMH6Y9GJ8WD");
         new LoadTask().execute();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
     }
 
     class LoadTask extends AsyncTask<Void, Void, Boolean> {

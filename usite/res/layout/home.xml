@@ -24,15 +24,12 @@
                 android:textSize="18sp"/>
         <ImageButton
                 android:id="@+id/btn_avatar"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/circle_bkg"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/home_button_bkg"
                 android:contentDescription="@null"
-                android:layout_marginRight="12dp"
-                android:clickable="true"
-                android:layout_centerVertical="true"
-                android:onClick="onLoginButtonClicked"
-                android:src="@drawable/ic_avatar_2"
+                android:onClick="onSearchClicked"
+                android:src="@drawable/ic_action_search"
                 android:layout_alignParentRight="true"/>
         <View
                 android:id="@+id/split_h"

@@ -33,4 +33,6 @@ public class Constants {
     public static final String API_COMMENT_POST = BASE_URL + "comment";
     public static final String API_FAVORITE_GET = BASE_URL + "get_favourite/0/%1$d?token=%2$s";
     public static final String API_UPGRADE = BASE_URL + "version";
+    public static final String API_SEARCH = BASE_URL + "search/%1$d?keyword=%2$s";
+
 }
