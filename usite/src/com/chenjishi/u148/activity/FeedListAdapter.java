@@ -2,6 +2,7 @@ package com.chenjishi.u148.activity;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.view.GifMovieView;
 import com.chenjishi.u148.volley.toolbox.ImageLoader;
 import com.chenjishi.u148.volley.toolbox.NetworkImageView;
 
@@ -82,6 +84,7 @@ public class FeedListAdapter extends BaseAdapter {
 
             holder.cellLayout = (RelativeLayout) convertView.findViewById(R.id.cell_layout);
             holder.thumb = (NetworkImageView) convertView.findViewById(R.id.feed_image);
+            holder.gifView = (GifMovieView) convertView.findViewById(R.id.gif_view);
             holder.category = (TextView) convertView.findViewById(R.id.feed_type);
             holder.title = (TextView) convertView.findViewById(R.id.feed_title);
             holder.viewsText = (TextView) convertView.findViewById(R.id.tv_views);
@@ -122,8 +125,29 @@ public class FeedListAdapter extends BaseAdapter {
 
         final Feed feed = getItem(position);
 
-        holder.thumb.setImageUrl(feed.pic_mid, mImageLoader);
-        holder.thumb.setDefaultImageResId(R.drawable.pictrue_bg);
+        String imageUrl = feed.pic_mid;
+        if (!TextUtils.isEmpty(imageUrl)) {
+            if (imageUrl.endsWith("gif") || imageUrl.endsWith("GIF") ||
+                    imageUrl.endsWith("Gif")) {
+                holder.thumb.setVisibility(View.GONE);
+
+                holder.gifView.setImageUrl(imageUrl, (int) (mDensity * 90));
+                holder.gifView.setVisibility(View.VISIBLE);
+            } else {
+                holder.gifView.setVisibility(View.GONE);
+
+                holder.thumb.setImageUrl(feed.pic_mid, mImageLoader);
+                holder.thumb.setDefaultImageResId(R.drawable.pictrue_bg);
+                holder.thumb.setVisibility(View.VISIBLE);
+            }
+
+        } else {
+            holder.gifView.setVisibility(View.GONE);
+
+            holder.thumb.setImageResource(R.drawable.pictrue_bg);
+            holder.thumb.setVisibility(View.VISIBLE);
+        }
+
         holder.category.setText("[" + mCategoryArray.get(feed.category) + "]");
         holder.title.setText(feed.title);
         holder.viewsText.setText(String.format(mResources.getString(R.string.views), feed.count_browse));
@@ -136,6 +160,7 @@ public class FeedListAdapter extends BaseAdapter {
     private static class ViewHolder {
         public RelativeLayout cellLayout;
         public NetworkImageView thumb;
+        public GifMovieView gifView;
         public TextView category;
         public TextView title;
         public TextView viewsText;
