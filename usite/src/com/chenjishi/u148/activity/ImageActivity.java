@@ -16,11 +16,12 @@ import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.view.DepthPageTransformer;
+import com.chenjishi.u148.view.GifMovieView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.view.TouchImageView;
 import com.chenjishi.u148.volley.VolleyError;
@@ -95,7 +96,6 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
         mToolBar = (RelativeLayout) findViewById(R.id.tool_bar);
         mViewPager = (ViewPager) findViewById(R.id.pager_photo);
-        mViewPager.setPageTransformer(true, new DepthPageTransformer());
         mViewPager.setAdapter(new PhotoPagerAdapter(this));
         mViewPager.setOnPageChangeListener(this);
     }
@@ -244,7 +244,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
         return filePath;
     }
 
-    class PhotoPagerAdapter extends PagerAdapter {
+    private class PhotoPagerAdapter extends PagerAdapter {
         private LayoutInflater inflater;
 
         public PhotoPagerAdapter(Context context) {
@@ -258,15 +258,36 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            View pageView = inflater.inflate(R.layout.photo_item, null);
+            View view = inflater.inflate(R.layout.photo_item, null);
 
-            final TouchImageView imageView = (TouchImageView) pageView.findViewById(R.id.img_photo);
+            TextView textView = (TextView) view.findViewById(R.id.loading_text);
+            TouchImageView imageView = (TouchImageView) view.findViewById(R.id.img_photo);
+            GifMovieView gifView = (GifMovieView) view.findViewById(R.id.gif_view);
 
-            imageLoader.get(mImageList.get(position),
-                    ImageLoader.getImageListener(imageView, R.drawable.gray, R.drawable.gray));
+            String imageUrl = mImageList.get(position);
+            if (!TextUtils.isEmpty(imageUrl)) {
+                if (imageUrl.endsWith("gif") || imageUrl.endsWith("GIF") || imageUrl.endsWith("Gif")) {
+                    int screenWidth = getResources().getDisplayMetrics().widthPixels;
 
-            container.addView(pageView);
-            return pageView;
+                    imageView.setVisibility(View.GONE);
+
+                    gifView.setImageUrl(imageUrl, screenWidth);
+                    gifView.setVisibility(View.VISIBLE);
+                } else {
+                    gifView.setVisibility(View.GONE);
+                    imageLoader.get(mImageList.get(position),
+                            ImageLoader.getImageListener(imageView, R.drawable.gray, R.drawable.gray));
+                    imageView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                imageView.setVisibility(View.GONE);
+                gifView.setVisibility(View.GONE);
+                textView.setText(R.string.image_loading_fail);
+                textView.setVisibility(View.VISIBLE);
+            }
+
+            container.addView(view);
+            return view;
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.chenjishi.u148.activity;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -78,6 +79,8 @@ public class FeedListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
+        final int theme = PrefsUtil.getThemeMode();
+        String color = "#FF9900";
         if (null == convertView) {
             convertView = mInflater.inflate(R.layout.feed_list_item, parent, false);
             holder = new ViewHolder();
@@ -85,24 +88,18 @@ public class FeedListAdapter extends BaseAdapter {
             holder.cellLayout = (RelativeLayout) convertView.findViewById(R.id.cell_layout);
             holder.thumb = (NetworkImageView) convertView.findViewById(R.id.feed_image);
             holder.gifView = (GifMovieView) convertView.findViewById(R.id.gif_view);
-            holder.category = (TextView) convertView.findViewById(R.id.feed_type);
             holder.title = (TextView) convertView.findViewById(R.id.feed_title);
-            holder.viewsText = (TextView) convertView.findViewById(R.id.tv_views);
             holder.commentText = (TextView) convertView.findViewById(R.id.tv_comment);
             holder.content = (TextView) convertView.findViewById(R.id.feed_content);
 
-            final int theme = PrefsUtil.getThemeMode();
             if (Constants.MODE_NIGHT == theme) {
-                holder.category.setTextColor(mResources.getColor(R.color.action_bar_bg_night));
+                color = "#B26B00";
                 holder.title.setTextColor(mResources.getColor(R.color.text_color_weak));
                 holder.content.setTextColor(mResources.getColor(R.color.text_color_summary));
-                holder.viewsText.setTextColor(mResources.getColor(R.color.text_color_summary));
                 holder.commentText.setTextColor(mResources.getColor(R.color.text_color_summary));
             } else {
-                holder.category.setTextColor(mResources.getColor(R.color.action_bar_bg));
                 holder.title.setTextColor(mResources.getColor(R.color.text_color_regular));
                 holder.content.setTextColor(mResources.getColor(R.color.text_color_weak));
-                holder.viewsText.setTextColor(mResources.getColor(R.color.text_color_weak));
                 holder.commentText.setTextColor(mResources.getColor(R.color.text_color_weak));
             }
 
@@ -122,7 +119,6 @@ public class FeedListAdapter extends BaseAdapter {
         }
 
         holder.cellLayout.setPadding(paddingLeft, (int) (paddingTop * mDensity), paddingLeft, padingBottom);
-
         final Feed feed = getItem(position);
 
         String imageUrl = feed.pic_mid;
@@ -148,10 +144,9 @@ public class FeedListAdapter extends BaseAdapter {
             holder.thumb.setVisibility(View.VISIBLE);
         }
 
-        holder.category.setText("[" + mCategoryArray.get(feed.category) + "]");
-        holder.title.setText(feed.title);
-        holder.viewsText.setText(String.format(mResources.getString(R.string.views), feed.count_browse));
-        holder.commentText.setText(String.format(mResources.getString(R.string.comment_count), feed.count_review));
+        String title = "<font color=\"" + color + "\">[" + mCategoryArray.get(feed.category) + "]</font> " + feed.title;
+        holder.title.setText(Html.fromHtml(title));
+        holder.commentText.setText(mResources.getString(R.string.views, feed.count_browse, feed.count_review));
         holder.content.setText(feed.summary);
 
         return convertView;
@@ -161,9 +156,7 @@ public class FeedListAdapter extends BaseAdapter {
         public RelativeLayout cellLayout;
         public NetworkImageView thumb;
         public GifMovieView gifView;
-        public TextView category;
         public TextView title;
-        public TextView viewsText;
         public TextView commentText;
         public TextView content;
     }

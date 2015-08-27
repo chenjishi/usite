@@ -86,9 +86,6 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(this);
-
-        swipeRefreshLayout.setColorScheme(R.color.color1, R.color.color2,
-                R.color.color3, R.color.color4);
         swipeRefreshLayout.setOnRefreshListener(this);
 
         return view;
