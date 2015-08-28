@@ -46,7 +46,7 @@ import static com.chenjishi.u148.util.Constants.API_COMMENT_POST;
  * To change this template use File | Settings | File Templates.
  */
 public class CommentActivity extends SlidingActivity implements Response.Listener<Comment>,
-        Response.ErrorListener, View.OnClickListener, LoginDialog.OnLoginListener, AdapterView.OnItemClickListener {
+        Response.ErrorListener, LoginDialog.OnLoginListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
     private String articleId;
     private String mContent;
     private String commentId;
@@ -57,6 +57,8 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
 
     private View emptyView;
     private int currentPage = 1;
+    private int mLastItemIndex;
+    private boolean mIsDataLoading;
     private View footView;
 
     private EditText mEditText;
@@ -71,31 +73,44 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
 
         emptyView = findViewById(R.id.empty_view);
         footView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        Button button = (Button) footView.findViewById(R.id.btn_load);
-        button.setOnClickListener(this);
+        TextView footLabel = (TextView) footView.findViewById(R.id.loading_text);
 
         mEditText = (EditText) findViewById(R.id.et_content);
 
         mAdapter = new CommentAdapter(this);
         ListView listView = (ListView) findViewById(R.id.list_comment);
-        listView.addFooterView(footView);
+        listView.addFooterView(footView, null, false);
         footView.setVisibility(View.GONE);
         listView.setEmptyView(emptyView);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(this);
+        listView.setOnScrollListener(this);
 
         if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
             listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
-            button.setBackgroundResource(R.drawable.btn_gray_night);
-            button.setTextColor(getResources().getColor(R.color.text_color_summary));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_summary));
         } else {
             listView.setDivider(getResources().getDrawable(R.drawable.split_color));
-            button.setBackgroundResource(R.drawable.btn_gray);
-            button.setTextColor(getResources().getColor(R.color.text_color_regular));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_regular));
         }
         listView.setDividerHeight(1);
 
         loadData();
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE && mLastItemIndex == mAdapter.getCount()) {
+            if (!mIsDataLoading) {
+                currentPage++;
+                loadData();
+            }
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        mLastItemIndex = firstVisibleItem + visibleItemCount - 1;
     }
 
     @Override
@@ -111,6 +126,7 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
     @Override
     public void onErrorResponse(VolleyError error) {
         Utils.setErrorView(emptyView, R.string.net_error);
+        mIsDataLoading = false;
         footView.setVisibility(View.GONE);
     }
 
@@ -130,15 +146,11 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
         Utils.showToast(getString(R.string.login_fail));
     }
 
-    @Override
-    public void onClick(View v) {
-        footView.findViewById(R.id.btn_load).setVisibility(View.GONE);
-        footView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
-        currentPage++;
-        loadData();
-    }
-
     private void loadData() {
+        mIsDataLoading = true;
+
+        if (currentPage > 1) footView.setVisibility(View.VISIBLE);
+
         final String url = String.format(API_COMMENTS_GET, articleId, currentPage);
         HttpUtils.get(url, Comment.class, this, this);
     }
@@ -228,23 +240,16 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
                 if (1 == currentPage) commentList.clear();
 
                 commentList.addAll(response.data.data);
-
-                if (count >= 30) {
-                    footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                    footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                    footView.setVisibility(View.VISIBLE);
-                } else {
-                    footView.setVisibility(View.GONE);
-                }
                 mAdapter.notifyDataSetChanged();
             } else {
                 Utils.setErrorView(emptyView, R.string.no_comment);
-                footView.setVisibility(View.GONE);
             }
         } else {
             Utils.setErrorView(emptyView, R.string.no_comment);
-            footView.setVisibility(View.GONE);
         }
+
+        mIsDataLoading = false;
+        footView.setVisibility(View.GONE);
     }
 
     private class CommentAdapter extends BaseAdapter {

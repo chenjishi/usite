@@ -1,45 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/foot_layout"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:paddingTop="12dp"
-             android:paddingBottom="12dp">
-    <Button
-            android:id="@+id/btn_load"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_gray"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:layout_gravity="center"
-            android:text="@string/page_next"
-            android:textColor="@color/text_color_regular"
-            android:textSize="16sp"/>
-    <LinearLayout
-            android:id="@+id/loading_layout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingTop="12dp"
+              android:paddingBottom="12dp"
+              android:orientation="horizontal"
+              android:gravity="center_horizontal">
+    <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:visibility="gone">
-        <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="4dp"
-                android:layout_gravity="center_vertical"
-                style="@android:style/Widget.ProgressBar.Small"
-                android:indeterminateDrawable="@drawable/progress_bar"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/loading"
-                android:textColor="@color/text_color_regular"
-                android:textSize="16sp"/>
-    </LinearLayout>
-</FrameLayout>
+            android:layout_marginRight="4dp"
+            android:layout_gravity="center_vertical"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:indeterminateDrawable="@drawable/progress_bar"/>
+    <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loading"
+            android:textColor="@color/text_color_regular"
+            android:textSize="16sp"/>
+</LinearLayout>

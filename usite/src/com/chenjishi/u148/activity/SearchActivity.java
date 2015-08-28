@@ -3,13 +3,11 @@ package com.chenjishi.u148.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
@@ -30,8 +28,8 @@ import java.util.Map;
 /**
  * Created by chenjishi on 15/2/3.
  */
-public class SearchActivity extends BaseActivity implements Response.Listener<FeedDoc>,
-        Response.ErrorListener, AdapterView.OnItemClickListener, View.OnClickListener {
+public class SearchActivity extends BaseActivity implements Response.Listener<FeedDoc>, AbsListView.OnScrollListener,
+        Response.ErrorListener, AdapterView.OnItemClickListener {
     private ListView mListView;
     private EditText mEditText;
     private View mFootView;
@@ -39,10 +37,10 @@ public class SearchActivity extends BaseActivity implements Response.Listener<Fe
 
     private FeedListAdapter mListAdapter;
 
-    private boolean mIsLoading;
     private int mPage = 1;
-
     private String mKeyword;
+    private int mLastItemIndex;
+    private boolean mIsDataLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,37 +52,34 @@ public class SearchActivity extends BaseActivity implements Response.Listener<Fe
         mListAdapter = new FeedListAdapter(this);
 
         mEmptyView = LayoutInflater.from(this).inflate(R.layout.empty_view, null);
-
         mFootView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        Button button = (Button) mFootView.findViewById(R.id.btn_load);
-        button.setOnClickListener(this);
+        TextView footLabel = (TextView) mFootView.findViewById(R.id.loading_text);
         mFootView.setVisibility(View.GONE);
 
         mListView = (ListView) findViewById(R.id.search_list);
-        mListView.addFooterView(mFootView);
+        mListView.addFooterView(mFootView, null, false);
         ((ViewGroup) mListView.getParent()).addView(mEmptyView);
         mListView.setEmptyView(mEmptyView);
 
         if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
             mListView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
-            button.setBackgroundResource(R.drawable.btn_gray_night);
-            button.setTextColor(getResources().getColor(R.color.text_color_summary));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_summary));
         } else {
             mListView.setDivider(getResources().getDrawable(R.drawable.split_color));
-            button.setBackgroundResource(R.drawable.btn_gray);
-            button.setTextColor(getResources().getColor(R.color.text_color_regular));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_regular));
         }
 
         mListView.setDividerHeight(1);
 
         mListView.setAdapter(mListAdapter);
         mListView.setOnItemClickListener(this);
+        mListView.setOnScrollListener(this);
         mListView.setVisibility(View.GONE);
         mEmptyView.setVisibility(View.GONE);
     }
 
     public void onSearchClicked(View view) {
-        if (mIsLoading) return;
+        if (mIsDataLoading) return;
 
         String text = mEditText.getText().toString();
         if (TextUtils.isEmpty(text)) return;
@@ -109,17 +104,35 @@ public class SearchActivity extends BaseActivity implements Response.Listener<Fe
     }
 
     private void request() {
-        mIsLoading = true;
+        mIsDataLoading = true;
+        if (mPage > 1) mFootView.setVisibility(View.VISIBLE);
 
         String url = String.format(Constants.API_SEARCH, mPage, mKeyword);
+        Log.i("test", "#url  " + url);
         HttpUtils.get(url, FeedDoc.class, this, this);
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE && mLastItemIndex == mListAdapter.getCount()) {
+            if (!mIsDataLoading) {
+                mPage++;
+                request();
+            }
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        mLastItemIndex = firstVisibleItem + visibleItemCount - 1;
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
         Utils.setErrorView(mEmptyView, getString(R.string.net_error));
         mFootView.setVisibility(View.GONE);
-        mIsLoading = false;
+        mIsDataLoading = false;
+        mFootView.setVisibility(View.GONE);
     }
 
     @Override
@@ -128,23 +141,13 @@ public class SearchActivity extends BaseActivity implements Response.Listener<Fe
             final List<Feed> feedList = response.data.data;
             if (null != feedList && feedList.size() > 0) {
                 mListAdapter.addData(feedList);
-
-                int size = feedList.size();
-                if (size < 12) {
-                    mFootView.setVisibility(View.GONE);
-                } else {
-                    mFootView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                    mFootView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                    mFootView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                mFootView.setVisibility(View.GONE);
             }
         } else {
             Utils.setErrorView(mEmptyView, getString(R.string.parse_error));
-            mFootView.setVisibility(View.GONE);
         }
-        mIsLoading = false;
+
+        mFootView.setVisibility(View.GONE);
+        mIsDataLoading = false;
     }
 
     @Override
@@ -159,17 +162,5 @@ public class SearchActivity extends BaseActivity implements Response.Listener<Fe
         final Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(Constants.KEY_FEED, feed);
         startActivity(intent);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mIsLoading) return;
-
-        if (v.getId() == R.id.btn_load) {
-            mFootView.findViewById(R.id.btn_load).setVisibility(View.GONE);
-            mFootView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
-            mPage++;
-            request();
-        }
     }
 }

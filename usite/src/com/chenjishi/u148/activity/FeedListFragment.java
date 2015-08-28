@@ -7,9 +7,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
@@ -35,7 +36,8 @@ import static com.chenjishi.u148.util.Constants.API_FEED_LIST;
  * To change this template use File | Settings | File Templates.
  */
 public class FeedListFragment extends Fragment implements AdapterView.OnItemClickListener,
-        Response.Listener<FeedDoc>, Response.ErrorListener, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+        Response.Listener<FeedDoc>, Response.ErrorListener, SwipeRefreshLayout.OnRefreshListener,
+        AbsListView.OnScrollListener {
     private SwipeRefreshLayout swipeRefreshLayout;
     private FeedListAdapter listAdapter;
     private View footView;
@@ -44,6 +46,9 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     protected int page = 1;
     private int category;
     private boolean dataLoaded;
+
+    private int mLastItemIndex;
+    private boolean mIsDataLoading;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,41 +69,45 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
         emptyView = view.findViewById(R.id.empty_view);
         footView = inflater.inflate(R.layout.load_more, null);
-        Button loadBtn = (Button) footView.findViewById(R.id.btn_load);
-        loadBtn.setOnClickListener(this);
+        TextView footLabel = (TextView) footView.findViewById(R.id.loading_text);
 
-        listView.addFooterView(footView);
+        listView.addFooterView(footView, null, false);
+        footView.setVisibility(View.GONE);
+
         listView.setEmptyView(emptyView);
 
         if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
             view.setBackgroundColor(getResources().getColor(R.color.background_night));
             listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
-            loadBtn.setBackgroundResource(R.drawable.btn_gray_night);
-            loadBtn.setTextColor(getResources().getColor(R.color.text_color_summary));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_summary));
         } else {
             view.setBackgroundColor(getResources().getColor(R.color.background));
             listView.setDivider(getResources().getDrawable(R.drawable.split_color));
-            loadBtn.setBackgroundResource(R.drawable.btn_gray);
-            loadBtn.setTextColor(getResources().getColor(R.color.text_color_regular));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_regular));
         }
 
         listView.setDividerHeight(1);
-
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(this);
+        listView.setOnScrollListener(this);
         swipeRefreshLayout.setOnRefreshListener(this);
 
         return view;
     }
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btn_load) {
-            footView.findViewById(R.id.btn_load).setVisibility(View.GONE);
-            footView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
-            page++;
-            request();
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE && mLastItemIndex == listAdapter.getCount()) {
+            if (!mIsDataLoading) {
+                page++;
+                request();
+            }
         }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        mLastItemIndex = firstVisibleItem + visibleItemCount - 1;
     }
 
     @Override
@@ -122,6 +131,10 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     }
 
     private void request() {
+        mIsDataLoading = true;
+
+        if (page > 1) footView.setVisibility(View.VISIBLE);
+
         String url = String.format(API_FEED_LIST, category, page);
         HttpUtils.get(url, FeedDoc.class, this, this);
     }
@@ -140,8 +153,9 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     public void onErrorResponse(VolleyError error) {
         Utils.setErrorView(emptyView, getString(R.string.net_error));
 
-        footView.setVisibility(View.GONE);
         swipeRefreshLayout.setRefreshing(false);
+        mIsDataLoading = false;
+        footView.setVisibility(View.GONE);
     }
 
     @Override
@@ -154,23 +168,14 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
             final List<Feed> feedList = response.data.data;
             if (null != feedList && feedList.size() > 0) {
                 listAdapter.addData(feedList);
-
-                int size = feedList.size();
-                if (size < 12) {
-                    footView.setVisibility(View.GONE);
-                } else {
-                    footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                    footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                    footView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                footView.setVisibility(View.GONE);
             }
         } else {
             Utils.setErrorView(emptyView, getString(R.string.parse_error));
-            footView.setVisibility(View.GONE);
         }
 
+        footView.setVisibility(View.GONE);
         swipeRefreshLayout.setRefreshing(false);
+        mIsDataLoading = false;
     }
+
 }

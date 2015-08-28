@@ -34,7 +34,7 @@ import static com.chenjishi.u148.util.Constants.API_FAVORITE_GET;
  * Created by chenjishi on 14-2-22.
  */
 public class FavoriteActivity extends SlidingActivity implements Response.Listener<Favorite>,
-        Response.ErrorListener, View.OnClickListener, AdapterView.OnItemClickListener,
+        Response.ErrorListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener,
         AdapterView.OnItemLongClickListener {
     private FavoriteAdapter mAdapter;
     private ArrayList<FavoriteItem> favoriteList = new ArrayList<FavoriteItem>();
@@ -43,6 +43,8 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
     private View footView;
 
     private int currentPage = 1;
+    private int mLastItemIndex;
+    private boolean mIsDataLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +53,14 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
         setTitle(R.string.favorite);
 
         footView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        Button button = (Button) footView.findViewById(R.id.btn_load);
-        button.setOnClickListener(this);
+        TextView footLabel = (TextView) footView.findViewById(R.id.loading_text);
 
         emptyView = findViewById(R.id.empty_layout);
         ListView listView = (ListView) findViewById(R.id.list_favorite);
         listView.addFooterView(footView);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
+        listView.setOnScrollListener(this);
         footView.setVisibility(View.GONE);
         listView.setEmptyView(emptyView);
         mAdapter = new FavoriteAdapter(this);
@@ -67,12 +69,10 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
 
         if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
             listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
-            button.setBackgroundResource(R.drawable.btn_gray_night);
-            button.setTextColor(getResources().getColor(R.color.text_color_summary));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_summary));
         } else {
             listView.setDivider(getResources().getDrawable(R.drawable.split_color));
-            button.setBackgroundResource(R.drawable.btn_gray);
-            button.setTextColor(getResources().getColor(R.color.text_color_regular));
+            footLabel.setTextColor(getResources().getColor(R.color.text_color_regular));
         }
         listView.setDividerHeight(1);
 
@@ -80,6 +80,10 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
     }
 
     void loadData() {
+        mIsDataLoading = true;
+
+        if (currentPage > 1) footView.setVisibility(View.VISIBLE);
+
         final UserInfo user = PrefsUtil.getUser();
         HttpUtils.get(String.format(API_FAVORITE_GET, currentPage, user.token), Favorite.class, this, this);
     }
@@ -87,6 +91,7 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
     @Override
     public void onErrorResponse(VolleyError error) {
         Utils.setErrorView(emptyView, "网络无连接，请检查网络");
+        mIsDataLoading = false;
         footView.setVisibility(View.GONE);
     }
 
@@ -97,28 +102,27 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
             if (null != favorites && favorites.size() > 0) {
                 favoriteList.addAll(favorites);
                 mAdapter.notifyDataSetChanged();
-
-                if (favorites.size() >= 30) {
-                    footView.findViewById(R.id.loading_layout).setVisibility(View.GONE);
-                    footView.findViewById(R.id.btn_load).setVisibility(View.VISIBLE);
-                    footView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                Utils.setErrorView(emptyView, "您暂时还没有收藏任何文章哦~");
-                footView.setVisibility(View.GONE);
             }
         } else {
             Utils.setErrorView(emptyView, "解析错误或者网络无返回，请稍后再试");
-            footView.setVisibility(View.GONE);
+        }
+        mIsDataLoading = false;
+        footView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE && mLastItemIndex == mAdapter.getCount()) {
+            if (!mIsDataLoading) {
+                currentPage++;
+                loadData();
+            }
         }
     }
 
     @Override
-    public void onClick(View v) {
-        footView.findViewById(R.id.btn_load).setVisibility(View.GONE);
-        footView.findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
-        currentPage++;
-        loadData();
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        mLastItemIndex = firstVisibleItem + visibleItemCount - 1;
     }
 
     private DeletePopupWindow mPopupWindow;
