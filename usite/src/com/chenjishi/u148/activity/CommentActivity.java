@@ -173,7 +173,7 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
                     new LoginDialog(this, this).show();
                 }
             } else {
-                Utils.showToast("评论不能为空");
+                Utils.showToast(R.string.empty_comment_tip);
             }
         }
     }
@@ -183,7 +183,7 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
 
         final UserInfo user = PrefsUtil.getUser();
         final ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("评论提交中...");
+        pd.setMessage(getString(R.string.submit_comment));
         pd.show();
 
         Map<String, String> params = new HashMap<String, String>();
@@ -209,23 +209,23 @@ public class CommentActivity extends SlidingActivity implements Response.Listene
                                     mEditText.setHint("");
                                     mEditText.clearFocus();
                                     mContent = content;
-                                    Utils.showToast("评论成功");
+                                    Utils.showToast(R.string.comment_success);
                                     loadData();
                                 } else {
-                                    Utils.showToast("评论失败，请稍后再试");
+                                    Utils.showToast(R.string.comment_fail);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            Utils.showToast("评论失败，请稍后再试");
+                            Utils.showToast(R.string.comment_fail);
                         }
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         pd.dismiss();
-                        Utils.showToast("评论失败，请稍后再试");
+                        Utils.showToast(R.string.comment_fail);
                     }
                 }
         );

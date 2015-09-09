@@ -76,9 +76,9 @@
         <activity android:name=".activity.SearchActivity"
                   android:theme="@style/SlideAppTheme"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".activity.PromotionsActivity"
+        <activity android:name=".promotions.PromotionsActivity"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".activity.PromotionsCommentActivity"
+        <activity android:name=".promotions.PromotionsCommentActivity"
                   android:screenOrientation="portrait"/>
         <service android:name=".service.MusicService" android:exported="false"/>
     </application>

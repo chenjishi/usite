@@ -77,6 +77,20 @@ public class HttpUtils {
         queue.add(new StringRequest(url, listener, errorListener));
     }
 
+    public static <T> Request<T> post(String url,
+                                      final Map<String, String> params, Class<T> clazz,
+                                      Response.Listener<T> listener, Response.ErrorListener errorListener) {
+        RequestQueue queue = getRequestQueue();
+        GsonRequest<T> request = new GsonRequest<T>(Request.Method.POST,url, clazz, listener,
+                errorListener) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return params;
+            }
+        };
+        return queue.add(request);
+    }
+
     public static void post(String url,
                             final Map<String, String> params,
                             Response.Listener<String> listener,

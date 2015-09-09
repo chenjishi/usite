@@ -16,6 +16,7 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.FeedDoc;
+import com.chenjishi.u148.promotions.PromotionsActivity;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
@@ -120,9 +121,9 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         final Feed feed = listAdapter.getItem(position);
 
         /** for promotions */
-        if (feed.id.equalsIgnoreCase("-1")) {
+        if (feed.category == -1) {
             Intent intent = new Intent(getActivity(), PromotionsActivity.class);
-            intent.putExtra(PromotionsActivity.KEY_URL, feed.status);
+            intent.putExtra(Constants.KEY_FEED, feed);
             startActivity(intent);
         } else {
             Map<String, String> params = new HashMap<String, String>();
@@ -209,10 +210,10 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
             JSONArray dataArr = dataObj.getJSONArray("funclub");
             if (null != dataArr && dataArr.length() > 0) {
                 JSONObject data = dataArr.getJSONObject(0);
-                feed.id = String.valueOf(-1);
-                feed.category = 0;
+                feed.id = data.optString("tid");
+                feed.category = -1;
                 feed.title = data.optString("title");
-                feed.summary = data.optString("content");
+                feed.summary = data.optString("autho_name");
                 feed.pic_mid = data.optString("pids");
                 feed.pic_min = feed.pic_mid;
                 feed.create_time = data.optLong("create_time");
