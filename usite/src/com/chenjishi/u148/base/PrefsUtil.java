@@ -56,6 +56,16 @@ public class PrefsUtil {
     private static final String SURPRISE_TITLE = "surprise_title";
     private static final String SURPRISE_DESC = "surprise_desc";
 
+    private static final String ADS_JSON = "ads_json";
+
+    public static void saveAdsJson(String json) {
+        saveStringPreference(ADS_JSON, json);
+    }
+
+    public static String getAdsJson() {
+        return getStringPreference(ADS_JSON);
+    }
+
     public static int getThemeMode() {
         return getIntPreference(KEY_THEME_MODE, Constants.MODE_DAY);
     }

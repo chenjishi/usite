@@ -80,6 +80,10 @@ public class BaseActivity extends FragmentActivity {
         finish();
     }
 
+    public void onRightButtonClicked(View v) {
+
+    }
+
     protected void setRightButtonIcon(int resId) {
         final ImageButton button = (ImageButton) findViewById(R.id.btn_right);
         button.setImageResource(resId);

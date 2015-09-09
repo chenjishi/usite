@@ -1,29 +1,29 @@
 package com.chenjishi.u148.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.*;
+import android.text.TextUtils;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.FileUtils;
+import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.volley.VolleyError;
 import com.flurry.android.FlurryAgent;
 
 import java.io.File;
 
-public class LaunchActivity extends Activity {
+public class LaunchActivity extends Activity implements Response.Listener<String>, Response.ErrorListener {
     private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
-
-    private Context context;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        findViewById(android.R.id.content).setBackgroundColor(0xFFF0F0F0);
 
-        context = this;
+        HttpUtils.get("http://app.goudaifu.com/funclub/v1/funclubget", this, this);
     }
 
     @Override
@@ -39,6 +39,18 @@ public class LaunchActivity extends Activity {
         FlurryAgent.onEndSession(this);
     }
 
+    @Override
+    public void onErrorResponse(VolleyError error) {
+
+    }
+
+    @Override
+    public void onResponse(String response) {
+        if (!TextUtils.isEmpty(response)) {
+            PrefsUtil.saveAdsJson(response);
+        }
+    }
+
     class LoadTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
@@ -46,8 +58,8 @@ public class LaunchActivity extends Activity {
             //clear cache of 2 days before
             long lastClearCacheTime = PrefsUtil.getClearCacheTime();
             if (System.currentTimeMillis() > lastClearCacheTime) {
-                context.deleteDatabase("webview.db");
-                context.deleteDatabase("webviewCache.db");
+                LaunchActivity.this.deleteDatabase("webview.db");
+                LaunchActivity.this.deleteDatabase("webviewCache.db");
                 PrefsUtil.setClearCacheTime(System.currentTimeMillis() + TWO_DAYS);
             }
 
@@ -74,7 +86,7 @@ public class LaunchActivity extends Activity {
             mainThread.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    startActivity(new Intent(context, HomeActivity.class));
+                    startActivity(new Intent(LaunchActivity.this, HomeActivity.class));
                     finish();
                 }
             }, 3000);

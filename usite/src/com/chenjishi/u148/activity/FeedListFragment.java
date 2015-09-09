@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,11 @@ import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.flurry.android.FlurryAgent;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,14 +119,21 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Feed feed = listAdapter.getItem(position);
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("author", feed.usr.nickname);
-        params.put("title", feed.title);
-        FlurryAgent.logEvent("read_article", params);
+        /** for promotions */
+        if (feed.id.equalsIgnoreCase("-1")) {
+            Intent intent = new Intent(getActivity(), PromotionsActivity.class);
+            intent.putExtra(PromotionsActivity.KEY_URL, feed.status);
+            startActivity(intent);
+        } else {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("author", feed.usr.nickname);
+            params.put("title", feed.title);
+            FlurryAgent.logEvent("read_article", params);
 
-        final Intent intent = new Intent(getActivity(), DetailsActivity.class);
-        intent.putExtra(Constants.KEY_FEED, feed);
-        startActivity(intent);
+            final Intent intent = new Intent(getActivity(), DetailsActivity.class);
+            intent.putExtra(Constants.KEY_FEED, feed);
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -165,8 +177,15 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
             dataLoaded = true;
 
-            final List<Feed> feedList = response.data.data;
-            if (null != feedList && feedList.size() > 0) {
+            List<Feed> feedList = new ArrayList<Feed>();
+            final List<Feed> tempList = response.data.data;
+            if (null != tempList && tempList.size() > 0) {
+                /** ads for promotions */
+                if (category == 0 && 1 == page) {
+                    Feed feed = getAdsItemFeed();
+                    if (null != feed) feedList.add(feed);
+                }
+                feedList.addAll(tempList);
                 listAdapter.addData(feedList);
             }
         } else {
@@ -178,4 +197,33 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         mIsDataLoading = false;
     }
 
+    private Feed getAdsItemFeed() {
+        String json = PrefsUtil.getAdsJson();
+        if (TextUtils.isEmpty(json)) return null;
+
+        Feed feed = new Feed();
+        try {
+            JSONObject jObj = new JSONObject(json);
+
+            JSONObject dataObj = jObj.getJSONObject("data");
+            JSONArray dataArr = dataObj.getJSONArray("funclub");
+            if (null != dataArr && dataArr.length() > 0) {
+                JSONObject data = dataArr.getJSONObject(0);
+                feed.id = String.valueOf(-1);
+                feed.category = 0;
+                feed.title = data.optString("title");
+                feed.summary = data.optString("content");
+                feed.pic_mid = data.optString("pids");
+                feed.pic_min = feed.pic_mid;
+                feed.create_time = data.optLong("create_time");
+                feed.count_browse = data.optInt("see_num");
+                feed.count_review = data.optInt("reply_num");
+                feed.status = data.optString("turl");
+            }
+        } catch (JSONException e) {
+            feed = null;
+        }
+
+        return feed;
+    }
 }

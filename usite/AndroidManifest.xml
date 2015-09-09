@@ -76,6 +76,10 @@
         <activity android:name=".activity.SearchActivity"
                   android:theme="@style/SlideAppTheme"
                   android:screenOrientation="portrait"/>
+        <activity android:name=".activity.PromotionsActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".activity.PromotionsCommentActivity"
+                  android:screenOrientation="portrait"/>
         <service android:name=".service.MusicService" android:exported="false"/>
     </application>
 </manifest> 

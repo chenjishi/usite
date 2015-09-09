@@ -42,14 +42,12 @@
             android:paddingTop="@dimen/action_bar_icon_vertical_padding"
             android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
             android:clickable="true"
-            android:onClick="onButtonClicked"
+            android:onClick="onRightButtonClicked"
             android:background="@drawable/home_up_bg"
-            android:adjustViewBounds="true"
             android:contentDescription="@null"
             android:layout_centerInParent="true"
             android:layout_alignParentRight="true"
-            android:visibility="gone"
-            android:scaleType="fitCenter"/>
+            android:visibility="gone"/>
     <View
             android:id="@+id/split_h"
             android:layout_width="match_parent"
