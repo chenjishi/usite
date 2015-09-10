@@ -19,7 +19,6 @@ import com.chenjishi.u148.model.FeedDoc;
 import com.chenjishi.u148.promotions.PromotionsActivity;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.IntentUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -120,22 +119,22 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Feed feed = listAdapter.getItem(position);
+        Intent intent = new Intent();
+        intent.putExtra(Constants.KEY_FEED, feed);
 
         /** for promotions */
         if (feed.category == -1) {
-            Intent intent = new Intent(getActivity(), PromotionsActivity.class);
-            intent.putExtra(Constants.KEY_FEED, feed);
-            IntentUtils.startPreviewActivity(getActivity(), intent);
+            intent.setClass(getActivity(), PromotionsActivity.class);
         } else {
             Map<String, String> params = new HashMap<String, String>();
             params.put("author", feed.usr.nickname);
             params.put("title", feed.title);
             FlurryAgent.logEvent("read_article", params);
 
-            final Intent intent = new Intent(getActivity(), DetailsActivity.class);
-            intent.putExtra(Constants.KEY_FEED, feed);
-            IntentUtils.startPreviewActivity(getActivity(), intent);
+            intent.setClass(getActivity(), DetailsActivity.class);
         }
+
+        startActivity(intent);
     }
 
     @Override

@@ -6,10 +6,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.view.MotionEventCompat;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -47,7 +46,7 @@ import static com.chenjishi.u148.util.Constants.API_ARTICLE;
  * Time: 下午7:56
  * To change this template use File | Settings | File Templates.
  */
-public class DetailsActivity extends SlidingActivity implements MusicPlayListener, Response.Listener<Article>,
+public class DetailsActivity extends BaseActivity implements MusicPlayListener, Response.Listener<Article>,
         Response.ErrorListener, JSCallback {
     private ArticleWebView mWebView;
 
@@ -64,13 +63,27 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
 
     private ShareDialog mShareDialog;
 
+    private int mSwipeMinDistance;
+    private int mSwipeThresholdVelocity;
+    private boolean mIsSwiped;
+
+    private float mInitialMotionX;
+    private float mInitialMotionY;
+    private VelocityTracker mVelocityTracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(null);
         setContentView(R.layout.activity_detail, R.layout.details_title_layout);
 
-        mFeed = getIntent().getExtras().getParcelable("feed");
+        mFeed = getIntent().getExtras().getParcelable(Constants.KEY_FEED);
+
+        final ViewConfiguration vc = ViewConfiguration.get(this);
+        mSwipeMinDistance = vc.getScaledPagingTouchSlop() * 2;
+        mSwipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
+
+        mSwipeMinDistance = 2 * mSwipeMinDistance;
 
         Map<String, String> categoryMap;
         categoryMap = new HashMap<String, String>();
@@ -391,5 +404,63 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
         if (null != feed && !TextUtils.isEmpty(feed.id)) {
             favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                mIsSwiped = false;
+                if (null == mVelocityTracker) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                } else {
+                    mVelocityTracker.clear();
+                }
+                mVelocityTracker.addMovement(ev);
+
+                final float x = ev.getX();
+                final float y = ev.getY();
+                mInitialMotionX = x;
+                mInitialMotionY = y;
+                break;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                final float x = ev.getX();
+                final float y = ev.getY();
+                final float diffX = x - mInitialMotionX;
+                final float adx = Math.abs(diffX);
+                final float ady = Math.abs(y - mInitialMotionY);
+
+                if (null != mVelocityTracker && !mIsSwiped) {
+                    mVelocityTracker.addMovement(ev);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+
+                    final float xVelocity = Math.abs(mVelocityTracker.getXVelocity());
+                    if (adx > ady && adx > mSwipeMinDistance && xVelocity > mSwipeThresholdVelocity) {
+                        mIsSwiped = true;
+                        if (diffX > 0) {
+//                            finish();
+                        } else {
+                            startCommentActivity();
+                        }
+                        return true;
+                    }
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+            case MotionEvent.ACTION_UP: {
+                if (mIsSwiped) {
+                    mVelocityTracker.clear();
+                    return true;
+                } else {
+                    return super.dispatchTouchEvent(ev);
+                }
+            }
+        }
+
+        return super.dispatchTouchEvent(ev);
     }
 }
