@@ -107,4 +107,6 @@
     <string name="search">搜索</string>
     <string name="image_loading">图片加载&#8230;</string>
     <string name="image_loading_fail">图片加载失败</string>
+    <string name="network_invalid">无网络连接，请检查网络设置</string>
+    <string name="server_error">服务器返回错误，请稍后再试</string>
 </resources>

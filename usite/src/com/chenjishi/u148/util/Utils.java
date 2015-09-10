@@ -52,6 +52,21 @@ public class Utils {
         }
     }
 
+    public static boolean isNetworkConnected(Context context) {
+        if (context == null) {
+            return false;
+        }
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (null != cm) {
+            NetworkInfo info = cm.getActiveNetworkInfo();
+            if (null != info) {
+                return info.isConnected();
+            }
+        }
+
+        return false;
+    }
+
     public static String getDeviceName() {
         String manufacturer = Build.MANUFACTURER;
         String model = Build.MODEL;
@@ -160,23 +175,6 @@ public class Utils {
         return versionCode;
     }
 
-    public static void runWithoutMessage(final Runnable action, final Runnable postAction) {
-        final Handler handler = new Handler() {
-            public void handleMessage(Message message) {
-                postAction.run();
-            }
-        };
-
-        final Thread runner = new Thread(new Runnable() {
-            public void run() {
-                action.run();
-                handler.sendEmptyMessage(0);
-            }
-        });
-        runner.setPriority(Thread.MIN_PRIORITY);
-        runner.start();
-    }
-
     public static String readFromAssets(Context context, String name) {
         if (null == context) return null;
 
@@ -199,10 +197,6 @@ public class Utils {
 
     public static boolean isLogin() {
         return null != PrefsUtil.getUser();
-    }
-
-    public static <T> Collection<T> nullSafe(Collection<T> c) {
-        return (null == c) ? Collections.<T>emptyList() : c;
     }
 
     public static Bitmap circleToBitmap(Bitmap bitmap) {

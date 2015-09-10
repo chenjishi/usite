@@ -19,6 +19,7 @@ import com.chenjishi.u148.model.FeedDoc;
 import com.chenjishi.u148.promotions.PromotionsActivity;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.IntentUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
@@ -124,7 +125,7 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
         if (feed.category == -1) {
             Intent intent = new Intent(getActivity(), PromotionsActivity.class);
             intent.putExtra(Constants.KEY_FEED, feed);
-            startActivity(intent);
+            IntentUtils.startPreviewActivity(getActivity(), intent);
         } else {
             Map<String, String> params = new HashMap<String, String>();
             params.put("author", feed.usr.nickname);
@@ -133,7 +134,7 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
 
             final Intent intent = new Intent(getActivity(), DetailsActivity.class);
             intent.putExtra(Constants.KEY_FEED, feed);
-            startActivity(intent);
+            IntentUtils.startPreviewActivity(getActivity(), intent);
         }
     }
 

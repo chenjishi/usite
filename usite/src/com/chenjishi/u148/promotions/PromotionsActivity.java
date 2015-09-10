@@ -2,11 +2,10 @@ package com.chenjishi.u148.promotions;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.activity.BaseActivity;
+import com.chenjishi.u148.activity.SlidingActivity;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.IntentUtils;
@@ -14,7 +13,7 @@ import com.chenjishi.u148.util.IntentUtils;
 /**
  * Created by chenjishi on 15/9/9.
  */
-public class PromotionsActivity extends BaseActivity {
+public class PromotionsActivity extends SlidingActivity {
     private Feed mFeed;
 
     @Override
@@ -35,7 +34,6 @@ public class PromotionsActivity extends BaseActivity {
         webView.getSettings().setJavaScriptEnabled(true);
 
         String url = "http://app.goudaifu.com" + mFeed.status;
-        Log.i("test", "#url " + url);
         webView.loadUrl(url);
     }
 

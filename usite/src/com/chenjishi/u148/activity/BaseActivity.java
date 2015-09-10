@@ -4,15 +4,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.util.Constants;
+import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.view.LoadingView;
 import com.flurry.android.FlurryAgent;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,6 +29,7 @@ public class BaseActivity extends FragmentActivity {
 
     protected float mDensity;
     protected LayoutInflater mInflater;
+    private FrameLayout mRootContentView;
 
     protected int mTheme;
 
@@ -36,9 +38,9 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mRootContentView = (FrameLayout) findViewById(android.R.id.content);
         mDensity = getResources().getDisplayMetrics().density;
-        mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = LayoutInflater.from(this);
     }
 
     @SuppressLint("NewApi")
@@ -49,20 +51,18 @@ public class BaseActivity extends FragmentActivity {
         } else {
             super.setContentView(R.layout.base_layout);
 
-            FrameLayout rootView = (FrameLayout) findViewById(android.R.id.content);
-            rootView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == PrefsUtil.getThemeMode()
+            mRootContentView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == PrefsUtil.getThemeMode()
                     ? R.color.background_night : R.color.background));
 
             if (!mHideTitle) {
                 int resId = mTitleResId == 0 ? R.layout.base_title_layout : mTitleResId;
-                mInflater.inflate(resId, rootView);
+                mInflater.inflate(resId, mRootContentView);
             }
 
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.BOTTOM);
-            final int marginTop = mHideTitle ? 0 : dp2px(48);
-            layoutParams.setMargins(0, marginTop, 0, 0);
-            rootView.addView(mInflater.inflate(layoutResID, null), layoutParams);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT,
+                    MATCH_PARENT, Gravity.BOTTOM);
+            lp.topMargin = mHideTitle ? 0 : dp2px(48);
+            mRootContentView.addView(mInflater.inflate(layoutResID, null), lp);
         }
     }
 
@@ -100,6 +100,54 @@ public class BaseActivity extends FragmentActivity {
     @Override
     public void setTitle(int titleId) {
         setTitle(getString(titleId));
+    }
+
+    private LoadingView mLoadingView;
+
+    protected void showLoadingView() {
+        if (null == mLoadingView) {
+            mLoadingView = new LoadingView(this);
+            mLoadingView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == PrefsUtil.getThemeMode()
+                    ? R.color.background_night : R.color.background));
+        }
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        lp.topMargin = dp2px(48);
+        lp.gravity = Gravity.BOTTOM;
+
+        ViewParent viewParent = mLoadingView.getParent();
+        if (null != viewParent) {
+            ((ViewGroup) viewParent).removeView(mLoadingView);
+        }
+
+        mRootContentView.addView(mLoadingView, lp);
+    }
+
+    protected void hideLoadingView() {
+        if (null != mLoadingView) {
+            ViewParent viewParent = mLoadingView.getParent();
+            if (null != viewParent) {
+                ((ViewGroup) viewParent).removeView(mLoadingView);
+            }
+            mLoadingView = null;
+        }
+    }
+
+    protected void setError(String tips) {
+        if (null != mLoadingView) {
+            mLoadingView.setError(tips);
+        }
+    }
+
+    protected void setError() {
+        if (null != mLoadingView) {
+            int resId = R.string.network_invalid;
+            if (Utils.isNetworkConnected(this)) {
+                resId = R.string.server_error;
+            }
+
+            mLoadingView.setError(getString(resId));
+        }
     }
 
     protected void applyTheme() {

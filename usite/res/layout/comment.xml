@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+    <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/action_bar_height">
+        <ListView
+                android:id="@+id/list_comment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-    <include android:id="@id/empty_view" layout="@layout/empty_view"/>
+                android:layout_height="match_parent"
+                android:cacheColorHint="#00000000"
+                android:listSelector="@color/transparent"
+                android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
+                android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
+                android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
+                android:scrollbarSize="4dp"
+                android:fadingEdge="none"
+                android:footerDividersEnabled="false"
+                android:divider="@drawable/line_light"
+                android:dividerHeight="1px"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
     <RelativeLayout
             android:id="@+id/comment_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/action_bar_height"
-            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
             android:background="#F6F6F6">
         <Button
                 android:id="@+id/btn_send"
@@ -46,25 +64,12 @@
               android:layout_alignParentTop="true"
               android:background="@color/white"/>
     </RelativeLayout>
-    <ListView
-            android:id="@+id/list_comment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:cacheColorHint="#00000000"
-            android:layout_above="@id/comment_layout"
-            android:listSelector="@color/transparent"
-            android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
-            android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
-            android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
-            android:scrollbarSize="4dp"
-            android:fadingEdge="none"
-            android:footerDividersEnabled="false"
-            android:divider="@drawable/line_light"
-            android:dividerHeight="1px"/>
+
     <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/shadow_horizon"
-            android:contentDescription="@null"
-            android:layout_above="@id/comment_layout"/>
-</RelativeLayout>
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="48dp"
+            android:contentDescription="@null"/>
+</FrameLayout>
