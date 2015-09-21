@@ -39,12 +39,14 @@ public class PhotoDialog extends Dialog implements View.OnClickListener {
 
         mImageView = (NetworkImageView) view.findViewById(R.id.photo_view);
         mImageView.setOnClickListener(this);
+
         mTextView = (TextView) view.findViewById(R.id.photo_text);
         view.findViewById(R.id.btn_exit).setOnClickListener(this);
 
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        int imageWidth = (int) (metrics.widthPixels * 0.8f - 2 * metrics.density * 16);
-        int imageHeight = (int) (imageWidth * 600.f / 400);
+        float density = metrics.density;
+        int imageWidth = (int) (metrics.widthPixels * .5f - 2 * 12 * density);
+        int imageHeight = (int) (400.f * imageWidth / 600);
 
         RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) mImageView.getLayoutParams();
         lp.width = imageWidth;
@@ -60,19 +62,18 @@ public class PhotoDialog extends Dialog implements View.OnClickListener {
             mTextView.setText(item.title);
         } else {
             mImageView.setImageResource(R.drawable.avatar);
-            mTextView.setText("Written By Jishi Chen, 2014/08/12");
+            mTextView.setText("Written By Jishi Chen, 2015/07/20");
         }
         mIndex = index;
     }
 
     @Override
     public void show() {
-        WindowManager windowManager = getWindow().getWindowManager();
-        DisplayMetrics metrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(metrics);
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-        layoutParams.width = (int) (metrics.widthPixels * 0.8f);
+        layoutParams.width = (int) (metrics.widthPixels * 0.5f);
+        layoutParams.height = (int) (metrics.heightPixels * 0.8f);
         getWindow().setAttributes(layoutParams);
 
         super.show();

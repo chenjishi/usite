@@ -12,5 +12,6 @@
     <item type="id" name="btn_close" />
     <item type="id" name="webview" />
     <item type="id" name="viewPager" />
+    <item type="id" name="scrollview" />
     <item name="content_layout" type="id"/>
 </resources>

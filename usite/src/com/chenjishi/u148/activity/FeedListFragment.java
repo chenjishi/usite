@@ -199,6 +199,9 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
     }
 
     private Feed getAdsItemFeed() {
+        int adsId = PrefsUtil.getAdsId();
+        if (adsId == -1) return null;
+
         String json = PrefsUtil.getAdsJson();
         if (TextUtils.isEmpty(json)) return null;
 
@@ -220,6 +223,7 @@ public class FeedListFragment extends Fragment implements AdapterView.OnItemClic
                 feed.count_browse = data.optInt("see_num");
                 feed.count_review = data.optInt("reply_num");
                 feed.status = data.optString("turl");
+                feed.uid = data.optString("type");
             }
         } catch (JSONException e) {
             feed = null;

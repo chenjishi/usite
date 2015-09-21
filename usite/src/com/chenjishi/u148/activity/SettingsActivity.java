@@ -8,6 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
+import com.chenjishi.u148.easter.FireworksActivity;
+import com.chenjishi.u148.easter.SurpriseActivity;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.FileUtils;
 import com.chenjishi.u148.util.Utils;
@@ -15,13 +17,30 @@ import com.chenjishi.u148.util.Utils;
 /**
  * Created by chenjishi on 14-1-11.
  */
-public class SettingsActivity extends SlidingActivity {
+public class SettingsActivity extends BaseActivity {
+    private int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         setTitle(R.string.app_settings);
+
+        findViewById(R.id.btn_others).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                count++;
+                if (count == 5) {
+                    Utils.showToast("再点击两次有惊喜哦~");
+                    return;
+                }
+
+                if (count == 7) {
+                    easterEgg();
+                    count = 0;
+                }
+            }
+        });
 
         cacheThread.start();
     }
@@ -112,5 +131,15 @@ public class SettingsActivity extends SlidingActivity {
             feedText.setTextColor(getResources().getColor(R.color.text_color_regular));
             split.setBackgroundColor(0xFFC9C9C9);
         }
+    }
+
+    private void easterEgg() {
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT >= 11) {
+            intent.setClass(this, SurpriseActivity.class);
+        } else {
+            intent.setClass(this, FireworksActivity.class);
+        }
+        startActivity(intent);
     }
 }

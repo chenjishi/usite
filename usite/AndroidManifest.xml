@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.chenjishi.u148"
-          android:versionCode="43"
+          android:versionCode="45"
           android:versionName="1.6">
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="17"/>
 
@@ -69,7 +69,7 @@
                   android:theme="@style/SlideAppTheme"/>
         <activity android:name=".easter.SurpriseActivity"
                   android:theme="@style/FullScreenStyle"
-                  android:screenOrientation="portrait"/>
+                  android:screenOrientation="landscape"/>
         <activity android:name=".easter.FireworksActivity"
                   android:theme="@style/FullScreenStyle"
                   android:screenOrientation="portrait"/>

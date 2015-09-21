@@ -144,7 +144,10 @@ public class FeedListAdapter extends BaseAdapter {
             holder.thumb.setVisibility(View.VISIBLE);
         }
 
-        String title = "<font color=\"" + color + "\">[" + mCategoryArray.get(feed.category) + "]</font> " + feed.title;
+        String type = mCategoryArray.get(feed.category);
+        if (feed.category == -1) type = feed.uid;
+
+        String title = "<font color=\"" + color + "\">[" + type + "]</font> " + feed.title;
         holder.title.setText(Html.fromHtml(title));
         holder.commentText.setText(mResources.getString(R.string.views, feed.count_browse, feed.count_review));
         holder.content.setText(feed.summary);

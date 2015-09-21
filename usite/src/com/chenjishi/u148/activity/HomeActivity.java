@@ -380,7 +380,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         switch (position) {
             case 1:
                 intent = new Intent(this, SettingsActivity.class);
-                IntentUtils.startPreviewActivity(this, intent);
+                startActivity(intent);
                 break;
             case 2:
                 PrefsUtil.setThemeMode(PrefsUtil.getThemeMode() == Constants.MODE_DAY
@@ -409,12 +409,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
                 drawerLayout.closeDrawer(Gravity.LEFT);
                 break;
             case 5:
-                AboutDialog dialog = new AboutDialog(this, new AboutDialog.AboutDialogListener() {
-                    @Override
-                    public void onVersionClicked() {
-                        easterEgg();
-                    }
-                });
+                AboutDialog dialog = new AboutDialog(this);
                 dialog.show();
                 drawerLayout.closeDrawer(Gravity.LEFT);
                 break;

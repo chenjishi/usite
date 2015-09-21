@@ -2,22 +2,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="16dp"
-                android:paddingBottom="16dp"
+                android:paddingLeft="12dp"
+                android:paddingBottom="12dp"
                 android:background="@drawable/photo_dialog_bkg">
     <com.chenjishi.u148.volley.toolbox.NetworkImageView
             android:id="@+id/photo_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_centerHorizontal="true"/>
     <TextView
             android:id="@+id/photo_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/photo_view"
+            android:layout_marginRight="12dp"
+            android:layout_centerHorizontal="true"
+            android:lineSpacingExtra="4dp"
             android:layout_marginTop="8dp"
-            android:layout_marginRight="16dp"
             android:textSize="14sp"
             android:textColor="#333"/>
     <ImageButton

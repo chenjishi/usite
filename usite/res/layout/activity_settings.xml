@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:background="@color/background">
     <LinearLayout
             android:id="@+id/settings_view"
             android:layout_width="match_parent"
@@ -45,4 +44,11 @@
                 android:textColor="@color/text_color_regular"
                 android:text="@string/feedback"/>
     </LinearLayout>
-</LinearLayout>
+    <Button
+            android:id="@+id/btn_others"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/home_up_bg"
+            android:layout_gravity="center_horizontal|bottom"/>
+</FrameLayout>
+

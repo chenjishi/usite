@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.activity.SlidingActivity;
+import com.chenjishi.u148.activity.BaseActivity;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.IntentUtils;
@@ -13,8 +13,10 @@ import com.chenjishi.u148.util.IntentUtils;
 /**
  * Created by chenjishi on 15/9/9.
  */
-public class PromotionsActivity extends SlidingActivity {
+public class PromotionsActivity extends BaseActivity implements View.OnClickListener {
     private Feed mFeed;
+
+    private WebView mWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +32,19 @@ public class PromotionsActivity extends SlidingActivity {
             finish();
         }
 
-        WebView webView = (WebView) findViewById(R.id.web_view);
-        webView.getSettings().setJavaScriptEnabled(true);
+        mWebView = (WebView) findViewById(R.id.web_view);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        findViewById(R.id.title_bar).setOnClickListener(this);
 
         String url = "http://app.goudaifu.com" + mFeed.status;
-        webView.loadUrl(url);
+        mWebView.loadUrl(url);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.title_bar) {
+            mWebView.scrollTo(0, 0);
+        }
     }
 
     @Override

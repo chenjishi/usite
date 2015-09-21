@@ -47,7 +47,7 @@ import static com.chenjishi.u148.util.Constants.API_ARTICLE;
  * To change this template use File | Settings | File Templates.
  */
 public class DetailsActivity extends BaseActivity implements MusicPlayListener, Response.Listener<Article>,
-        Response.ErrorListener, JSCallback {
+        Response.ErrorListener, JSCallback, View.OnClickListener {
     private ArticleWebView mWebView;
 
     private ImageButton favoriteBtn;
@@ -105,8 +105,17 @@ public class DetailsActivity extends BaseActivity implements MusicPlayListener, 
         mWebView = (ArticleWebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
+        findViewById(R.id.title_bar).setOnClickListener(this);
+
         showLoadingView();
         HttpUtils.ArticleRequest(String.format(API_ARTICLE, mFeed.id), this, this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.title_bar) {
+            mWebView.scrollTo(0, 0);
+        }
     }
 
     private View mMusicPanel;

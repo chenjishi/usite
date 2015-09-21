@@ -12,6 +12,8 @@ import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.volley.Response;
 import com.chenjishi.u148.volley.VolleyError;
 import com.flurry.android.FlurryAgent;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 
@@ -22,6 +24,20 @@ public class LaunchActivity extends Activity implements Response.Listener<String
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        HttpUtils.get("http://u148.oss-cn-beijing.aliyuncs.com/config", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (!TextUtils.isEmpty(response)) {
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        int adsId = jObj.optInt("ads_id", -1);
+                        PrefsUtil.saveAdsId(adsId);
+                    } catch (JSONException e) {
+                    }
+                }
+            }
+        }, this);
 
         HttpUtils.get("http://app.goudaifu.com/funclub/v1/funclubget", this, this);
     }

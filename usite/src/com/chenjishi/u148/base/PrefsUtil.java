@@ -55,6 +55,7 @@ public class PrefsUtil {
     private static final String QQ_EXPIRES_IN = "qq_expires_in";
     private static final String SURPRISE_TITLE = "surprise_title";
     private static final String SURPRISE_DESC = "surprise_desc";
+    private static final String ADS_ID = "ads_id";
 
     private static final String ADS_JSON = "ads_json";
 
@@ -88,6 +89,14 @@ public class PrefsUtil {
 
     public static long getRegisterTime() {
         return getLongPreferences(KEY_REGISTER_TIME, -1L);
+    }
+
+    public static void saveAdsId(int id) {
+        saveIntPreference(ADS_ID, id);
+    }
+
+    public static int getAdsId() {
+        return getIntPreference(ADS_ID, 233);
     }
 
     public static void setUser(UserInfo user) {
