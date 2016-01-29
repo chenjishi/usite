@@ -9,7 +9,7 @@ https://play.google.com/store/apps/details?id=com.chenjishi.u148&feature=search_
 ##ScreenShot
 <p align="center">
   <img src="https://raw.github.com/chenjishi/usite/master/image_1.png?raw=true" 
-  alt="usite" height="480" width="270"/>
+  alt="usite" height="960" width="540"/>
 </p>
 <p align="center">
   <img src="https://raw.github.com/chenjishi/usite/master/image_3.png?raw=true" 
