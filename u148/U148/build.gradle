@@ -1,0 +1,51 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+    }
+}
+apply plugin: 'com.android.application'
+
+repositories {
+    jcenter()
+}
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "com.chenjishi.u148"
+        minSdkVersion 14
+        targetSdkVersion 21
+        versionCode 48
+        versionName "1.8"
+    }
+    signingConfigs {
+        release {
+            storeFile file("/Users/chenjishi/workarea/chenjishi.keystore")
+            storePassword "331500311113Ctrl"
+            keyAlias "chenjishi_key"
+            keyPassword "331500311113Ctrl"
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile 'com.android.support:support-v4:23.1.0'
+    compile 'org.jsoup:jsoup:1.8.3'
+    compile 'com.google.code.gson:gson:2.5'
+    compile 'com.facebook.fresco:fresco:0.9.0+'
+}
