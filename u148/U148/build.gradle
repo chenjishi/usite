@@ -20,15 +20,15 @@ android {
         applicationId "com.chenjishi.u148"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 48
-        versionName "1.8"
+        versionCode 49
+        versionName "1.9"
     }
     signingConfigs {
         release {
             storeFile file("/Users/chenjishi/workarea/chenjishi.keystore")
-            storePassword "331500311113Ctrl"
-            keyAlias "chenjishi_key"
-            keyPassword "331500311113Ctrl"
+            storePassword "************"
+            keyAlias "************"
+            keyPassword "************"
         }
     }
     buildTypes {

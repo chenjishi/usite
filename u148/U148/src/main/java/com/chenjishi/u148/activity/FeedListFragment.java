@@ -44,11 +44,9 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
 
     private LoadingView mLoadingView;
 
-    private FeedListAdapter2 mListAdapter;
+    private FeedListAdapter mListAdapter;
 
-    private LinearLayoutManager mLayoutManager;
-
-    private OnListScrollListener mSrollListener;
+    private OnListScrollListener mScrollListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,10 +55,7 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
         category = bundle != null ? bundle.getInt("category") : 0;
         dataLoaded = false;
 
-        mListAdapter = new FeedListAdapter2(getActivity());
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mSrollListener = new OnListScrollListener(mLayoutManager);
-        mSrollListener.setOnPageEndListener(this);
+        mListAdapter = new FeedListAdapter(getActivity());
     }
 
     @Override
@@ -70,12 +65,15 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
 
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mScrollListener = new OnListScrollListener(layoutManager);
+        mScrollListener.setOnPageEndListener(this);
+
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.feed_list_view);
-        recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity()));
-        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mListAdapter);
-        recyclerView.addOnScrollListener(mSrollListener);
+        recyclerView.addOnScrollListener(mScrollListener);
 
         swipeRefreshLayout.setOnRefreshListener(this);
 
@@ -95,7 +93,7 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
     }
 
     private void request() {
-        mSrollListener.setIsLoading(true);
+        mScrollListener.setIsLoading(true);
         HttpUtils.get(String.format(API_FEED_LIST, category, mPage), FeedDoc.class, this, this);
     }
 
@@ -118,7 +116,7 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
         }
 
         swipeRefreshLayout.setRefreshing(false);
-        mSrollListener.setIsLoading(false);
+        mScrollListener.setIsLoading(false);
     }
 
     @Override
@@ -137,7 +135,7 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
         }
 
         swipeRefreshLayout.setRefreshing(false);
-        mSrollListener.setIsLoading(false);
+        mScrollListener.setIsLoading(false);
         hideLoading();
     }
 

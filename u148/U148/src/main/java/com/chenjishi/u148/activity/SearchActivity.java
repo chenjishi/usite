@@ -26,7 +26,7 @@ import java.util.List;
 public class SearchActivity extends SlidingActivity implements Listener<FeedDoc>, ErrorListener, OnPageEndListener {
     private EditText mEditText;
 
-    private FeedListAdapter2 mListAdapter;
+    private FeedListAdapter mListAdapter;
 
     private int mPage = 1;
     private String mKeyword;
@@ -40,7 +40,7 @@ public class SearchActivity extends SlidingActivity implements Listener<FeedDoc>
         setTitle(R.string.search);
 
         mEditText = (EditText) findViewById(R.id.edit_search);
-        mListAdapter = new FeedListAdapter2(this);
+        mListAdapter = new FeedListAdapter(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mScrollListener = new OnListScrollListener(layoutManager);
         mScrollListener.setOnPageEndListener(this);

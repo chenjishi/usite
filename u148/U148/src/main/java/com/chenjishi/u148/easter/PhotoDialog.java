@@ -3,6 +3,7 @@ package com.chenjishi.u148.easter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,20 +11,16 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
-import com.chenjishi.u148.volley.toolbox.NetworkImageView;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 /**
  * Created by chenjishi on 15/1/26.
  */
 public class PhotoDialog extends Dialog implements View.OnClickListener {
-    private NetworkImageView mImageView;
+    private SimpleDraweeView mImageView;
     private TextView mTextView;
 
     private OnDialogDismissCallback mCallback;
-
-    private ImageLoader mImageLoader;
 
     public PhotoDialog(Context context, OnDialogDismissCallback callback) {
         super(context, R.style.FullHeightDialog);
@@ -31,12 +28,11 @@ public class PhotoDialog extends Dialog implements View.OnClickListener {
         setCancelable(false);
 
         mCallback = callback;
-        mImageLoader = HttpUtils.getImageLoader();
 
         View view = LayoutInflater.from(context).inflate(R.layout.photo_dialog, null);
         setContentView(view);
 
-        mImageView = (NetworkImageView) view.findViewById(R.id.photo_view);
+        mImageView = (SimpleDraweeView) view.findViewById(R.id.photo_view);
         mImageView.setOnClickListener(this);
 
         mTextView = (TextView) view.findViewById(R.id.photo_text);
@@ -57,7 +53,7 @@ public class PhotoDialog extends Dialog implements View.OnClickListener {
 
     public void setPhotoItem(PhotoItem item, int index) {
         if (null != item) {
-            mImageView.setImageUrl(item.image, mImageLoader);
+            mImageView.setImageURI(Uri.parse(item.image));
             mTextView.setText(item.title);
         } else {
             mImageView.setImageResource(R.drawable.avatar);

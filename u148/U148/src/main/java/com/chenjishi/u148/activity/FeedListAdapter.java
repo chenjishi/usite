@@ -30,9 +30,13 @@ import java.util.Map;
 /**
  * Created by chenjishi on 16/2/2.
  */
-public class FeedListAdapter2 extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final ArrayList<Feed> mDataList = new ArrayList<Feed>();
+    private static final int ITEM_TYPE_FEED = 0;
+
+    private static final int ITEM_TYPE_FOOTER = 1;
+
+    private final ArrayList<Feed> mDataList = new ArrayList<>();
 
     private LayoutInflater mInflater;
 
@@ -40,7 +44,7 @@ public class FeedListAdapter2 extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private SparseArray<String> mCategoryArray;
 
-    public FeedListAdapter2(Context context) {
+    public FeedListAdapter(Context context) {
         mContext = context;
         mInflater = LayoutInflater.from(mContext);
 
@@ -67,60 +71,78 @@ public class FeedListAdapter2 extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = mInflater.inflate(R.layout.feed_list_item, viewGroup, false);
-
-        return new ItemViewHolder(view);
+        if (i == ITEM_TYPE_FOOTER) {
+            View view = mInflater.inflate(R.layout.load_more, viewGroup, false);
+            return new FootViewHolder(view);
+        } else {
+            View view = mInflater.inflate(R.layout.feed_list_item, viewGroup, false);
+            return new ItemViewHolder(view);
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        Feed feed = mDataList.get(i);
-        ItemViewHolder holder = (ItemViewHolder) viewHolder;
-
         final int theme = PrefsUtil.getThemeMode();
         final Resources res = mContext.getResources();
-        String color = "#FF9900";
 
-        if (Constants.MODE_NIGHT == theme) {
-            color = "#B26B00";
+        if (getItemViewType(i) == ITEM_TYPE_FEED) {
+            Feed feed = mDataList.get(i);
+            ItemViewHolder holder = (ItemViewHolder) viewHolder;
 
-            holder.titleText.setTextColor(res.getColor(R.color.text_color_weak));
-            holder.descText.setTextColor(res.getColor(R.color.text_color_summary));
-            holder.numText.setTextColor(res.getColor(R.color.text_color_summary));
-        } else {
-            holder.titleText.setTextColor(res.getColor(R.color.text_color_regular));
-            holder.descText.setTextColor(res.getColor(R.color.text_color_weak));
-            holder.numText.setTextColor(res.getColor(R.color.text_color_weak));
-        }
+            String color = "#FF9900";
+            if (Constants.MODE_NIGHT == theme) {
+                color = "#B26B00";
 
-        String imageUrl = feed.pic_mid;
-        if (!TextUtils.isEmpty(imageUrl)) {
-            Uri uri = Uri.parse(imageUrl);
-            if (imageUrl.endsWith("gif") || imageUrl.endsWith("GIF") ||
-                    imageUrl.endsWith("Gif")) {
-                DraweeController controller = Fresco.newDraweeControllerBuilder().setUri(uri)
-                        .setAutoPlayAnimations(true)
-                        .build();
-                holder.imageView.setController(controller);
+                holder.titleText.setTextColor(res.getColor(R.color.text_color_weak));
+                holder.descText.setTextColor(res.getColor(R.color.text_color_summary));
+                holder.numText.setTextColor(res.getColor(R.color.text_color_summary));
             } else {
-                holder.imageView.setImageURI(uri);
+                holder.titleText.setTextColor(res.getColor(R.color.text_color_regular));
+                holder.descText.setTextColor(res.getColor(R.color.text_color_weak));
+                holder.numText.setTextColor(res.getColor(R.color.text_color_weak));
+            }
+
+            String imageUrl = feed.pic_mid;
+            if (!TextUtils.isEmpty(imageUrl)) {
+                Uri uri = Uri.parse(imageUrl);
+                if (imageUrl.endsWith("gif") || imageUrl.endsWith("GIF") ||
+                        imageUrl.endsWith("Gif")) {
+                    DraweeController controller = Fresco.newDraweeControllerBuilder().setUri(uri)
+                            .setAutoPlayAnimations(true)
+                            .build();
+                    holder.imageView.setController(controller);
+                } else {
+                    holder.imageView.setImageURI(uri);
+                }
+            }
+
+            String type = mCategoryArray.get(feed.category);
+            if (feed.category == -1) type = feed.uid;
+
+            String title = "<font color='" + color + "'>[" + type + "]</font> " + feed.title;
+            holder.titleText.setText(Html.fromHtml(title));
+            holder.numText.setText(res.getString(R.string.views, feed.count_browse, feed.count_review));
+            holder.descText.setText(feed.summary);
+            holder.itemLayout.setTag(i);
+            holder.itemLayout.setOnClickListener(mOnClickListener);
+        } else {
+            FootViewHolder holder = (FootViewHolder) viewHolder;
+            if (theme == Constants.MODE_NIGHT) {
+                holder.mFootText.setTextColor(res.getColor(R.color.text_color_summary));
+            } else {
+                holder.mFootText.setTextColor(res.getColor(R.color.text_color_regular));
             }
         }
+    }
 
-        String type = mCategoryArray.get(feed.category);
-        if (feed.category == -1) type = feed.uid;
-
-        String title = "<font color='" + color + "'>[" + type + "]</font> " + feed.title;
-        holder.titleText.setText(Html.fromHtml(title));
-        holder.numText.setText(res.getString(R.string.views, feed.count_browse, feed.count_review));
-        holder.descText.setText(feed.summary);
-        holder.itemLayout.setTag(i);
-        holder.itemLayout.setOnClickListener(mOnClickListener);
+    @Override
+    public int getItemViewType(int position) {
+        return position == mDataList.size() ? ITEM_TYPE_FOOTER : ITEM_TYPE_FEED;
     }
 
     @Override
     public int getItemCount() {
-        return mDataList.size();
+        return mDataList.size() > 0 ? mDataList.size() + 1 : 0;
     }
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
