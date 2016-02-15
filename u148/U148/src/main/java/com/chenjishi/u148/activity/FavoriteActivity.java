@@ -2,12 +2,17 @@ package com.chenjishi.u148.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Favorite;
@@ -18,12 +23,18 @@ import com.chenjishi.u148.util.Constants;
 import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.DeletePopupWindow;
-import com.chenjishi.u148.volley.Response;
+import com.chenjishi.u148.view.DividerItemDecoration;
+import com.chenjishi.u148.volley.Response.ErrorListener;
+import com.chenjishi.u148.volley.Response.Listener;
 import com.chenjishi.u148.volley.VolleyError;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import static com.chenjishi.u148.util.Constants.API_DELETE_FAVORITE;
@@ -32,18 +43,14 @@ import static com.chenjishi.u148.util.Constants.API_FAVORITE_GET;
 /**
  * Created by chenjishi on 14-2-22.
  */
-public class FavoriteActivity extends SlidingActivity implements Response.Listener<Favorite>,
-        Response.ErrorListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener,
-        AdapterView.OnItemLongClickListener {
-    private FavoriteAdapter mAdapter;
-    private ArrayList<FavoriteItem> favoriteList = new ArrayList<FavoriteItem>();
+public class FavoriteActivity extends SlidingActivity implements Listener<Favorite>,
+        ErrorListener, OnPageEndListener {
 
-    private View emptyView;
-    private View footView;
+    private int mPage = 1;
 
-    private int currentPage = 1;
-    private int mLastItemIndex;
-    private boolean mIsDataLoading;
+    private FavoriteListAdapter mListAdapter;
+
+    private OnListScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,47 +58,37 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
         setContentView(R.layout.activity_favorite);
         setTitle(R.string.favorite);
 
-        footView = LayoutInflater.from(this).inflate(R.layout.load_more, null);
-        TextView footLabel = (TextView) footView.findViewById(R.id.loading_text);
+        mListAdapter = new FavoriteListAdapter(this, mOnLongClickListener);
 
-        emptyView = findViewById(R.id.empty_layout);
-        ListView listView = (ListView) findViewById(R.id.list_favorite);
-        listView.addFooterView(footView);
-        listView.setOnItemClickListener(this);
-        listView.setOnItemLongClickListener(this);
-        listView.setOnScrollListener(this);
-        footView.setVisibility(View.GONE);
-        listView.setEmptyView(emptyView);
-        mAdapter = new FavoriteAdapter(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mScrollListener = new OnListScrollListener(layoutManager);
+        mScrollListener.setOnPageEndListener(this);
 
-        listView.setAdapter(mAdapter);
-
-        if (Constants.MODE_NIGHT == PrefsUtil.getThemeMode()) {
-            listView.setDivider(getResources().getDrawable(R.drawable.split_color_night));
-            footLabel.setTextColor(getResources().getColor(R.color.text_color_summary));
-        } else {
-            listView.setDivider(getResources().getDrawable(R.drawable.split_color));
-            footLabel.setTextColor(getResources().getColor(R.color.text_color_regular));
-        }
-        listView.setDividerHeight(1);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.favorite_list_view);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(this));
+        recyclerView.setAdapter(mListAdapter);
+        recyclerView.addOnScrollListener(mScrollListener);
 
         loadData();
     }
 
     void loadData() {
-        mIsDataLoading = true;
-
-        if (currentPage > 1) footView.setVisibility(View.VISIBLE);
+        mScrollListener.setIsLoading(true);
 
         final UserInfo user = PrefsUtil.getUser();
-        HttpUtils.get(String.format(API_FAVORITE_GET, currentPage, user.token), Favorite.class, this, this);
+        HttpUtils.get(String.format(API_FAVORITE_GET, mPage, user.token), Favorite.class, this, this);
+    }
+
+    @Override
+    public void onPageEnd() {
+        mPage += 1;
+        loadData();
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Utils.setErrorView(emptyView, "网络无连接，请检查网络");
-        mIsDataLoading = false;
-        footView.setVisibility(View.GONE);
+        mScrollListener.setIsLoading(false);
     }
 
     @Override
@@ -99,137 +96,153 @@ public class FavoriteActivity extends SlidingActivity implements Response.Listen
         if (null != response) {
             final ArrayList<FavoriteItem> favorites = response.data.data;
             if (null != favorites && favorites.size() > 0) {
-                favoriteList.addAll(favorites);
-                mAdapter.notifyDataSetChanged();
-            }
-        } else {
-            Utils.setErrorView(emptyView, "解析错误或者网络无返回，请稍后再试");
-        }
-        mIsDataLoading = false;
-        footView.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (scrollState == SCROLL_STATE_IDLE && mLastItemIndex == mAdapter.getCount()) {
-            if (!mIsDataLoading) {
-                currentPage++;
-                loadData();
+                mListAdapter.addData(favorites);
             }
         }
-    }
-
-    @Override
-    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        mLastItemIndex = firstVisibleItem + visibleItemCount - 1;
+        mScrollListener.setIsLoading(false);
     }
 
     private DeletePopupWindow mPopupWindow;
 
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null == mPopupWindow) {
-            mPopupWindow = new DeletePopupWindow(this);
-        }
-
-        final FavoriteItem favorite = favoriteList.get(position);
-        mPopupWindow.setOnDeleteListener(new DeletePopupWindow.OnDeleteListener() {
-            @Override
-            public void onDelete() {
-                favoriteList.remove(favorite);
-                mAdapter.notifyDataSetChanged();
-                deleteFavorite(favorite.id);
-            }
-        });
-        mPopupWindow.showAtLocation(findViewById(android.R.id.content), Gravity.NO_GRAVITY, 0, 0);
-
-        return true;
-    }
-
     private void deleteFavorite(String id) {
         final UserInfo user = PrefsUtil.getUser();
         String url = String.format(API_DELETE_FAVORITE, id, user.token);
-        HttpUtils.get(url, new Response.Listener<String>() {
+        HttpUtils.get(url, new Listener<String>() {
             @Override
             public void onResponse(String response) {
+                if (!TextUtils.isEmpty(response)) {
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        int code = jObj.optInt("code", -1);
+                        Utils.showToast(code == 0 ? R.string.favorite_delete_success :
+                                R.string.favorite_delete_fail);
+                    } catch (JSONException e) {
+                    }
+                } else {
+                    Utils.showToast(R.string.favorite_delete_fail);
+                }
             }
         }, this);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final FavoriteItem favoriteItem = favoriteList.get(position);
-
-        Feed feed = new Feed();
-        feed.id = favoriteItem.aid;
-        feed.title = favoriteItem.title;
-        feed.create_time = favoriteItem.create_time;
-        feed.category = favoriteItem.category;
-
-        Intent intent = new Intent(this, DetailsActivity.class);
-        intent.putExtra("feed", feed);
-        IntentUtils.getInstance().startActivity(this, intent);
-    }
-
-    class FavoriteAdapter extends BaseAdapter {
-        LayoutInflater inflater;
-        private SimpleDateFormat dateFormat;
-
-        public FavoriteAdapter(Context context) {
-            inflater = LayoutInflater.from(context);
-            dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        }
-
+    private final View.OnLongClickListener mOnLongClickListener = new View.OnLongClickListener() {
         @Override
-        public int getCount() {
-            return favoriteList.size();
-        }
+        public boolean onLongClick(View v) {
+            if (null == v.getTag()) return false;
 
-        @Override
-        public FavoriteItem getItem(int position) {
-            return favoriteList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-
-            if (null == convertView) {
-                convertView = inflater.inflate(R.layout.favorite_list_item, parent, false);
-                holder = new ViewHolder();
-
-                holder.titleText = (TextView) convertView.findViewById(R.id.tv_title);
-                holder.timeText = (TextView) convertView.findViewById(R.id.tv_time);
-
-                if (PrefsUtil.getThemeMode() == Constants.MODE_NIGHT) {
-                    holder.titleText.setTextColor(getResources().getColor(R.color.text_color_weak));
-                    holder.timeText.setTextColor(getResources().getColor(R.color.text_color_summary));
-                } else {
-                    holder.titleText.setTextColor(getResources().getColor(R.color.text_color_regular));
-                    holder.timeText.setTextColor(getResources().getColor(R.color.text_color_weak));
-                }
-
-                convertView.setTag(holder);
+            if (null == mPopupWindow) {
+                mPopupWindow = new DeletePopupWindow(FavoriteActivity.this);
             }
-            holder = (ViewHolder) convertView.getTag();
 
-            final FavoriteItem favorite = getItem(position);
-            holder.titleText.setText(favorite.title);
+            final FavoriteItem favorite = (FavoriteItem) v.getTag();
+            mPopupWindow.setOnDeleteListener(new DeletePopupWindow.OnDeleteListener() {
+                @Override
+                public void onDelete() {
+                    deleteFavorite(favorite.id);
+                    mListAdapter.deleteItem(favorite);
+                }
+            });
+            mPopupWindow.showAtLocation(findViewById(android.R.id.content), Gravity.NO_GRAVITY, 0, 0);
 
-            final String formattedTime = dateFormat.format(new Date(favorite.create_time * 1000L));
-            holder.timeText.setText(formattedTime);
-
-            return convertView;
+            return true;
         }
+    };
+
+    private static class FavoriteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        private final List<FavoriteItem> mDataList = new ArrayList<>();
+
+        private Context mContext;
+
+        private LayoutInflater mInflater;
+
+        private final DateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        private final Date mDate = new Date();
+
+        private View.OnLongClickListener mOnLongClickListener;
+
+        public FavoriteListAdapter(Context context, View.OnLongClickListener listener) {
+            mContext = context;
+            mInflater = LayoutInflater.from(context);
+            mOnLongClickListener = listener;
+        }
+
+        public void deleteItem(FavoriteItem item) {
+            mDataList.remove(item);
+            notifyDataSetChanged();
+        }
+
+        public void addData(List<FavoriteItem> dataList) {
+            mDataList.addAll(dataList);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = mInflater.inflate(R.layout.favorite_list_item, parent, false);
+            return new ItemViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            FavoriteItem item = mDataList.get(position);
+            ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
+
+            final Resources res = mContext.getResources();
+            if (PrefsUtil.getThemeMode() == Constants.MODE_NIGHT) {
+                itemViewHolder.titleText.setTextColor(res.getColor(R.color.text_color_weak));
+                itemViewHolder.timeText.setTextColor(res.getColor(R.color.text_color_summary));
+            } else {
+                itemViewHolder.titleText.setTextColor(res.getColor(R.color.text_color_regular));
+                itemViewHolder.timeText.setTextColor(res.getColor(R.color.text_color_weak));
+            }
+
+            itemViewHolder.titleText.setText(item.title);
+            mDate.setTime(item.create_time * 1000);
+            itemViewHolder.timeText.setText(mDateFormat.format(mDate));
+            itemViewHolder.itemLayout.setTag(item);
+            itemViewHolder.itemLayout.setOnClickListener(mOnClickListener);
+            itemViewHolder.itemLayout.setOnLongClickListener(mOnLongClickListener);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mDataList.size();
+        }
+
+        private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null == v.getTag()) return;
+
+                FavoriteItem item = (FavoriteItem) v.getTag();
+                Feed feed = new Feed();
+                feed.id = item.aid;
+                feed.title = item.title;
+                feed.create_time = item.create_time;
+                feed.category = item.category;
+
+                Intent intent = new Intent(mContext, DetailsActivity.class);
+                intent.putExtra("feed", feed);
+                IntentUtils.getInstance().startActivity(mContext, intent);
+            }
+        };
     }
 
-    static class ViewHolder {
-        TextView titleText;
-        TextView timeText;
+    private static class ItemViewHolder extends RecyclerView.ViewHolder {
+
+        public RelativeLayout itemLayout;
+
+        public TextView titleText;
+
+        public TextView timeText;
+
+        public ItemViewHolder(View itemView) {
+            super(itemView);
+            itemLayout = (RelativeLayout) itemView.findViewById(R.id.item_layout);
+            titleText = (TextView) itemView.findViewById(R.id.tv_title);
+            timeText = (TextView) itemView.findViewById(R.id.tv_time);
+        }
     }
 }

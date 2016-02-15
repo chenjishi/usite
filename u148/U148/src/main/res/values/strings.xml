@@ -96,6 +96,8 @@
     <string name="email">邮箱</string>
     <string name="comment_hint">写下你的评论</string>
     <string name="password">密码</string>
+    <string name="favorite_delete_fail">删除失败,请稍后再试</string>
+    <string name="favorite_delete_success">删除成功!</string>
 
     <string name="pub_time">%1$s&#160;&#160;%2$s</string>
     <string name="pub_reviews">%1$d人看过&#160;&#160;%2$d评论</string>

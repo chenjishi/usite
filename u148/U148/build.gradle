@@ -20,7 +20,7 @@ android {
         applicationId "com.chenjishi.u148"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 49
+        versionCode 50
         versionName "1.9"
     }
     signingConfigs {

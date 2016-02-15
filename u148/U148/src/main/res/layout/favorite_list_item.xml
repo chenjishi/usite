@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@drawable/list_item_bkg"
-              android:paddingLeft="8dp"
-              android:paddingTop="16dp"
-              android:paddingRight="8dp"
-              android:paddingBottom="16dp"
-        >
+                android:id="@+id/item_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_bkg"
+                android:paddingLeft="8dp"
+                android:paddingTop="16dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="16dp">
     <TextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
@@ -16,8 +15,7 @@
             android:layout_marginLeft="8dp"
             android:textColor="@color/text_color_weak"
             android:textSize="14sp"
-            android:layout_alignParentRight="true"
-            />
+            android:layout_alignParentRight="true"/>
     <TextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
@@ -25,7 +23,5 @@
             android:textSize="16sp"
             android:singleLine="true"
             android:textColor="@color/text_color_regular"
-            android:layout_toLeftOf="@id/tv_time"
-            />
-
+            android:layout_toLeftOf="@id/tv_time"/>
 </RelativeLayout>

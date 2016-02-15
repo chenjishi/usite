@@ -4,19 +4,8 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <ListView
-            android:id="@+id/list_favorite"
+    <android.support.v7.widget.RecyclerView
+            android:id="@+id/favorite_list_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:cacheColorHint="#00000000"
-            android:listSelector="@color/transparent"
-            android:scrollbarThumbHorizontal="@drawable/scrollbar_vertical_track"
-            android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
-            android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
-            android:scrollbarSize="4dp"
-            android:footerDividersEnabled="false"
-            android:fadingEdge="none"
-            android:divider="#FFE5E5E5"
-            android:dividerHeight="1px"/>
-    <include layout="@layout/empty_view" android:id="@+id/empty_layout"/>
+            android:layout_height="match_parent"/>
 </LinearLayout>
