@@ -20,7 +20,7 @@ android {
         applicationId "com.chenjishi.u148"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 50
+        versionCode 51
         versionName "1.9"
     }
     signingConfigs {
@@ -48,4 +48,5 @@ dependencies {
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.facebook.fresco:fresco:0.9.0+'
+    compile 'com.flurry.android:analytics:6.2.0'
 }
