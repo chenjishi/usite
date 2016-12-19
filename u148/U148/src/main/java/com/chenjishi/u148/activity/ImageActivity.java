@@ -19,13 +19,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
 import com.chenjishi.u148.view.GifMovieView;
 import com.chenjishi.u148.view.ShareDialog;
 import com.chenjishi.u148.view.TouchImageView;
-import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.facebook.common.executors.UiThreadImmediateExecutorService;
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
+import com.facebook.datasource.DataSubscriber;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.flurry.android.FlurryAgent;
 
 import java.io.File;
@@ -48,8 +55,6 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
 
     private ViewPager mViewPager;
     private RelativeLayout mToolBar;
-
-    private ImageLoader imageLoader;
 
     private boolean showToolBar = false;
 
@@ -92,7 +97,6 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
         }
 
         mGestureDetector = new GestureDetector(this, this);
-        imageLoader = HttpUtils.getImageLoader();
 
         mToolBar = (RelativeLayout) findViewById(R.id.tool_bar);
         mViewPager = (ViewPager) findViewById(R.id.pager_photo);
@@ -193,16 +197,17 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
         final String imageUrl = mImageList.get(mCurrentIndex);
         if (TextUtils.isEmpty(imageUrl)) return;
 
-        imageLoader.get(imageUrl, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                String picUrl = null;
-                Bitmap bitmap = response.getBitmap();
+        requestImage(imageUrl);
+    }
 
-                if (null != bitmap) {
+    private void requestImage(String url) {
+        DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
+            @Override
+            protected void onNewResultImpl(Bitmap bitmap) {
+                if (null != bitmap && !bitmap.isRecycled()) {
                     String name = System.currentTimeMillis() + ".jpg";
                     ContentResolver cr = ImageActivity.this.getContentResolver();
-                    picUrl = MediaStore.Images.Media.insertImage(cr, bitmap, name, "Image Saved From U148");
+                    String picUrl = MediaStore.Images.Media.insertImage(cr, bitmap, name, "Image Saved From U148");
 
                     if (!TextUtils.isEmpty(picUrl)) {
                         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -211,17 +216,23 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
                         intent.setData(uri);
                         ImageActivity.this.sendBroadcast(intent);
                     }
+                    Utils.showToast(getString(TextUtils.isEmpty(picUrl) ?
+                            R.string.image_save_fail : R.string.image_save_success));
                 }
-
-                Utils.showToast(getString(TextUtils.isEmpty(picUrl) ?
-                        R.string.image_save_fail : R.string.image_save_success));
             }
 
             @Override
-            public void onErrorResponse(VolleyError error) {
+            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
                 Utils.showToast(getString(R.string.image_save_fail));
             }
-        });
+        };
+
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url));
+        ImageRequest request = builder.build();
+        DataSource<CloseableReference<CloseableImage>>
+                dataSource = imagePipeline.fetchDecodedImage(request, this);
+        dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
     }
 
     private String getFilePathByContentResolver(Uri uri) {
@@ -261,7 +272,7 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
             View view = inflater.inflate(R.layout.photo_item, null);
 
             TextView textView = (TextView) view.findViewById(R.id.loading_text);
-            TouchImageView imageView = (TouchImageView) view.findViewById(R.id.img_photo);
+            final TouchImageView imageView = (TouchImageView) view.findViewById(R.id.img_photo);
             GifMovieView gifView = (GifMovieView) view.findViewById(R.id.gif_view);
 
             String imageUrl = mImageList.get(position);
@@ -275,9 +286,27 @@ public class ImageActivity extends BaseActivity implements GestureDetector.OnGes
                     gifView.setVisibility(View.VISIBLE);
                 } else {
                     gifView.setVisibility(View.GONE);
-                    imageLoader.get(mImageList.get(position),
-                            ImageLoader.getImageListener(imageView, R.drawable.gray, R.drawable.gray));
-                    imageView.setVisibility(View.VISIBLE);
+
+                    DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
+                        @Override
+                        protected void onNewResultImpl(Bitmap bitmap) {
+                            if (null != bitmap && !bitmap.isRecycled()) {
+                                imageView.setImageBitmap(bitmap);
+                                imageView.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
+                        }
+                    };
+
+                    ImagePipeline imagePipeline = Fresco.getImagePipeline();
+                    ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(imageUrl));
+                    ImageRequest request = builder.build();
+                    DataSource<CloseableReference<CloseableImage>>
+                            dataSource = imagePipeline.fetchDecodedImage(request, this);
+                    dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
                 }
             } else {
                 imageView.setVisibility(View.GONE);

@@ -13,12 +13,11 @@ import android.widget.FrameLayout.LayoutParams;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.FeedDoc;
-import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.ErrorListener;
+import com.chenjishi.u148.util.Listener;
+import com.chenjishi.u148.util.NetworkRequest;
 import com.chenjishi.u148.view.DividerItemDecoration;
 import com.chenjishi.u148.view.LoadingView;
-import com.chenjishi.u148.volley.Response.ErrorListener;
-import com.chenjishi.u148.volley.Response.Listener;
-import com.chenjishi.u148.volley.VolleyError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +93,7 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
 
     private void request() {
         mScrollListener.setIsLoading(true);
-        HttpUtils.get(String.format(API_FEED_LIST, category, mPage), FeedDoc.class, this, this);
+        NetworkRequest.getInstance().get(String.format(API_FEED_LIST, category, mPage), FeedDoc.class, this, this);
     }
 
     @Override
@@ -108,25 +107,13 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
-        if (mListAdapter.getItemCount() > 1) {
-            hideLoading();
-        } else {
-            mLoadingView.setError(getString(R.string.net_error));
-        }
-
-        swipeRefreshLayout.setRefreshing(false);
-        mScrollListener.setIsLoading(false);
-    }
-
-    @Override
     public void onResponse(FeedDoc response) {
         if (null != response && null != response.data) {
             if (1 == mPage) mListAdapter.clear();
 
             dataLoaded = true;
 
-            List<Feed> feedList = new ArrayList<Feed>();
+            List<Feed> feedList = new ArrayList<>();
             final List<Feed> tempList = response.data.data;
             if (null != tempList && tempList.size() > 0) {
                 feedList.addAll(tempList);
@@ -137,6 +124,18 @@ public class FeedListFragment extends Fragment implements Listener<FeedDoc>, Err
         swipeRefreshLayout.setRefreshing(false);
         mScrollListener.setIsLoading(false);
         hideLoading();
+    }
+
+    @Override
+    public void onErrorResponse() {
+        if (mListAdapter.getItemCount() > 1) {
+            hideLoading();
+        } else {
+            mLoadingView.setError(getString(R.string.net_error));
+        }
+
+        swipeRefreshLayout.setRefreshing(false);
+        mScrollListener.setIsLoading(false);
     }
 
     private void showLoading() {

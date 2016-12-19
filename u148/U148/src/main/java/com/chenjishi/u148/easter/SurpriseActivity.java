@@ -24,10 +24,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.ErrorListener;
+import com.chenjishi.u148.util.Listener;
+import com.chenjishi.u148.util.NetworkRequest;
 import com.chenjishi.u148.view.GifMovieView;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -37,8 +37,8 @@ import java.util.Random;
  * Created by chenjishi on 15/1/26.
  */
 public class SurpriseActivity extends Activity implements View.OnClickListener,
-        PhotoDialog.OnDialogDismissCallback, Response.Listener<EasterData>,
-        Response.ErrorListener {
+        PhotoDialog.OnDialogDismissCallback, Listener<EasterData>,
+        ErrorListener {
     private final static int MAX_FISH_COUNT = 10;
     private final static int MAX_BUBBLE_COUNT = 20;
     private final static long TIME_INTERVAL = 1000L;
@@ -124,11 +124,12 @@ public class SurpriseActivity extends Activity implements View.OnClickListener,
         mPlayer.setLooping(true);
         mPlayer.start();
 
-        HttpUtils.get("http://u148.oss-cn-beijing.aliyuncs.com/image/easter", EasterData.class, this, this);
+        NetworkRequest.getInstance().get("http://u148.oss-cn-beijing.aliyuncs.com/image/easter", EasterData.class, this, this);
+
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
 
     }
 

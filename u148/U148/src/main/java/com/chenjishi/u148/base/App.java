@@ -1,7 +1,6 @@
 package com.chenjishi.u148.base;
 
 import android.app.Application;
-import com.chenjishi.u148.util.HttpUtils;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.flurry.android.FlurryAgent;
 
@@ -24,7 +23,6 @@ public class App extends Application {
         FlurryAgent.init(this, "YYHS4STVXPMH6Y9GJ8WD");
 
         FileCache.init(this);
-        HttpUtils.init(this);
         DBHelper.getInstance(this);
 
         Fresco.initialize(this);

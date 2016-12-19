@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,13 +20,18 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.QQAuthToken;
-import com.chenjishi.u148.sina.RequestListener;
-import com.chenjishi.u148.sina.StatusesAPI;
 import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.HttpUtils;
 import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.ImageLoader;
+import com.facebook.common.executors.UiThreadImmediateExecutorService;
+import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.DataSource;
+import com.facebook.datasource.DataSubscriber;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuth;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
@@ -39,14 +45,12 @@ import com.tencent.tauth.UiError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * Created by chenjishi on 14-6-17.
  */
-public class ShareDialog extends Dialog implements View.OnClickListener, RequestListener {
+public class ShareDialog extends Dialog implements View.OnClickListener {
     private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
     private static final int THUMB_SIZE = 100;
 
@@ -141,25 +145,38 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
     }
 
     private void shareToWX(final int type) {
-        HttpUtils.getImageLoader().get(mImageList.get(0), new ImageLoader.ImageListener() {
+        requestImage(mImageList.get(0), type);
+    }
+
+    private void requestImage(String url, final int type) {
+        DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
             @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                Bitmap bitmap = response.getBitmap();
-                if (null != bitmap) {
-                    if (null != mFeed) {
-                        sendWebPage(type, bitmap);
-                    } else {
-                        sendImage(type, bitmap);
+            protected void onNewResultImpl(Bitmap bitmap) {
+                if (null != bitmap && !bitmap.isRecycled()) {
+                    if (null != bitmap) {
+                        if (null != mFeed) {
+                            sendWebPage(type, bitmap);
+                        } else {
+                            sendImage(type, bitmap);
+                        }
                     }
                 }
             }
 
             @Override
-            public void onErrorResponse(VolleyError error) {
+            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
                 Utils.showToast(R.string.share_image_fail);
             }
-        });
+        };
+
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url));
+        ImageRequest request = builder.build();
+        DataSource<CloseableReference<CloseableImage>>
+                dataSource = imagePipeline.fetchDecodedImage(request, this);
+        dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
     }
+
 
     private void shareToQzone() {
         QQAuthToken authToken = PrefsUtil.getQQAuthToken();
@@ -310,18 +327,6 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
         if (!token.isSessionValid()) {
             authorize(content);
         } else {
-            updateStatus(content, token);
-        }
-    }
-
-    private void updateStatus(String content, Oauth2AccessToken token) {
-        StatusesAPI api = new StatusesAPI(token);
-
-        String imageUrl = mImageList.get(0);
-        if (!TextUtils.isEmpty(imageUrl)) {
-            api.uploadUrlText(content, imageUrl, null, null, null, this);
-        } else {
-            api.update(content, null, null, this);
         }
     }
 
@@ -351,8 +356,6 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
             public void onComplete(Bundle bundle) {
                 Oauth2AccessToken accessToken = Oauth2AccessToken.parseAccessToken(bundle);
                 PrefsUtil.saveAccessToken(accessToken);
-
-                updateStatus(content, accessToken);
             }
 
             @Override
@@ -392,25 +395,6 @@ public class ShareDialog extends Dialog implements View.OnClickListener, Request
         }
 
         dismiss();
-    }
-
-    @Override
-    public void onComplete(String response) {
-        showWeiboMessage(true);
-    }
-
-    @Override
-    public void onComplete4binary(ByteArrayOutputStream responseOS) {
-    }
-
-    @Override
-    public void onIOException(IOException e) {
-        showWeiboMessage(false);
-    }
-
-    @Override
-    public void onError(WeiboException e) {
-        showWeiboMessage(false);
     }
 
     private void showWeiboMessage(final boolean success) {

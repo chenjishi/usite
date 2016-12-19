@@ -62,9 +62,6 @@ public class FileUtils {
     }
 
     public static void clearCache() {
-        //clear images
-        HttpUtils.getRequestQueue().getCache().clear();
-
         //clear data
         String dataCacheDir = FileCache.getDataCacheDir(App.getInstance());
         File[] cachedFiles = new File(dataCacheDir).listFiles();

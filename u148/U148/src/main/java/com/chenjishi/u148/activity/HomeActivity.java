@@ -29,16 +29,12 @@ import com.chenjishi.u148.easter.FireworksActivity;
 import com.chenjishi.u148.easter.SurpriseActivity;
 import com.chenjishi.u148.model.UpdateInfo;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.AboutDialog;
 import com.chenjishi.u148.view.ExitDialog;
 import com.chenjishi.u148.view.LoginDialog;
 import com.chenjishi.u148.view.TabPageIndicator;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
-import com.chenjishi.u148.volley.toolbox.NetworkImageView;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.flurry.android.FlurryAgent;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -69,7 +65,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
 
     private LinearLayout mButtonLayout;
     private TextView mNameText;
-    private NetworkImageView mIconView;
+    private SimpleDraweeView mIconView;
 
     private int maxIconIndent;
     private float density;
@@ -150,7 +146,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         long lastCheckTime = PrefsUtil.getLongPreferences(PrefsUtil.KEY_CHECK_UPDATE_TIME, -1L);
         long currentTime = System.currentTimeMillis();
         if (lastCheckTime == -1 || currentTime >= lastCheckTime) {
-            HttpUtils.get(API_UPGRADE, UpdateInfo.class, new Response.Listener<UpdateInfo>() {
+            NetworkRequest.getInstance().get(API_UPGRADE, UpdateInfo.class, new Listener<UpdateInfo>() {
                 @Override
                 public void onResponse(UpdateInfo response) {
                     if (null == response || null == response.data) return;
@@ -162,9 +158,9 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
                         downloadApk(data.url);
                     }
                 }
-            }, new Response.ErrorListener() {
+            }, new ErrorListener() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
+                public void onErrorResponse() {
 
                 }
             });
@@ -340,7 +336,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
                     R.drawable.ic_menu4};
             UserInfo userInfo = PrefsUtil.getUser();
 
-            mIconView.setImageUrl(userInfo.icon, HttpUtils.getImageLoader());
+            mIconView.setImageURI(Uri.parse(userInfo.icon));
             mNameText.setText(userInfo.nickname);
 
             mButtonLayout.setVisibility(View.GONE);
@@ -436,7 +432,7 @@ public class HomeActivity extends FragmentActivity implements DrawerLayout.Drawe
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dp2px(32), dp2px(32));
         lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
         int id1 = Utils.generateViewId();
-        mIconView = new NetworkImageView(this);
+        mIconView = new SimpleDraweeView(this);
         mIconView.setBackgroundResource(R.drawable.head);
         mIconView.setId(id1);
         mIconView.setLayoutParams(lp);

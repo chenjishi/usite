@@ -19,14 +19,9 @@ import com.chenjishi.u148.model.Favorite;
 import com.chenjishi.u148.model.FavoriteItem;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.DeletePopupWindow;
 import com.chenjishi.u148.view.DividerItemDecoration;
-import com.chenjishi.u148.volley.Response.ErrorListener;
-import com.chenjishi.u148.volley.Response.Listener;
-import com.chenjishi.u148.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,7 +72,7 @@ public class FavoriteActivity extends SlidingActivity implements Listener<Favori
         mScrollListener.setIsLoading(true);
 
         final UserInfo user = PrefsUtil.getUser();
-        HttpUtils.get(String.format(API_FAVORITE_GET, mPage, user.token), Favorite.class, this, this);
+        NetworkRequest.getInstance().get(String.format(API_FAVORITE_GET, mPage, user.token), Favorite.class, this, this);
     }
 
     @Override
@@ -87,7 +82,7 @@ public class FavoriteActivity extends SlidingActivity implements Listener<Favori
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
         mScrollListener.setIsLoading(false);
     }
 
@@ -107,7 +102,7 @@ public class FavoriteActivity extends SlidingActivity implements Listener<Favori
     private void deleteFavorite(String id) {
         final UserInfo user = PrefsUtil.getUser();
         String url = String.format(API_DELETE_FAVORITE, id, user.token);
-        HttpUtils.get(url, new Listener<String>() {
+        NetworkRequest.getInstance().get(url, new Listener<String>() {
             @Override
             public void onResponse(String response) {
                 if (!TextUtils.isEmpty(response)) {

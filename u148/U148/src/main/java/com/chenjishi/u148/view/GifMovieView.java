@@ -5,17 +5,17 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Movie;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.volley.RequestQueue;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.util.ErrorListener;
+import com.chenjishi.u148.util.Listener;
+import com.chenjishi.u148.util.NetworkRequest;
 
 /**
  * Created by chenjishi on 14/11/14.
  */
-public class GifMovieView extends View implements Response.Listener<byte[]>, Response.ErrorListener {
+public class GifMovieView extends View implements Listener<byte[]>, ErrorListener {
     private static final int MOVE_VIEW_DURATION = 1000;
 
     private Movie mMovie;
@@ -160,7 +160,7 @@ public class GifMovieView extends View implements Response.Listener<byte[]>, Res
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
 
     }
 
@@ -168,7 +168,13 @@ public class GifMovieView extends View implements Response.Listener<byte[]>, Res
     public void onResponse(byte[] response) {
         if (null != response && response.length > 0) {
             mMovie = Movie.decodeByteArray(response, 0, response.length);
-            requestLayout();
+
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    requestLayout();
+                }
+            });
         }
     }
 
@@ -180,9 +186,7 @@ public class GifMovieView extends View implements Response.Listener<byte[]>, Res
     }
 
     public void setImageUrl(String url, int width) {
-        RequestQueue queue = HttpUtils.getRequestQueue();
-        queue.add(new ByteArrayRequest(url, this, this));
-
+        NetworkRequest.getInstance().getBytes(url, this, this);
         mRequestWidth = width;
     }
 }

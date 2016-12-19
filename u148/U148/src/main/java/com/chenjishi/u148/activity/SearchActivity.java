@@ -10,11 +10,10 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.model.Feed;
 import com.chenjishi.u148.model.FeedDoc;
 import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.ErrorListener;
+import com.chenjishi.u148.util.Listener;
+import com.chenjishi.u148.util.NetworkRequest;
 import com.chenjishi.u148.view.DividerItemDecoration;
-import com.chenjishi.u148.volley.Response.Listener;
-import com.chenjishi.u148.volley.Response.ErrorListener;
-import com.chenjishi.u148.volley.VolleyError;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -83,11 +82,11 @@ public class SearchActivity extends SlidingActivity implements Listener<FeedDoc>
         mScrollListener.setIsLoading(true);
 
         String url = String.format(Constants.API_SEARCH, mPage, mKeyword);
-        HttpUtils.get(url, FeedDoc.class, this, this);
+        NetworkRequest.getInstance().get(url, FeedDoc.class, this, this);
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
 //        Utils.setErrorView(mEmptyView, getString(R.string.net_error));
         mScrollListener.setIsLoading(false);
     }

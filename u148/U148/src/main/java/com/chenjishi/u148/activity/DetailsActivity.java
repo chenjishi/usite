@@ -26,9 +26,13 @@ import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.ArticleWebView;
 import com.chenjishi.u148.view.CircleView;
 import com.chenjishi.u148.view.ShareDialog;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
 import com.flurry.android.FlurryAgent;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -47,8 +51,8 @@ import static com.chenjishi.u148.util.Constants.API_ARTICLE;
  * Time: 下午7:56
  * To change this template use File | Settings | File Templates.
  */
-public class DetailsActivity extends SlidingActivity implements MusicPlayListener, Response.Listener<Article>,
-        Response.ErrorListener, JSCallback, View.OnClickListener {
+public class DetailsActivity extends SlidingActivity implements MusicPlayListener, Listener<String>,
+        ErrorListener, JSCallback, View.OnClickListener {
     private ArticleWebView mWebView;
 
     private ImageButton favoriteBtn;
@@ -73,7 +77,7 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
         mFeed = getIntent().getExtras().getParcelable(Constants.KEY_FEED);
 
         Map<String, String> categoryMap;
-        categoryMap = new HashMap<String, String>();
+        categoryMap = new HashMap();
         int[] ids = getResources().getIntArray(R.array.category_id);
         String[] names = getResources().getStringArray(R.array.category_name);
         for (int i = 0; i < ids.length; i++) {
@@ -95,7 +99,7 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
         findViewById(R.id.title_bar).setOnClickListener(this);
 
         showLoadingView();
-        HttpUtils.ArticleRequest(String.format(API_ARTICLE, mFeed.id), this, this);
+        NetworkRequest.getInstance().get(String.format(API_ARTICLE, mFeed.id), this, this);
     }
 
     @Override
@@ -227,7 +231,7 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
         }
 
         String requestUrl = String.format(API_ADD_FAVORITE, mFeed.id, user.token);
-        HttpUtils.get(requestUrl, new Response.Listener<String>() {
+        NetworkRequest.getInstance().get(requestUrl, new Listener<String>() {
             @Override
             public void onResponse(String response) {
                 favoriteBtn.setImageResource(R.drawable.ic_favorite_full);
@@ -269,19 +273,30 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
-        setError();
+    public void onResponse(String response) {
+        if (TextUtils.isEmpty(response)) {
+            setError(getString(R.string.parse_error));
+            return;
+        }
+
+        hideLoadingView();
+
+        String json = new String(response);
+
+        try {
+            JSONObject jObj = new JSONObject(json);
+            JSONObject dataObj = jObj.getJSONObject("data");
+
+            String result = dataObj.getString("content");
+            mArticle = parseU148Content(result);
+            renderPage();
+        } catch (JSONException e) {
+        }
     }
 
     @Override
-    public void onResponse(Article response) {
-        if (null != response && !TextUtils.isEmpty(response.content)) {
-            mArticle = response;
-            renderPage();
-            hideLoadingView();
-        } else {
-            setError(getString(R.string.parse_error));
-        }
+    public void onErrorResponse() {
+        setError();
     }
 
     private void renderPage() {
@@ -377,6 +392,30 @@ public class DetailsActivity extends SlidingActivity implements MusicPlayListene
                 }
             }
         });
+    }
+
+    private Article parseU148Content(String html) {
+        Document doc = Jsoup.parse(html);
+        if (null == doc) return null;
+
+        Article article = new Article();
+
+        Elements images = doc.select("img");
+        for (Element image : images) {
+            article.imageList.add(image.attr("src"));
+        }
+
+        Elements videos = doc.select("embed");
+        for (Element video : videos) {
+            String videoUrl = video.attr("src");
+            if (videoUrl.contains("xiami")) {
+                video.parent().html("<img src=\"file:///android_asset/audio.png\" title=\"" + videoUrl + "\" />");
+            } else {
+                video.parent().html("<img src=\"file:///android_asset/video.png\" title=\"" + videoUrl + "\" />");
+            }
+        }
+        article.content = doc.html();
+        return article;
     }
 
     @Override

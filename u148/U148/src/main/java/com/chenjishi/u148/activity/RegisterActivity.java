@@ -8,10 +8,7 @@ import android.widget.EditText;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,7 +21,7 @@ import static com.chenjishi.u148.util.Constants.API_REGISTER;
 /**
  * Created by chenjishi on 14-3-4.
  */
-public class RegisterActivity extends BaseActivity implements Response.Listener<String>, Response.ErrorListener {
+public class RegisterActivity extends BaseActivity implements Listener<String>, ErrorListener {
     private EditText mEmailEdit;
     private EditText mPasswordEdit;
     private EditText mNickNameEdit;
@@ -43,7 +40,7 @@ public class RegisterActivity extends BaseActivity implements Response.Listener<
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
         Utils.showToast("注册失败，请稍后重试");
         mProgress.dismiss();
     }
@@ -139,7 +136,7 @@ public class RegisterActivity extends BaseActivity implements Response.Listener<
         mProgress.setMessage("正在注册...");
         mProgress.setCancelable(false);
         mProgress.show();
-        HttpUtils.post(API_REGISTER, params, this, this);
+        NetworkRequest.getInstance().post(API_REGISTER, params, this, this);
     }
 
     boolean emailValid(String email) {

@@ -7,17 +7,14 @@ import android.text.TextUtils;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.FileCache;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.util.FileUtils;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.util.*;
 import com.flurry.android.FlurryAgent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 
-public class LaunchActivity extends Activity implements Response.Listener<String>, Response.ErrorListener {
+public class LaunchActivity extends Activity implements Listener<String>, ErrorListener {
     private static final long TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
     @Override
@@ -25,7 +22,7 @@ public class LaunchActivity extends Activity implements Response.Listener<String
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        HttpUtils.get("http://u148.oss-cn-beijing.aliyuncs.com/config", new Response.Listener<String>() {
+        NetworkRequest.getInstance().get("http://u148.oss-cn-beijing.aliyuncs.com/config", new Listener<String>() {
             @Override
             public void onResponse(String response) {
                 if (!TextUtils.isEmpty(response)) {
@@ -38,8 +35,7 @@ public class LaunchActivity extends Activity implements Response.Listener<String
                 }
             }
         }, this);
-
-        HttpUtils.get("http://app.goudaifu.com/funclub/v1/funclubget", this, this);
+        NetworkRequest.getInstance().get("http://app.goudaifu.com/funclub/v1/funclubget", this, this);
     }
 
     @Override
@@ -56,7 +52,7 @@ public class LaunchActivity extends Activity implements Response.Listener<String
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
 
     }
 

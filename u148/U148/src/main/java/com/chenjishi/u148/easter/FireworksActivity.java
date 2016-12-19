@@ -6,17 +6,17 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
-import com.chenjishi.u148.util.HttpUtils;
+import com.chenjishi.u148.util.ErrorListener;
+import com.chenjishi.u148.util.Listener;
+import com.chenjishi.u148.util.NetworkRequest;
 import com.chenjishi.u148.view.FireworksView;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Created by chenjishi on 15/1/27.
  */
-public class FireworksActivity extends Activity implements Response.Listener<String>, Response.ErrorListener {
+public class FireworksActivity extends Activity implements Listener<String>, ErrorListener {
     private MediaPlayer mPlayer;
 
     private FireworksView mFireworksView;
@@ -32,7 +32,7 @@ public class FireworksActivity extends Activity implements Response.Listener<Str
         mPlayer.setLooping(true);
         mPlayer.start();
 
-        HttpUtils.get("http://u148.oss-cn-beijing.aliyuncs.com/greetings", this, this);
+        NetworkRequest.getInstance().get("http://u148.oss-cn-beijing.aliyuncs.com/greetings", this, this);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class FireworksActivity extends Activity implements Response.Listener<Str
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
 
     }
 

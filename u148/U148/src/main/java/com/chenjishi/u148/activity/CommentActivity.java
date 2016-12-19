@@ -20,14 +20,9 @@ import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.Comment;
 import com.chenjishi.u148.model.CommentItem;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.Constants;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
+import com.chenjishi.u148.util.*;
 import com.chenjishi.u148.view.DividerItemDecoration;
 import com.chenjishi.u148.view.LoginDialog;
-import com.chenjishi.u148.volley.Response.ErrorListener;
-import com.chenjishi.u148.volley.Response.Listener;
-import com.chenjishi.u148.volley.VolleyError;
 import com.facebook.drawee.view.SimpleDraweeView;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,7 +115,7 @@ public class CommentActivity extends SlidingActivity implements Listener<Comment
     };
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
         setError();
         mRefreshLayout.setRefreshing(false);
         mScrollListener.setIsLoading(false);
@@ -146,7 +141,7 @@ public class CommentActivity extends SlidingActivity implements Listener<Comment
         mScrollListener.setIsLoading(true);
 
         final String url = String.format(API_COMMENTS_GET, articleId, mPage);
-        HttpUtils.get(url, Comment.class, this, this);
+        NetworkRequest.getInstance().get(url, Comment.class, this, this);
     }
 
     public void onSendButtonClicked(View v) {
@@ -189,40 +184,39 @@ public class CommentActivity extends SlidingActivity implements Listener<Comment
             params.put("review_id", id);
         }
 
-        HttpUtils.post(API_COMMENT_POST, params, new Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        pd.dismiss();
-                        if (!TextUtils.isEmpty(response)) {
-                            try {
-                                JSONObject jObj = new JSONObject(response);
-                                int code = jObj.optInt("code", -1);
+        NetworkRequest.getInstance().post(API_COMMENT_POST, params, new Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                pd.dismiss();
+                if (!TextUtils.isEmpty(response)) {
+                    try {
+                        JSONObject jObj = new JSONObject(response);
+                        int code = jObj.optInt("code", -1);
 
-                                if (0 == code) {
-                                    mEditText.setText("");
-                                    mEditText.setHint("");
-                                    mEditText.clearFocus();
-                                    mContent = content;
-                                    Utils.showToast(R.string.comment_success);
-                                    loadData();
-                                } else {
-                                    Utils.showToast(R.string.comment_fail);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                        if (0 == code) {
+                            mEditText.setText("");
+                            mEditText.setHint("");
+                            mEditText.clearFocus();
+                            mContent = content;
+                            Utils.showToast(R.string.comment_success);
+                            loadData();
                         } else {
                             Utils.showToast(R.string.comment_fail);
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        pd.dismiss();
-                        Utils.showToast(R.string.comment_fail);
-                    }
+                } else {
+                    Utils.showToast(R.string.comment_fail);
                 }
-        );
+            }
+        }, new ErrorListener() {
+            @Override
+            public void onErrorResponse() {
+                pd.dismiss();
+                Utils.showToast(R.string.comment_fail);
+            }
+        });
     }
 
     @Override

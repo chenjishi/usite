@@ -11,10 +11,7 @@ import android.widget.EditText;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.base.PrefsUtil;
 import com.chenjishi.u148.model.UserInfo;
-import com.chenjishi.u148.util.HttpUtils;
-import com.chenjishi.u148.util.Utils;
-import com.chenjishi.u148.volley.Response;
-import com.chenjishi.u148.volley.VolleyError;
+import com.chenjishi.u148.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +23,7 @@ import static com.chenjishi.u148.util.Constants.API_LOGIN;
 /**
  * Created by chenjishi on 13-12-20.
  */
-public class LoginDialog extends Dialog implements View.OnClickListener, Response.Listener<String>, Response.ErrorListener {
+public class LoginDialog extends Dialog implements View.OnClickListener, Listener<String>, ErrorListener {
     private OnLoginListener listener;
     private Context context;
 
@@ -58,14 +55,14 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Respons
             params.put("email", str1);
             params.put("password", str2);
 
-            HttpUtils.post(API_LOGIN, params, this, this);
+            NetworkRequest.getInstance().post(API_LOGIN, params, this, this);
         } else {
             dismiss();
         }
     }
 
     @Override
-    public void onErrorResponse(VolleyError error) {
+    public void onErrorResponse() {
         listener.onLoginError();
         dismiss();
     }

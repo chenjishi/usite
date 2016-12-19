@@ -13,22 +13,22 @@ repositories {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.chenjishi.u148"
         minSdkVersion 14
-        targetSdkVersion 21
-        versionCode 51
-        versionName "1.9"
+        targetSdkVersion 23
+        versionCode 53
+        versionName "2.0"
     }
     signingConfigs {
         release {
             storeFile file("/Users/chenjishi/workarea/chenjishi.keystore")
-            storePassword "************"
-            keyAlias "************"
-            keyPassword "************"
+            storePassword "331500311113Ctrl"
+            keyAlias "chenjishi_key"
+            keyPassword "331500311113Ctrl"
         }
     }
     buildTypes {
@@ -46,7 +46,9 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.0'
     compile 'com.android.support:support-v4:23.1.0'
     compile 'org.jsoup:jsoup:1.8.3'
-    compile 'com.google.code.gson:gson:2.5'
-    compile 'com.facebook.fresco:fresco:0.9.0+'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.squareup.okio:okio:1.10.0'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.facebook.fresco:fresco:0.11.0'
     compile 'com.flurry.android:analytics:6.2.0'
 }
