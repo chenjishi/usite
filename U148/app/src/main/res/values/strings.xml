@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">有意思吧</string>
+    <string name="app_home">首页</string>
+    <string name="app_video">影像</string>
+    <string name="app_image">图画</string>
+    <string name="slogan">分享&#160;•&#160;情怀&#160;•&#160;超越，不仅仅是娱乐&#160;!</string>
+    <string name="app_audio">音频</string>
+    <string name="app_text">文字</string>
+    <string name="app_market">集市</string>
+    <string name="app_bottle">漂流</string>
+    <string name="app_latest">最新文章</string>
+    <string name="app_miscell">杂粹</string>
+    <string name="app_story">短品</string>
+    <string name="loading">载入中&#8230;</string>
+    <string name="usite">www.u148.net</string>
+    <string name="exit_tip">确定退出应用吗?</string>
+    <string name="email_choose">选择邮箱</string>
+    <string name="register">注&#160;&#160;&#160;&#160;册</string>
+    <string name="register_title">注册</string>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="feedback">意见反馈</string>
+    <string name="feedback2">有意思吧意见反馈</string>
+    <string name="send">发送</string>
+    <string name="about">关于</string>
+    <string name="app_settings">设置</string>
+    <string name="net_error">网络无连接，请检查网络设置</string>
+    <string name="weibo">countryhouses</string>
+    <string name="about_tip">分享生活，回味时光</string>
+    <string name="cache_clear">当前缓存(%1$s)</string>
+    <string name="clear">清理缓存</string>
+    <string name="login_input_empty">请输入用户名和密码</string>
+    <string name="login_fail">登录失败，用户名或密码错误</string>
+    <string name="login_success">登录成功</string>
+    <string name="google_play_unavailable">无法打开Google Play</string>
+
+    <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
+    <string name="video_play_failed">此视频无法播放</string>
+    <string name="video_loading">视频加载中...</string>
+    <string name="updating_app">正在更新应用程序&#8230;</string>
+    <string name="page_next">显示下一页</string>
+    <string name="content_loading">正在加载...</string>
+    <string name="new_version_tip">程序版本更新了哦，需要更新吗?</string>
+
+    <string name="image_save_success">已保存至相册</string>
+    <string name="image_save_fail">下载失败,请重试...</string>
+    <string name="video_decoder_fail">解码器初始化失败，无法播放视频</string>
+    <string name="music_album_unknown">专辑:%1$s</string>
+    <string name="music_artist_unknown">歌手:%1$s</string>
+
+    <string name="pull_to_refresh_pull_label">下拉刷新…</string>
+    <string name="pull_to_refresh_release_label">手指松开刷新…</string>
+    <string name="pull_to_refresh_refreshing_label">加载中…</string>
+
+    <string name="connection_error">网络连接错误</string>
+    <string name="parse_error">数据解析出错了, 请稍后再试</string>
+
+    <string name="share_weibo">新浪微博</string>
+    <string name="share_session">微信好友</string>
+    <string name="share_friend">朋友圈</string>
+    <string name="qqzone">QQ空间</string>
+    <string name="qq_friends">QQ好友</string>
+    <string name="app_author">作者：CountryHouses</string>
+    <string name="copyright">©2007 &#8211; 2019 Www.U148.Net</string>
+    <string name="close_dialog">关闭窗口</string>
+    <string name="wechat_not_install">您还没有安装微信，无法使用微信分享</string>
+    <string name="weibo_not_install">您还没有安装新浪微博，无法使用微博分享</string>
+    <string name="wechat_not_support">您的微信版本过低，不支持该分享功能</string>
+    <string name="wechat_timeline_not_support">您的微信版本过低，不支持朋友圈分享</string>
+    <string name="share_title">%1$s&#160;-&#160;U148.Net</string>
+    <string name="share_file_error">分享失败, 文件不存在</string>
+    <string name="share_error">分享失败</string>
+    <string name="share_success">分享成功</string>
+    <string name="share_image_tip">我在有意思吧分享了一张图片</string>
+    <string name="video_share">有意思吧视频分享-%1$s%2$s</string>
+
+    <string name="comment">评论</string>
+    <string name="no_comment">暂无评论</string>
+    <string name="views">%1$d人看过&#160;&#160;&#160;&#160;%2$d评论</string>
+    <string name="comment_count">%1$d评论</string>
+    <string name="empty_comment_tip">评论不能为空</string>
+    <string name="submit_comment">评论提交中&#8230;</string>
+    <string name="comment_success">评论成功</string>
+    <string name="comment_fail">评论失败，请稍后再试</string>
+
+    <string name="favorite">收藏</string>
+    <string name="favorite_success">收藏成功</string>
+    <string name="favorite_cancel">取消收藏</string>
+    <string name="share">分享</string>
+
+    <string name="login">登录</string>
+    <string name="logout_tips">确认退出账号吗？</string>
+    <string name="logout_success">退出成功</string>
+    <string name="write_comment">写评论</string>
+    <string name="email">邮箱</string>
+    <string name="comment_hint">写下你的评论</string>
+    <string name="password">密码</string>
+    <string name="favorite_delete_fail">删除失败,请稍后再试</string>
+    <string name="favorite_delete_success">删除成功!</string>
+
+    <string name="pub_time">%1$s&#160;&#160;%2$s</string>
+    <string name="pub_reviews">%1$d人看过&#160;&#160;%2$d评论</string>
+    <string name="netop_network_error">网络无法访问，请您检查手机的网络设置。</string>
+
+    <string name="weibo_share_success">新浪微博分享成功!</string>
+    <string name="weibo_share_fail">新浪微博分享失败!</string>
+    <string name="share_image_fail">图片分享失败，请稍后再试</string>
+    <string name="search">搜索</string>
+    <string name="image_loading">图片加载&#8230;</string>
+    <string name="image_loading_fail">图片加载失败</string>
+    <string name="network_invalid">无网络连接，请检查网络设置</string>
+    <string name="server_error">服务器返回错误，请稍后再试</string>
+    <string name="pull_to_refresh_from_bottom_pull_label">向上滑传给附近10个人</string>
+    <string name="pull_to_refresh_from_bottom_release_label">向上滑传给附近10个人</string>
+    <string name="pull_to_refresh_from_bottom_refreshing_label">加载中&#8230;</string>
+    <string name="menu_register">注册</string>
+    <string name="mode_night">夜间</string>
+    <string name="mode_day">日间</string>
+    <string name="exit_tips">再按一次退出</string>
+    <string-array name="menu_item">
+        <item>设置</item>
+        <item>夜间</item>
+        <item>收藏</item>
+        <item>点赞</item>
+        <item>关于</item>
+        <item>退出</item>
+    </string-array>
+
+    <string-array name="setting_item">
+        <item>清除缓存</item>
+        <item>意见反馈</item>
+    </string-array>
+
+    <integer-array name="category_id">
+        <item>0</item>
+        <item>3</item>
+        <item>6</item>
+        <item>5</item>
+        <item>10</item>
+        <item>7</item>
+        <item>2</item>
+        <item>9</item>
+        <item>8</item>
+        <item>4</item>
+    </integer-array>
+
+    <string-array name="category_name">
+        <item>首页</item>
+        <item>图画</item>
+        <item>文字</item>
+        <item>音频</item>
+        <item>短品</item>
+        <item>杂粹</item>
+        <item>影像</item>
+        <item>集市</item>
+        <item>漂流</item>
+        <item>游戏</item>
+    </string-array>
+</resources>

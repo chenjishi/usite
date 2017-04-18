@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_logo_big"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="125dp"
+            android:contentDescription="@null"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/slogan"
+            android:layout_gravity="bottom|center_horizontal"
+            android:textColor="@color/text_color_weak"
+            android:layout_marginBottom="80dp"
+            android:textSize="14sp"/>
+</FrameLayout>

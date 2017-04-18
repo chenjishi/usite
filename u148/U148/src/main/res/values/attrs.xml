@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- The attribute to set in your Application/Activity theme to reference your custom theme -->
-    <attr name="ptrHeaderStyle" format="reference"/>
-    <attr name="vpiTabPageIndicatorStyle" format="reference"/>
-</resources>
