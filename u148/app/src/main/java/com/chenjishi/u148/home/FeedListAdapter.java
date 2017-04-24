@@ -164,7 +164,7 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             params.put("title", feed.title);
             FlurryAgent.logEvent("read_article", params);
 
-            IntentUtils.getInstance().startActivity(mContext, intent);
+            mContext.startActivity(intent);
         }
     };
 

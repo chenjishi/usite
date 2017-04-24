@@ -17,13 +17,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.home.FeedListFragment;
 import com.chenjishi.u148.home.MenuLayout;
-import com.chenjishi.u148.home.SearchActivity;
 import com.chenjishi.u148.model.UpdateInfo;
 import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.TabPageIndicator;
@@ -73,6 +71,7 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setBackgroundDrawable(null);
+        setStatusViewColor(getResources().getColor(R.color.action_bar_bg));
 
         mLeftView = (LinearLayout) findViewById(R.id.left_view);
         mLeftView.setPadding(0, 0, 0, 0);
@@ -114,12 +113,6 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
     @Override
     public void onPanelClose() {
         drawerLayout.closeDrawers();
-    }
-
-    @Override
-    public void onRightButtonClicked(View v) {
-        Intent intent = new Intent(this, SearchActivity.class);
-        IntentUtils.getInstance().startActivity(this, intent);
     }
 
     private void checkUpdate() {
@@ -283,10 +276,7 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
         titleText.setTypeface(null);
         ((ImageView) findViewById(R.id.ic_arrow)).setImageResource(day ?
         R.mipmap.ic_navigation_drawer : R.mipmap.ic_navigation_drawer_night);
-
-        ImageButton rightBtn = (ImageButton) findViewById(R.id.btn_right);
-        rightBtn.setImageResource(day ? R.mipmap.ic_action_search : R.mipmap.ic_action_search_night);
-        rightBtn.setVisibility(View.VISIBLE);
+        setRightButtonIcon(day ? R.mipmap.ic_action_search : R.mipmap.ic_action_search_night);
         findViewById(R.id.split_h).setBackgroundColor(day ? 0xFFE6E6E6 :
                 res.getColor(R.color.text_color_regular));
 

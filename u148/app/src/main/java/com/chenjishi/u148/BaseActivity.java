@@ -1,6 +1,9 @@
 package com.chenjishi.u148;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
@@ -34,6 +37,7 @@ public class BaseActivity extends AppCompatActivity {
         mRootView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == Config.getThemeMode(this)
                 ? R.color.background_night : R.color.background));
         mInflater = LayoutInflater.from(this);
+        setStatusViewColor(0xFFE5E5E5);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class BaseActivity extends AppCompatActivity {
             super.setContentView(R.layout.base_layout);
 
             if (!mHideTitle) {
-                int resId = mTitleResId == -1 ? R.layout.base_title_layout : mTitleResId;
+                int resId = mTitleResId == -1 ? R.layout.title_base : mTitleResId;
                 mInflater.inflate(resId, mRootView);
             }
 
@@ -82,10 +86,6 @@ public class BaseActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onRightButtonClicked(View v) {
-
-    }
-
     @Override
     public void setTitle(CharSequence title) {
         final TextView textView = (TextView) findViewById(R.id.tv_title);
@@ -99,9 +99,19 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void setRightButtonIcon(int resId) {
-        ImageButton button = (ImageButton) findViewById(R.id.btn_right);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.right_view);
+        layout.removeAllViews();
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dp2px(48), MATCH_PARENT);
+        layout.addView(getImageButton(resId), lp);
+    }
+
+    protected ImageButton getImageButton(int resId) {
+        ImageButton button = new ImageButton(this);
+        button.setBackgroundResource(R.drawable.home_up_bg);
         button.setImageResource(resId);
-        button.setVisibility(View.VISIBLE);
+
+        return button;
     }
 
     private LoadingView mLoadingView;
@@ -181,5 +191,13 @@ public class BaseActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
+    }
+
+    protected void setStatusViewColor(@ColorInt int color) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().setStatusBarColor(color);
     }
 }

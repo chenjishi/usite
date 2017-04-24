@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="{SCREEN_MODE}">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="file:///android_asset/usite.css"/>
+    <script type="text/javascript" src="file:///android_asset/usite.js"></script>
+    <script type="text/javascript">
+        String.prototype.trim = function() {
+            return this.replace(/^\s+/, '').replace(/\s+$/, '');
+        };
+        document.addEventListener("DOMContentLoaded", function() {
+            loadData();
+        }, false);
+    </script>
+</head>
+<body>
+<div id="title">{TITLE}</div>
+<div id="wrapper">
+    <div id="left">{U_AUTHOR}</div>
+    <div id="right">{U_COMMENT}</div>
+</div>
+<div id="content">{CONTENT}</div>
+</body>
+</html>
+
