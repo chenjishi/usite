@@ -3,8 +3,7 @@ package com.chenjishi.u148.article;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -15,11 +14,9 @@ import com.chenjishi.u148.BaseActivity;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.comment.CommentActivity;
-import com.chenjishi.u148.model.Article;
-import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.model.UserInfo;
+import com.chenjishi.u148.home.Feed;
+import com.chenjishi.u148.home.UserInfo;
 import com.chenjishi.u148.utils.*;
-import com.chenjishi.u148.widget.ArticleWebView;
 import com.chenjishi.u148.widget.CircleView;
 import com.chenjishi.u148.widget.ShareDialog;
 import com.flurry.android.FlurryAgent;
@@ -38,50 +35,44 @@ import java.util.*;
 import static android.text.TextUtils.isEmpty;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.chenjishi.u148.utils.Constants.*;
+import static com.chenjishi.u148.utils.Utils.showToast;
 
 /**
  * Created by jishichen on 2017/4/14.
  */
 public class DetailsActivity extends BaseActivity implements Listener<String>, ErrorListener,
         JSCallback, View.OnClickListener {
+    private static final int TAG_SHARE = 233;
+    private static final int TAG_FAVORITE = 234;
+    private static final int TAG_COMMENT = 235;
 
-    private ArticleWebView mWebView;
-
-    private ImageButton favoriteBtn;
+    private WebView mWebView;
 
     private Article mArticle;
     private Feed mFeed;
 
     private DBHelper mDatabase;
 
-    private ShareDialog mShareDialog;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setBackgroundDrawable(null);
         setContentView(R.layout.activity_details);
 
+        mDatabase = DBHelper.getInstance(this);
         mFeed = getIntent().getExtras().getParcelable(Constants.KEY_FEED);
 
-        Map<String, String> categoryMap;
-        categoryMap = new HashMap();
+        SparseArray<String> array = new SparseArray<>();
         int[] ids = getResources().getIntArray(R.array.category_id);
         String[] names = getResources().getStringArray(R.array.category_name);
         for (int i = 0; i < ids.length; i++) {
-            categoryMap.put(String.valueOf(ids[i]), names[i]);
+            array.put(ids[i], names[i]);
         }
 
-        mDatabase = DBHelper.getInstance(this);
-        String title = categoryMap.get(String.valueOf(mFeed.category));
-        if (null == mFeed.usr) {
-            title = "返回";
-        }
+        String title = array.get(mFeed.category);
+        if (null == mFeed.usr) title = getString(R.string.back);
         setTitle(title);
 
-        favoriteBtn = (ImageButton) findViewById(R.id.btn_favorite);
-
-        mWebView = (ArticleWebView) findViewById(R.id.web_view);
+        mWebView = (WebView) findViewById(R.id.web_view);
         mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
         findViewById(R.id.title_bar).setOnClickListener(this);
@@ -90,58 +81,48 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         NetworkRequest.getInstance().get(String.format(API_ARTICLE, mFeed.id), this, this);
     }
 
-    public void onCommentClicked(View v) {
-        startCommentActivity();
-    }
-
-    private void startCommentActivity() {
-        Intent intent = new Intent(this, CommentActivity.class);
-        intent.putExtra("article_id", mFeed.id);
-        IntentUtils.getInstance().startActivity(this, intent);
-    }
-
-    public void onFavoriteClicked(View v) {
+    private void addToFavorite() {
         UserInfo user = Config.getUser(this);
-
-        if (null == user || TextUtils.isEmpty(user.token)) {
-            Utils.showToast(this, "请先登录再收藏");
+        if (null == user || isEmpty(user.token)) {
+            showToast(this, R.string.login_to_favorite);
             return;
         }
 
-        Feed feed = mDatabase.getFavoriteById(mFeed.id);
-        if (null != feed && !TextUtils.isEmpty(feed.id)) {
-            Utils.showToast(this, "已收藏");
+        if (mDatabase.isFavorite(mFeed.id)) {
+            showToast(this, R.string.favorite_already);
             return;
         }
 
-        String requestUrl = String.format(API_ADD_FAVORITE, mFeed.id, user.token);
-        NetworkRequest.getInstance().get(requestUrl, new Listener<String>() {
+        String url = String.format(API_ADD_FAVORITE, mFeed.id, user.token);
+        NetworkRequest.getInstance().get(url, new Listener<String>() {
             @Override
             public void onResponse(String response) {
-                favoriteBtn.setImageResource(R.mipmap.ic_favorite_full);
                 mDatabase.insert(mFeed);
-                Utils.showToast(DetailsActivity.this, R.string.favorite_success);
+                applyTheme();
+                showToast(DetailsActivity.this, R.string.favorite_success);
             }
-        }, this);
+        }, new ErrorListener() {
+            @Override
+            public void onErrorResponse() {
+
+            }
+        });
     }
 
-    public void onShareClicked(View v) {
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(Constants.PARAM_TITLE, mFeed.title);
-        FlurryAgent.logEvent(Constants.EVENT_ARTICLE_SHARE, params);
+    private void share() {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TITLE, mFeed.title);
+        FlurryAgent.logEvent(EVENT_ARTICLE_SHARE, params);
 
-        if (null == mShareDialog) {
-            mShareDialog = new ShareDialog(this);
-        }
-
-        final ArrayList<String> imageList = mArticle.imageList;
+        ShareDialog dialog = new ShareDialog(this);
+        ArrayList<String> imageList = mArticle.imageList;
         if (null == imageList || imageList.size() == 0) {
             imageList.add(mFeed.pic_mid);
         }
 
-        mShareDialog.setShareFeed(mFeed);
-        mShareDialog.setImageList(imageList);
-        mShareDialog.show();
+        dialog.setShareFeed(mFeed);
+        dialog.setImageList(imageList);
+        dialog.show();
     }
 
     @Override
@@ -166,29 +147,22 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         String template = Utils.readFromAssets(this, "usite.html");
         template = template.replace("{TITLE}", mFeed.title);
 
-        final UserInfo usr = mFeed.usr;
+        UserInfo usr = mFeed.usr;
+        String author = "", review = "";
         if (null != usr) {
-            long t = mFeed.create_time * 1000L;
-            Date date = new Date(t);
+            Date date = new Date(mFeed.create_time * 1000);
             Format format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String pubTime = String.format(getString(R.string.pub_time),
-                    mFeed.usr.nickname, format.format(date));
-            template = template.replace("{U_AUTHOR}", pubTime);
-            String reviews = String.format(getString(R.string.pub_reviews), mFeed.count_browse,
+            author = String.format(getString(R.string.pub_time), mFeed.usr.nickname,
+                    format.format(date));
+            review = String.format(getString(R.string.pub_reviews), mFeed.count_browse,
                     mFeed.count_review);
-            template = template.replace("{U_COMMENT}", reviews);
-        } else {
-            template = template.replace("{U_AUTHOR}", "");
-            template = template.replace("{U_COMMENT}", "");
         }
+        template = template.replace("{U_AUTHOR}", author);
+        template = template.replace("{U_COMMENT}", review);
         template = template.replace("{CONTENT}", mArticle.content);
 
-        final int mode = Config.getThemeMode(this);
-        if (Constants.MODE_NIGHT == mode) {
-            template = template.replace("{SCREEN_MODE}", "night");
-        } else {
-            template = template.replace("{SCREEN_MODE}", "");
-        }
+        int mode = Config.getThemeMode(this);
+        template = template.replace("{SCREEN_MODE}", mode == MODE_DAY ? "" : "night");
 
         mWebView.loadDataWithBaseURL(null, template, "text/html", "UTF-8", null);
         mWebView.setWebChromeClient(new MyWebChromeClient());
@@ -199,10 +173,8 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             if (newProgress == 100) {
-                final int offset = mDatabase.getOffsetById(mFeed.id);
-                if (offset > 0) {
-                    mWebView.scrollTo(0, offset);
-                }
+                int offset = mDatabase.getOffsetById(mFeed.id);
+                if (offset > 0) mWebView.scrollTo(0, offset);
             }
         }
 
@@ -219,6 +191,7 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         if (null == doc) return null;
 
         Article article = new Article();
+        article.imageList = new ArrayList<>();
 
         Elements images = doc.select("img");
         for (Element image : images) {
@@ -253,24 +226,38 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
 
     @Override
     public void onThemeChange() {
+        final int mode = Config.getThemeMode(this);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int mode = Config.getThemeMode(DetailsActivity.this);
-                if (mode == Constants.MODE_NIGHT) {
-                    mWebView.loadUrl("javascript:setScreenMode('night')");
-                } else {
-                    mWebView.loadUrl("javascript:setScreenMode('day')");
-                }
+                mWebView.loadUrl("javascript:setScreenMode('" +
+                        (mode == MODE_DAY ? "day" : "night") + "')");
             }
         });
-
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.title_bar) {
             mWebView.scrollTo(0, 0);
+            return;
+        }
+
+        if (null == v.getTag()) return;
+
+        int idx = (Integer) v.getTag();
+        switch (idx) {
+            case TAG_COMMENT:
+                Intent intent = new Intent(this, CommentActivity.class);
+                intent.putExtra("article_id", mFeed.id);
+                startActivity(intent);
+                break;
+            case TAG_FAVORITE:
+                addToFavorite();
+                break;
+            case TAG_SHARE:
+                share();
+                break;
         }
     }
 
@@ -283,10 +270,6 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
     @Override
     protected void applyTheme() {
         super.applyTheme();
-        initButtons();
-    }
-
-    private void initButtons() {
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.right_view);
         layout.removeAllViews();
 
@@ -305,8 +288,11 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dp2px(48), MATCH_PARENT);
             lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             lp.rightMargin = i * dp2px(48);
-            layout.addView(getImageButton(theme == MODE_DAY ?
-                    icons1[i] : icons2[i]), lp);
+            ImageButton button = getImageButton(theme == MODE_DAY ?
+                    icons1[i] : icons2[i]);
+            button.setTag(i + TAG_SHARE);
+            button.setOnClickListener(this);
+            layout.addView(button, lp);
         }
 
         if (null != mFeed && mFeed.count_review > 0) {

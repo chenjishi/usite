@@ -1,4 +1,4 @@
-package com.chenjishi.u148.model;
+package com.chenjishi.u148.home;
 
 import java.util.List;
 

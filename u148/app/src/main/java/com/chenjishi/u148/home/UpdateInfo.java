@@ -1,4 +1,4 @@
-package com.chenjishi.u148.model;
+package com.chenjishi.u148.home;
 
 /**
  * Created by chenjishi on 14-6-24.

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="20dp">
+    <EditText
+            android:id="@+id/edit_email"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:textSize="16sp"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:textColorHint="@color/text_color_weak"
+            android:background="@null"/>
+    <View android:layout_width="match_parent"
+          android:layout_height="1px"
+          android:background="#D6D6D6"/>
+    <EditText
+            android:id="@+id/edit_pwd"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            android:hint="@string/password_tip"
+            android:maxLength="16"
+            android:inputType="textPassword"
+            android:textColorHint="@color/text_color_weak"
+            android:background="@null"/>
+    <View android:layout_width="match_parent"
+          android:layout_height="1px"
+          android:background="#D6D6D6"/>
+    <EditText
+            android:id="@+id/edit_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:textSize="16sp"
+            android:hint="@string/nickname_tip"
+            android:maxLength="25"
+            android:layout_marginTop="12dp"
+            android:textColorHint="@color/text_color_weak"
+            android:background="@null"/>
+    <View android:layout_width="match_parent"
+          android:layout_height="1px"
+          android:background="#D6D6D6"/>
+    <TextView
+            android:id="@+id/btn_submit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/text_color_regular"
+            android:textSize="16sp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:onClick="onSubmitClicked"
+            android:clickable="true"
+            android:text="@string/register"
+            android:background="@drawable/btn_gray"
+            android:gravity="center"/>
+</LinearLayout>

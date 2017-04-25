@@ -1,4 +1,4 @@
-package com.chenjishi.u148.model;
+package com.chenjishi.u148.utils;
 
 import android.text.TextUtils;
 

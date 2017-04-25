@@ -15,9 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.model.UserInfo;
+import com.chenjishi.u148.favorite.FavoriteActivity;
+import com.chenjishi.u148.settings.SettingsActivity;
 import com.chenjishi.u148.utils.Constants;
-import com.chenjishi.u148.utils.IntentUtils;
 import com.chenjishi.u148.utils.Utils;
 import com.chenjishi.u148.widget.AboutDialog;
 import com.chenjishi.u148.widget.ExitDialog;
@@ -186,7 +186,7 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
         switch (index) {
             case TAG_SETTINGS:
                 intent = new Intent(ctx, SettingsActivity.class);
-                IntentUtils.getInstance().startActivity(ctx, intent);
+                ctx.startActivity(intent);
                 listener.onPanelClose();
                 break;
             case TAG_MODE:
@@ -198,7 +198,7 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
             case TAG_FAVORITE:
                 if (Config.isLogin(ctx)) {
                     intent = new Intent(ctx, FavoriteActivity.class);
-                    IntentUtils.getInstance().startActivity(ctx, intent);
+                    ctx.startActivity(intent);
                 } else {
                     new LoginDialog(ctx, this).show();
                 }

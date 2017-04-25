@@ -1,6 +1,5 @@
 package com.chenjishi.u148;
 
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
@@ -82,6 +81,10 @@ public class BaseActivity extends AppCompatActivity {
         setContentView(layoutResID);
     }
 
+    protected void onRightIconClicked() {
+
+    }
+
     public void onBackClicked(View v) {
         finish();
     }
@@ -103,7 +106,15 @@ public class BaseActivity extends AppCompatActivity {
         layout.removeAllViews();
 
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dp2px(48), MATCH_PARENT);
-        layout.addView(getImageButton(resId), lp);
+        ImageButton button = getImageButton(resId);
+        button.setBackgroundResource(R.drawable.home_button_bkg);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRightIconClicked();
+            }
+        });
+        layout.addView(button, lp);
     }
 
     protected ImageButton getImageButton(int resId) {

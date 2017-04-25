@@ -1,4 +1,4 @@
-package com.chenjishi.u148;
+package com.chenjishi.u148.home;
 
 import android.app.AlertDialog;
 import android.app.DownloadManager;
@@ -20,9 +20,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.chenjishi.u148.home.FeedListFragment;
-import com.chenjishi.u148.home.MenuLayout;
-import com.chenjishi.u148.model.UpdateInfo;
+import com.chenjishi.u148.BaseActivity;
+import com.chenjishi.u148.Config;
+import com.chenjishi.u148.R;
 import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.TabPageIndicator;
 
@@ -74,6 +74,7 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
         setStatusViewColor(getResources().getColor(R.color.action_bar_bg));
 
         mLeftView = (LinearLayout) findViewById(R.id.left_view);
+        mLeftView.setBackgroundResource(R.drawable.home_button_bkg);
         mLeftView.setPadding(0, 0, 0, 0);
 
         //maximum 8dp for the indent of drawer icon
@@ -94,6 +95,11 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
 
         mTabIndicator.setViewPager(viewPager);
         checkUpdate();
+    }
+
+    @Override
+    protected void onRightIconClicked() {
+        startActivity(new Intent(this, SearchActivity.class));
     }
 
     @Override
@@ -215,7 +221,6 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
                     Utils.showToast(this, R.string.exit_tips);
                     lastBackPressTime = System.currentTimeMillis();
                 } else {
-                    IntentUtils.getInstance().clear();
                     finish();
                 }
             }

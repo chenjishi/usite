@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
-import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.model.UserInfo;
+import com.chenjishi.u148.home.Feed;
+import com.chenjishi.u148.home.UserInfo;
 
 import java.util.ArrayList;
 
@@ -84,6 +84,23 @@ public class DBHelper extends SQLiteOpenHelper {
     public void delete(String id) {
         final String sql = "DELETE FROM " + TB_NAME_FAVORITE + " WHERE " + COL_ID + " = ?";
         mDb.execSQL(sql, new String[]{id});
+    }
+
+    public boolean isFavorite(String id) {
+        String sql = "SELECT * FROM " + TB_NAME_FAVORITE + " WHERE " + COL_ID + "='" + id + "'";
+        Log.i("test", "#sql " + sql);
+        boolean b = false;
+        Cursor cursor = null;
+
+        try {
+            cursor = mDb.rawQuery(sql, null);
+            b = cursor.moveToNext();
+        } catch (Exception e) {
+        } finally {
+            if (null != cursor) cursor.close();
+        }
+
+        return b;
     }
 
     public boolean exist(String id) {

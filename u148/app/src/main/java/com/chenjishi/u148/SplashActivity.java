@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import com.chenjishi.u148.home.MainActivity;
 import com.chenjishi.u148.utils.FileUtils;
 import com.chenjishi.u148.utils.Utils;
 

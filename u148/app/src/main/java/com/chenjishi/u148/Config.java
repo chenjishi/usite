@@ -3,8 +3,8 @@ package com.chenjishi.u148;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import com.chenjishi.u148.model.QQAuthToken;
-import com.chenjishi.u148.model.UserInfo;
+import com.chenjishi.u148.utils.QQAuthToken;
+import com.chenjishi.u148.home.UserInfo;
 import com.chenjishi.u148.utils.Constants;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 

@@ -11,8 +11,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.model.Feed;
-import com.chenjishi.u148.model.FeedDoc;
 import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.LoadingView;
 

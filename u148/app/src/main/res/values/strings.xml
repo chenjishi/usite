@@ -21,7 +21,6 @@
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
     <string name="feedback">意见反馈</string>
-    <string name="feedback2">有意思吧意见反馈</string>
     <string name="send">发送</string>
     <string name="about">关于</string>
     <string name="app_settings">设置</string>
@@ -118,6 +117,27 @@
     <string name="mode_night">夜间</string>
     <string name="mode_day">日间</string>
     <string name="exit_tips">再按一次退出</string>
+    <string name="login_to_favorite">请先登录再收藏</string>
+    <string name="favorite_already">已收藏</string>
+    <string name="back">返回</string>
+    <string name="reply_to">回复：%1$s</string>
+    <string name="delete_favorite">删除收藏</string>
+    <string name="clear_success">清除缓存成功!</string>
+    <string name="cache_clean">正在清除&#8230;</string>
+    <string name="phone_info">有意思吧意见反馈(版本：%1$s 机型：%2$s 系统：%3$s)</string>
+    <string name="password_tip">6 ~ 16位密码</string>
+    <string name="nickname_tip">昵称，不超过25字，中文不超过12字</string>
+    <string name="register_fail">注册失败，请稍后重试</string>
+    <string name="register_fail_network">注册失败，网络原因</string>
+    <string name="register_success">注册成功</string>
+    <string name="too_frequent">一个小时内不能再注册</string>
+    <string name="email_null">邮箱不能为空</string>
+    <string name="email_invalid">邮箱不合法</string>
+    <string name="password_null">密码不能为空</string>
+    <string name="password_invalid">密码长度需要6位并且小于16位</string>
+    <string name="nickname_null">请输入昵称</string>
+    <string name="nickname_invalid">昵称太长，中文请限制在12字内，英文25字母内</string>
+    <string name="register_ing">正在注册&#8230;</string>
     <string-array name="menu_item">
         <item>设置</item>
         <item>夜间</item>

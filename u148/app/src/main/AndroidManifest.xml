@@ -22,13 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name=".home.MainActivity"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".home.FavoriteActivity"
+        <activity android:name=".favorite.FavoriteActivity"
                   android:screenOrientation="portrait"/>
-        <activity android:name=".home.SettingsActivity"
+        <activity android:name=".settings.SettingsActivity"
                   android:screenOrientation="portrait"/>
         <activity android:name=".article.DetailsActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".comment.CommentActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".home.RegisterActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".home.SearchActivity"
                   android:screenOrientation="portrait"/>
     </application>
 

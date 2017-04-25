@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.model.UserInfo;
+import com.chenjishi.u148.home.UserInfo;
 import com.chenjishi.u148.utils.ErrorListener;
 import com.chenjishi.u148.utils.Listener;
 import com.chenjishi.u148.utils.NetworkRequest;
