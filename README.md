@@ -1,7 +1,7 @@
 U148
 =====
 
-Official Android app for www.u148.net,<p>support picture browers and download</p><p>support share to SNS for video,music,text,and pictures</p>
+Official Android app for www.u148.net<p>support picture browers and download</p><p>support share to SNS for video,music,text,and pictures</p>
 
 ## Google Play Download: 
 https://play.google.com/store/apps/details?id=com.chenjishi.u148&feature=search_result#?t=W251bGwsMSwyLDEsImNvbS5jaGVuamlzaGkudTE0OCJd
@@ -24,7 +24,7 @@ https://play.google.com/store/apps/details?id=com.chenjishi.u148&feature=search_
 
 The MIT License (MIT)
 
-Copyright (c) 2013 Jishi Chen
+Copyright (c) 2017 Jishi Chen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -42,8 +42,3 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-
-
-
