@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,16 +20,6 @@ import com.chenjishi.u148.R;
 import com.chenjishi.u148.home.Feed;
 import com.chenjishi.u148.utils.QQAuthToken;
 import com.chenjishi.u148.utils.Utils;
-import com.facebook.common.executors.UiThreadImmediateExecutorService;
-import com.facebook.common.references.CloseableReference;
-import com.facebook.datasource.DataSource;
-import com.facebook.datasource.DataSubscriber;
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.imagepipeline.core.ImagePipeline;
-import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
-import com.facebook.imagepipeline.image.CloseableImage;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuth;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
@@ -99,8 +88,8 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
         container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        int[] iconIds = {R.mipmap.ic_session, R.mipmap.ic_friend, R.mipmap.ic_weibo,
-                R.mipmap.ic_qqzone, R.mipmap.ic_qq};
+        int[] iconIds = {R.drawable.ic_session, R.drawable.ic_friend, R.drawable.ic_weibo,
+                R.drawable.ic_qqzone, R.drawable.ic_qq};
         int[] nameIds = {R.string.share_session, R.string.share_friend, R.string.share_weibo,
                 R.string.qqzone, R.string.qq_friends};
 
@@ -148,32 +137,32 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
     }
 
     private void requestImage(String url, final int type) {
-        DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
-            @Override
-            protected void onNewResultImpl(Bitmap bitmap) {
-                if (null != bitmap && !bitmap.isRecycled()) {
-                    if (null != bitmap) {
-                        if (null != mFeed) {
-                            sendWebPage(type, bitmap);
-                        } else {
-                            sendImage(type, bitmap);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
-                Utils.showToast(getContext(), R.string.share_image_fail);
-            }
-        };
-
-        ImagePipeline imagePipeline = Fresco.getImagePipeline();
-        ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url));
-        ImageRequest request = builder.build();
-        DataSource<CloseableReference<CloseableImage>>
-                dataSource = imagePipeline.fetchDecodedImage(request, this);
-        dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
+//        DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
+//            @Override
+//            protected void onNewResultImpl(Bitmap bitmap) {
+//                if (null != bitmap && !bitmap.isRecycled()) {
+//                    if (null != bitmap) {
+//                        if (null != mFeed) {
+//                            sendWebPage(type, bitmap);
+//                        } else {
+//                            sendImage(type, bitmap);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
+//                Utils.showToast(getContext(), R.string.share_image_fail);
+//            }
+//        };
+//
+//        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+//        ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url));
+//        ImageRequest request = builder.build();
+//        DataSource<CloseableReference<CloseableImage>>
+//                dataSource = imagePipeline.fetchDecodedImage(request, this);
+//        dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
     }
 
 

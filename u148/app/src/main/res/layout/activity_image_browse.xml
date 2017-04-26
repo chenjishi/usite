@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@color/gray_bg">
+    <android.support.v4.view.ViewPager
+            android:id="@+id/pager_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    <RelativeLayout android:id="@+id/tool_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_gravity="bottom"
+                    android:background="#AA000000">
+        <ImageButton
+                style="@style/ImageButtonStyle"
+                android:onClick="onCloseButtonClicked"
+                android:layout_alignParentLeft="true"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_action_close"/>
+        <ImageButton
+                style="@style/ImageButtonStyle"
+                android:onClick="onDownloadButtonClicked"
+                android:layout_centerInParent="true"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_action_file_download"/>
+        <ImageButton
+                style="@style/ImageButtonStyle"
+                android:onClick="onShareButtonClicked"
+                android:layout_alignParentRight="true"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_action_share"/>
+    </RelativeLayout>
+</FrameLayout>

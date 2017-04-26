@@ -1,12 +1,12 @@
 package com.chenjishi.u148.comment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.bumptech.glide.Glide;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.home.UserInfo;
@@ -90,8 +90,7 @@ public class CommentListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             UserInfo user = cmt.usr;
             mDate.setTime(cmt.create_time * 1000);
 
-            viewHolder.imageView.setImageURI(Uri.parse(user.icon));
-
+            Glide.with(mContext).load(user.icon).into(viewHolder.imageView);
             String formattedString = user.nickname + " " + (isNight
                     ? "<font color='#666666'>" : "<font color='#999999'>") + mDateFormat.format(mDate) + "</font>";
             viewHolder.userText.setText(Html.fromHtml(formattedString));

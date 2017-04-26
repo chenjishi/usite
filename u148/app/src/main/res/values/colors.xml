@@ -11,4 +11,5 @@
     <color name="text_color_regular">#ff333333</color>
     <color name="action_bar_bg">#FFFF9900</color>
     <color name="action_bar_bg_night">#B26B00</color>
+    <color name="gray_bg">#FF3B3B3B</color>
 </resources>

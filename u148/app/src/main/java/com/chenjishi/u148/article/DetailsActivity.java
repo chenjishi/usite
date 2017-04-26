@@ -3,10 +3,12 @@ package com.chenjishi.u148.article;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -73,6 +75,10 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         setTitle(title);
 
         mWebView = (WebView) findViewById(R.id.web_view);
+        mWebView.setHorizontalScrollBarEnabled(false);
+        mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        WebSettings settings = mWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
         mWebView.addJavascriptInterface(new JavaScriptBridge(this), "U148");
 
         findViewById(R.id.title_bar).setOnClickListener(this);
@@ -218,7 +224,8 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
 
     @Override
     public void onImageClicked(String url) {
-        Intent intent = new Intent(this, ImageActivity.class);
+        Log.i("test", "#url " + url);
+        Intent intent = new Intent(this, ImageBrowseActivity.class);
         intent.putExtra("imgsrc", url);
         intent.putStringArrayListExtra("images", mArticle.imageList);
         startActivity(intent);
@@ -273,14 +280,14 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.right_view);
         layout.removeAllViews();
 
-        int[] icons1 = {R.mipmap.ic_social_share, R.mipmap.ic_favorite,
-                R.mipmap.ic_comment};
-        int[] icons2 = {R.mipmap.ic_share_night, R.mipmap.ic_favorite_night,
-                R.mipmap.ic_comment_night};
+        int[] icons1 = {R.drawable.ic_social_share, R.drawable.ic_favorite,
+                R.drawable.ic_comment};
+        int[] icons2 = {R.drawable.ic_share_night, R.drawable.ic_favorite_night,
+                R.drawable.ic_comment_night};
         Feed feed = mDatabase.getFavoriteById(mFeed.id);
         if (null != feed && !isEmpty(feed.id)) {
-            icons1[1] = R.mipmap.ic_favorite_full;
-            icons2[1] = R.mipmap.ic_favorite_full;
+            icons1[1] = R.drawable.ic_favorite_full;
+            icons2[1] = R.drawable.ic_favorite_full;
         }
 
         int theme = Config.getThemeMode(this);

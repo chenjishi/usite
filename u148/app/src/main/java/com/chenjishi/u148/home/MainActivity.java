@@ -23,7 +23,10 @@ import android.widget.TextView;
 import com.chenjishi.u148.BaseActivity;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.utils.*;
+import com.chenjishi.u148.utils.ErrorListener;
+import com.chenjishi.u148.utils.Listener;
+import com.chenjishi.u148.utils.NetworkRequest;
+import com.chenjishi.u148.utils.Utils;
 import com.chenjishi.u148.widget.TabPageIndicator;
 
 import static com.chenjishi.u148.utils.Constants.API_UPGRADE;
@@ -280,8 +283,8 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
         titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.f);
         titleText.setTypeface(null);
         ((ImageView) findViewById(R.id.ic_arrow)).setImageResource(day ?
-        R.mipmap.ic_navigation_drawer : R.mipmap.ic_navigation_drawer_night);
-        setRightButtonIcon(day ? R.mipmap.ic_action_search : R.mipmap.ic_action_search_night);
+        R.drawable.ic_navigation_drawer : R.drawable.ic_navigation_drawer_night);
+        setRightButtonIcon(day ? R.drawable.ic_action_search : R.drawable.ic_action_search_night);
         findViewById(R.id.split_h).setBackgroundColor(day ? 0xFFE6E6E6 :
                 res.getColor(R.color.text_color_regular));
 

@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.favorite.FavoriteActivity;
@@ -22,7 +23,6 @@ import com.chenjishi.u148.utils.Utils;
 import com.chenjishi.u148.widget.AboutDialog;
 import com.chenjishi.u148.widget.ExitDialog;
 import com.chenjishi.u148.widget.LoginDialog;
-import com.facebook.drawee.view.SimpleDraweeView;
 
 import static android.widget.FrameLayout.LayoutParams.MATCH_PARENT;
 import static android.widget.FrameLayout.LayoutParams.WRAP_CONTENT;
@@ -66,7 +66,7 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
         setClickable(true);
         LayoutParams lp = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
         ImageView backgroundImage = new ImageView(ctx);
-        backgroundImage.setImageResource(R.mipmap.road);
+        backgroundImage.setImageResource(R.drawable.road);
         backgroundImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         addView(backgroundImage, lp);
 
@@ -90,7 +90,7 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp2px(32), dp2px(32));
         lp.topMargin = dp2px(16);
-        SimpleDraweeView imageView = new SimpleDraweeView(ctx);
+        ImageView imageView = new ImageView(ctx);
         container.addView(imageView, lp);
 
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
@@ -98,12 +98,12 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
         lp1.bottomMargin = dp2px(12);
 
         String[] titles = res.getStringArray(R.array.menu_item);
-        int[] icons = {R.mipmap.ic_settings,
-                R.mipmap.ic_bulb,
-                R.mipmap.ic_favorite_menu,
-                R.mipmap.ic_star,
-                R.mipmap.ic_info,
-                R.mipmap.ic_menu4};
+        int[] icons = {R.drawable.ic_settings,
+                R.drawable.ic_bulb,
+                R.drawable.ic_favorite_menu,
+                R.drawable.ic_star,
+                R.drawable.ic_info,
+                R.drawable.ic_menu4};
         titles[1] = res.getString(Config.getThemeMode(ctx) == MODE_DAY
                 ? R.string.mode_day : R.string.mode_night);
         int size = titles.length;
@@ -111,11 +111,11 @@ public class MenuLayout extends FrameLayout implements View.OnClickListener,
         if (Config.isLogin(ctx)) {
             UserInfo info = Config.getUser(ctx);
 
-            imageView.setImageURI(Uri.parse(info.icon));
+            Glide.with(ctx).load(info.icon).into(imageView);
             TextView nameLabel = Utils.generateTextView(ctx, info.nickname, 0xFF3C645A, 16.f);
             container.addView(nameLabel, lp1);
         } else {
-            imageView.setImageResource(R.mipmap.head);
+            imageView.setImageResource(R.drawable.head);
 
             LinearLayout buttonLayout = new LinearLayout(ctx);
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);

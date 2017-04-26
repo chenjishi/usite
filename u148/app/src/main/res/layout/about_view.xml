@@ -14,7 +14,7 @@
                 android:layout_width="100dp"
                 android:layout_height="96dp"
                 android:contentDescription="@null"
-                android:src="@mipmap/ic_logo_big"/>
+                android:src="@drawable/ic_logo_big"/>
         <Button
                 android:id="@+id/btn_version"
                 android:layout_width="wrap_content"

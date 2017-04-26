@@ -28,11 +28,11 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.flurry.android:analytics:7.0.0@aar'
     compile 'org.jsoup:jsoup:1.8.3'
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'com.squareup.okio:okio:1.10.0'
     compile 'com.google.code.gson:gson:2.7'
-    compile 'com.facebook.fresco:fresco:0.11.0'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.flurry.android:analytics:7.0.0@aar'
 }

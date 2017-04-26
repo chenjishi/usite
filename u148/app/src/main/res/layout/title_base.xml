@@ -19,7 +19,7 @@
                 android:id="@+id/ic_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/back_arrow"
+                android:src="@drawable/back_arrow"
                 android:layout_marginRight="4dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"

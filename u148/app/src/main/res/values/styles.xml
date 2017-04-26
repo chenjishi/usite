@@ -28,4 +28,15 @@
         <item name="android:windowEnterAnimation">@anim/slide_in_from_bottom</item>
         <item name="android:windowExitAnimation">@anim/slide_out_to_bottom</item>
     </style>
+    <style name="ImageButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">@drawable/home_button_bkg</item>
+    </style>
+    <style name="FullScreenStyle" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@null</item>
+    </style>
 </resources>

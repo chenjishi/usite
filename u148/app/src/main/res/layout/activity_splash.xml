@@ -5,7 +5,7 @@
     <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_logo_big"
+            android:src="@drawable/ic_logo_big"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="125dp"
             android:contentDescription="@null"/>

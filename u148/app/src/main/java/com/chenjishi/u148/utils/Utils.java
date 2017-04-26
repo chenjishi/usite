@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.facebook.cache.disk.FileCache;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

@@ -36,6 +36,11 @@
                   android:screenOrientation="portrait"/>
         <activity android:name=".home.SearchActivity"
                   android:screenOrientation="portrait"/>
+        <activity android:name=".article.ImageBrowseActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".settings.SurpriseActivity"
+                  android:screenOrientation="landscape"
+                  android:theme="@style/FullScreenStyle"/>
     </application>
 
 </manifest>

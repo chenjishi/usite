@@ -27,8 +27,6 @@ public class BaseActivity extends AppCompatActivity {
 
     protected int mTheme;
 
-    protected boolean mSliding;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,21 +52,16 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     public void setContentView(int layoutResID) {
-        if (mSliding) {
-            super.setContentView(R.layout.base_sliding_layout);
-        } else {
-            super.setContentView(R.layout.base_layout);
-
-            if (!mHideTitle) {
-                int resId = mTitleResId == -1 ? R.layout.title_base : mTitleResId;
-                mInflater.inflate(resId, mRootView);
-            }
-
-            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT,
-                    MATCH_PARENT, Gravity.BOTTOM);
-            lp.topMargin = mHideTitle ? 0 : dp2px(48);
-            mRootView.addView(mInflater.inflate(layoutResID, null), lp);
+        super.setContentView(R.layout.base_layout);
+        if (!mHideTitle) {
+            int resId = mTitleResId == -1 ? R.layout.title_base : mTitleResId;
+            mInflater.inflate(resId, mRootView);
         }
+
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT,
+                MATCH_PARENT, Gravity.BOTTOM);
+        lp.topMargin = mHideTitle ? 0 : dp2px(48);
+        mRootView.addView(mInflater.inflate(layoutResID, null), lp);
     }
 
     protected void setContentView(int layoutResID, int titleResId) {
@@ -184,12 +177,12 @@ public class BaseActivity extends AppCompatActivity {
                 titleView.setBackgroundColor(0xFF1C1C1C);
                 titleText.setTextColor(0xFF999999);
                 divider.setBackgroundColor(0xFF303030);
-                backBtn.setImageResource(R.mipmap.ic_back_night);
+                backBtn.setImageResource(R.drawable.ic_back_night);
             } else {
                 titleView.setBackgroundColor(0xFFE5E5E5);
                 titleText.setTextColor(0xFF666666);
                 divider.setBackgroundColor(0xFFCACACA);
-                backBtn.setImageResource(R.mipmap.back_arrow);
+                backBtn.setImageResource(R.drawable.back_arrow);
             }
         }
     }

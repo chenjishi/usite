@@ -3,7 +3,6 @@ package com.chenjishi.u148.home;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.TextUtils;
@@ -11,16 +10,17 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.article.DetailsActivity;
 import com.chenjishi.u148.utils.Constants;
 import com.chenjishi.u148.utils.FootViewHolder;
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.interfaces.DraweeController;
-import com.facebook.drawee.view.SimpleDraweeView;
+import com.chenjishi.u148.utils.Utils;
+import com.chenjishi.u148.widget.GifMovieView;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
@@ -103,17 +103,17 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 holder.numText.setTextColor(res.getColor(R.color.text_color_weak));
             }
 
-            String imageUrl = feed.pic_mid;
-            if (!TextUtils.isEmpty(imageUrl)) {
-                Uri uri = Uri.parse(imageUrl);
-                if (imageUrl.endsWith("gif") || imageUrl.endsWith("GIF") ||
-                        imageUrl.endsWith("Gif")) {
-                    DraweeController controller = Fresco.newDraweeControllerBuilder().setUri(uri)
-                            .setAutoPlayAnimations(true)
-                            .build();
-                    holder.imageView.setController(controller);
+            String url = feed.pic_mid;
+            if (!TextUtils.isEmpty(url)) {
+                if (url.endsWith("gif") || url.endsWith("GIF") ||
+                        url.endsWith("Gif")) {
+                    holder.imageView.setVisibility(View.GONE);
+                    holder.gifView.setImageUrl(url, Utils.dp2px(mContext, 90));
+                    holder.gifView.setVisibility(View.VISIBLE);
                 } else {
-                    holder.imageView.setImageURI(uri);
+                    holder.gifView.setVisibility(View.GONE);
+                    Glide.with(mContext).load(url).into(holder.imageView);
+                    holder.imageView.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -170,7 +170,9 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         public RelativeLayout itemLayout;
 
-        public SimpleDraweeView imageView;
+        public ImageView imageView;
+
+        public GifMovieView gifView;
 
         public TextView titleText;
 
@@ -182,7 +184,8 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             super(itemView);
 
             itemLayout = (RelativeLayout) itemView.findViewById(R.id.cell_layout);
-            imageView = (SimpleDraweeView) itemView.findViewById(R.id.image_view);
+            imageView = (ImageView) itemView.findViewById(R.id.image_view);
+            gifView = (GifMovieView) itemView.findViewById(R.id.gif_view);
             titleText = (TextView) itemView.findViewById(R.id.feed_title);
             numText = (TextView) itemView.findViewById(R.id.tv_comment);
             descText = (TextView) itemView.findViewById(R.id.feed_content);

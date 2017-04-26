@@ -138,6 +138,7 @@
     <string name="nickname_null">请输入昵称</string>
     <string name="nickname_invalid">昵称太长，中文请限制在12字内，英文25字母内</string>
     <string name="register_ing">正在注册&#8230;</string>
+    <string name="permission_denied">权限被拒绝，一些功能可能无法使用</string>
     <string-array name="menu_item">
         <item>设置</item>
         <item>夜间</item>
