@@ -24,8 +24,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.chenjishi.u148.BaseActivity;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.utils.Constants;
-import com.chenjishi.u148.utils.Utils;
+import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.GifMovieView;
 import com.chenjishi.u148.widget.ShareDialog;
 import com.chenjishi.u148.widget.TouchImageView;
@@ -41,7 +40,8 @@ import java.util.List;
 /**
  * Created by jishichen on 2017/4/26.
  */
-public class ImageBrowseActivity extends BaseActivity implements ViewPager.OnPageChangeListener {
+public class ImageBrowseActivity extends BaseActivity implements ViewPager.OnPageChangeListener,
+        Listener<byte[]>, ErrorListener {
     private ViewPager mViewPager;
     private RelativeLayout mToolBar;
 
@@ -98,7 +98,7 @@ public class ImageBrowseActivity extends BaseActivity implements ViewPager.OnPag
         String imageUrl = mImageList.get(mCurrentIndex);
         if (TextUtils.isEmpty(imageUrl)) return;
 
-        downloadImage(imageUrl);
+        NetworkRequest.getInstance().getBytes(imageUrl, this, this);
     }
 
     public void onShareButtonClicked(View v) {
@@ -152,41 +152,34 @@ public class ImageBrowseActivity extends BaseActivity implements ViewPager.OnPag
 
     }
 
-    private void downloadImage(final String url) {
-        OkHttpClient httpClient = new OkHttpClient();
-        final Request.Builder request = new Request.Builder()
-                .url(url);
-        httpClient.newCall(request.build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                showDownloadTips(getString(R.string.image_save_fail));
-            }
+    @Override
+    public void onResponse(byte[] response) {
+        Bitmap bitmap = BitmapFactory.decodeByteArray(response, 0, response.length);
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                byte[] bytes = response.body().bytes();
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        String url = mImageList.get(mCurrentIndex);
+        String suffix = ".jpg";
+        int idx = url.lastIndexOf(".");
+        if (-1 != idx) suffix = url.substring(idx);
 
-                String suffix = ".jpg";
-                int idx = url.lastIndexOf(".");
-                if (-1 != idx) suffix = url.substring(idx);
+        String name = System.currentTimeMillis() + suffix;
+        ContentResolver cr = ImageBrowseActivity.this.getContentResolver();
+        String picUrl = MediaStore.Images.Media.insertImage(cr, bitmap, name, "Image Saved From U148");
 
-                String name = System.currentTimeMillis() + suffix;
-                ContentResolver cr = ImageBrowseActivity.this.getContentResolver();
-                String picUrl = MediaStore.Images.Media.insertImage(cr, bitmap, name, "Image Saved From U148");
+        if (!TextUtils.isEmpty(picUrl)) {
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            String imagePath = getFilePathByContentResolver(Uri.parse(picUrl));
+            Uri uri = Uri.fromFile(new File(imagePath));
+            intent.setData(uri);
+            ImageBrowseActivity.this.sendBroadcast(intent);
+        }
 
-                if (!TextUtils.isEmpty(picUrl)) {
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    String imagePath = getFilePathByContentResolver(Uri.parse(picUrl));
-                    Uri uri = Uri.fromFile(new File(imagePath));
-                    intent.setData(uri);
-                    ImageBrowseActivity.this.sendBroadcast(intent);
-                }
+        showDownloadTips(getString(TextUtils.isEmpty(picUrl) ?
+                R.string.image_save_fail : R.string.image_save_success));
+    }
 
-                showDownloadTips(getString(TextUtils.isEmpty(picUrl) ?
-                        R.string.image_save_fail : R.string.image_save_success));
-            }
-        });
+    @Override
+    public void onErrorResponse() {
+        showDownloadTips(getString(R.string.image_save_fail));
     }
 
     private void showDownloadTips(final String tip) {

@@ -3,42 +3,52 @@ package com.chenjishi.u148.widget;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.chenjishi.u148.Config;
 import com.chenjishi.u148.R;
 import com.chenjishi.u148.home.Feed;
-import com.chenjishi.u148.utils.QQAuthToken;
+import com.chenjishi.u148.utils.ErrorListener;
+import com.chenjishi.u148.utils.Listener;
+import com.chenjishi.u148.utils.NetworkRequest;
 import com.chenjishi.u148.utils.Utils;
-import com.sina.weibo.sdk.auth.Oauth2AccessToken;
-import com.sina.weibo.sdk.auth.WeiboAuth;
-import com.sina.weibo.sdk.auth.WeiboAuthListener;
-import com.sina.weibo.sdk.exception.WeiboException;
+import com.sina.weibo.sdk.WbSdk;
+import com.sina.weibo.sdk.api.ImageObject;
+import com.sina.weibo.sdk.api.TextObject;
+import com.sina.weibo.sdk.api.WebpageObject;
+import com.sina.weibo.sdk.api.WeiboMultiMessage;
+import com.sina.weibo.sdk.auth.AuthInfo;
+import com.sina.weibo.sdk.share.WbShareCallback;
+import com.sina.weibo.sdk.share.WbShareHandler;
 import com.tencent.connect.share.QQShare;
 import com.tencent.connect.share.QzoneShare;
-import com.tencent.mm.sdk.openapi.*;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXImageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * Created by chenjishi on 14-6-17.
  */
-public class ShareDialog extends Dialog implements View.OnClickListener {
+public class ShareDialog extends Dialog implements View.OnClickListener, WbShareCallback, Listener<byte[]>, ErrorListener {
     private static final int TIMELINE_SUPPORTED_VERSION = 0x21020001;
     private static final int THUMB_SIZE = 100;
 
@@ -58,70 +68,79 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
     private static final int SHARE_TO_QZONE = 103;
     private static final int SHARE_TO_QQ = 104;
 
-    private Context mContext;
-
     private IWXAPI mWXAPI;
     private Feed mFeed;
+
+    private int mType;
 
     private ArrayList<String> mImageList;
 
     private Tencent mTencent;
 
+    private Context mContext;
+
+    private final IUiListener mListener = new IUiListener() {
+        @Override
+        public void onComplete(Object o) {
+
+        }
+
+        @Override
+        public void onError(UiError uiError) {
+
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+    };
+
     public ShareDialog(Context context) {
         super(context, R.style.FullHeightDialog);
-
+        setCanceledOnTouchOutside(true);
         mContext = context;
 
-        setCanceledOnTouchOutside(true);
-
-        mWXAPI = WXAPIFactory.createWXAPI(context, WX_APP_ID);
-        mWXAPI.registerApp(WX_APP_ID);
-
-        mTencent = Tencent.createInstance(QQ_APP_ID, context.getApplicationContext());
-
         int paddingTop = Utils.dp2px(context, 12.f);
-        LinearLayout container = new LinearLayout(context);
-        container.setBackgroundColor(0xFFFFFFFF);
-        container.setOrientation(LinearLayout.HORIZONTAL);
-        container.setWeightSum(5.f);
-        container.setPadding(0, paddingTop, 0, paddingTop);
-        container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        LinearLayout layout = new LinearLayout(context);
+        layout.setBackgroundColor(Color.WHITE);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setWeightSum(5.f);
+        layout.setPadding(0, paddingTop, 0, paddingTop);
 
-        int[] iconIds = {R.drawable.ic_session, R.drawable.ic_friend, R.drawable.ic_weibo,
+        Resources res = context.getResources();
+        int[] icons = {R.drawable.ic_session, R.drawable.ic_friend, R.drawable.ic_weibo,
                 R.drawable.ic_qqzone, R.drawable.ic_qq};
-        int[] nameIds = {R.string.share_session, R.string.share_friend, R.string.share_weibo,
-                R.string.qqzone, R.string.qq_friends};
+        String[] titles = res.getStringArray(R.array.share_items);
 
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, WRAP_CONTENT);
         lp.weight = 1.f;
-
         int padding = Utils.dp2px(context, 8);
-        for (int i = 0; i < iconIds.length; i++) {
-            TextView tv = new TextView(context);
-            tv.setLayoutParams(lp);
-            tv.setCompoundDrawablesWithIntrinsicBounds(0, iconIds[i], 0, 0);
+        for (int i = 0; i < icons.length; i++) {
+            TextView tv = Utils.generateTextView(context, titles[i], Color.BLACK, 12.f);
+            tv.setCompoundDrawablesWithIntrinsicBounds(0, icons[i], 0, 0);
             tv.setCompoundDrawablePadding(padding);
             tv.setPadding(padding, padding, padding, padding);
             tv.setBackgroundResource(R.drawable.home_up_bg);
             tv.setGravity(Gravity.CENTER);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.f);
-            tv.setTextColor(0xFF000000);
-            tv.setText(nameIds[i]);
             tv.setTag(SHARE_TO_SESSION + i);
             tv.setOnClickListener(this);
 
-            container.addView(tv);
+            layout.addView(tv, lp);
         }
-
-        setContentView(container);
+        setContentView(layout, new ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
-        layoutParams.width = context.getResources().getDisplayMetrics().widthPixels;
+        layoutParams.width = res.getDisplayMetrics().widthPixels;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.BOTTOM;
         getWindow().setAttributes(layoutParams);
+
+        mWXAPI = WXAPIFactory.createWXAPI(context, WX_APP_ID);
+        mWXAPI.registerApp(WX_APP_ID);
+
+        mTencent = Tencent.createInstance(QQ_APP_ID, context);
+        WbSdk.install(context, new AuthInfo(context, WB_APP_ID, REDIRECT_URL, SCOPE));
     }
 
     public void setShareFeed(Feed feed) {
@@ -133,130 +152,108 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
     }
 
     private void shareToWX(final int type) {
-        requestImage(mImageList.get(0), type);
+        if (!mWXAPI.isWXAppInstalled()) {
+            Utils.showToast(getContext(), R.string.wechat_not_install);
+            return;
+        }
+
+        if (!mWXAPI.isWXAppSupportAPI()) {
+            Utils.showToast(getContext(), R.string.wechat_not_support);
+            return;
+        }
+
+        if (type == SHARE_TO_FRIENDS && mWXAPI.getWXAppSupportAPI() < TIMELINE_SUPPORTED_VERSION) {
+            Utils.showToast(getContext(), R.string.wechat_timeline_not_support);
+        }
+
+        String url = mImageList.get(0);
+        NetworkRequest.getInstance().getBytes(url, this, this);
     }
 
-    private void requestImage(String url, final int type) {
-//        DataSubscriber subscriber = new BaseBitmapDataSubscriber() {
-//            @Override
-//            protected void onNewResultImpl(Bitmap bitmap) {
-//                if (null != bitmap && !bitmap.isRecycled()) {
-//                    if (null != bitmap) {
-//                        if (null != mFeed) {
-//                            sendWebPage(type, bitmap);
-//                        } else {
-//                            sendImage(type, bitmap);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
-//                Utils.showToast(getContext(), R.string.share_image_fail);
-//            }
-//        };
-//
-//        ImagePipeline imagePipeline = Fresco.getImagePipeline();
-//        ImageRequestBuilder builder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url));
-//        ImageRequest request = builder.build();
-//        DataSource<CloseableReference<CloseableImage>>
-//                dataSource = imagePipeline.fetchDecodedImage(request, this);
-//        dataSource.subscribe(subscriber, UiThreadImmediateExecutorService.getInstance());
-    }
+    @Override
+    public void onResponse(byte[] response) {
+        Bitmap bitmap = BitmapFactory.decodeByteArray(response, 0, response.length);
+        if (null == bitmap) {
+            Utils.showToast(getContext(), mType == SHARE_TO_WEIBO ?
+                    R.string.weibo_share_fail : R.string.share_image_fail);
+            return;
+        }
 
-
-    private void shareToQzone() {
-        QQAuthToken authToken = Config.getQQAuthToken(getContext());
-
-        if (authToken.invalid()) {
-            mTencent.setOpenId(authToken.open_id);
-            long expireTime = (authToken.expires_in - System.currentTimeMillis()) / 1000;
-            mTencent.setAccessToken(authToken.access_token, String.valueOf(expireTime));
-            sendToQzone();
+        if (mType == SHARE_TO_WEIBO) {
+            share2Weibo(response);
         } else {
-            mTencent.login((Activity) mContext, "all", new IUiListener() {
-                @Override
-                public void onComplete(Object o) {
-                    String result = o.toString();
-                    if (!TextUtils.isEmpty(result)) {
-                        saveQQToken(result);
-                        sendToQzone();
-                    } else {
-                        Utils.showToast(getContext(), "QQ登陆失败，请稍后再试");
-                    }
-                }
-
-                @Override
-                public void onError(UiError uiError) {
-                }
-
-                @Override
-                public void onCancel() {
-                }
-            });
+            if (null != mFeed) {
+                sendWebPage(mType, bitmap);
+            } else {
+                sendImage(mType, bitmap);
+            }
         }
     }
 
-    private void saveQQToken(String json) {
-        QQAuthToken authToken = new QQAuthToken();
+    private void share2Weibo(byte[] bytes) {
+        WbShareHandler shareHandler = new WbShareHandler((Activity) mContext);
+        shareHandler.registerApp();
 
-        try {
-            JSONObject jObj = new JSONObject(json);
-            authToken.open_id = jObj.optString("openid", "");
-            authToken.access_token = jObj.optString("access_token", "");
-            authToken.expires_in = jObj.optLong("expires_in", 0);
+        WeiboMultiMessage message = new WeiboMultiMessage();
 
-            Config.putQQAuthToken(getContext(), authToken);
-        } catch (JSONException e) {
+        String title, url, content;
+        if (null != mFeed) {
+            title = mFeed.title;
+            url = String.format(ARTICLE_URL, mFeed.id);
+            content = mFeed.summary;
+            if (content.length() > 140) {
+                content = content.substring(0, 138);
+            }
+        } else {
+            title = getContext().getString(R.string.image_share);
+            url = "http://www.u148.net/";
+            content = getContext().getString(R.string.share_image_tip);
         }
+
+        TextObject textObject = new TextObject();
+        textObject.text = content;
+        message.textObject = textObject;
+
+        ImageObject imageObject = new ImageObject();
+        imageObject.imageData = bytes;
+        message.imageObject = imageObject;
+
+        WebpageObject webpageObject = new WebpageObject();
+        webpageObject.title = title;
+        webpageObject.actionUrl = url;
+        webpageObject.identify = "u148" + System.currentTimeMillis();
+
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        webpageObject.setThumbImage(getThumbBitmap(bitmap));
+        shareHandler.shareMessage(message, false);
+    }
+
+    @Override
+    public void onErrorResponse() {
+        Utils.showToast(getContext(), mType == SHARE_TO_WEIBO ?
+                R.string.weibo_share_fail : R.string.share_image_fail);
     }
 
     private void sendToQQFriends() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
-        bundle.putString(QQShare.SHARE_TO_QQ_TITLE, mFeed.title);
-        bundle.putString(QQShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
-        bundle.putString(QQShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
-        bundle.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, mImageList.get(0));
+        Bundle args = new Bundle();
+        args.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+        args.putString(QQShare.SHARE_TO_QQ_TITLE, mFeed.title);
+        args.putString(QQShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
+        args.putString(QQShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
+        args.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, mImageList.get(0));
 
-        mTencent.shareToQQ((Activity) mContext, bundle, new IUiListener() {
-            @Override
-            public void onComplete(Object o) {
-            }
-
-            @Override
-            public void onError(UiError uiError) {
-            }
-
-            @Override
-            public void onCancel() {
-            }
-        });
-
+        mTencent.shareToQQ((Activity) mContext, args, mListener);
     }
 
     private void sendToQzone() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
-        bundle.putString(QzoneShare.SHARE_TO_QQ_TITLE, mFeed.title);
-        bundle.putString(QzoneShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
-        bundle.putString(QzoneShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
-        bundle.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, mImageList);
+        Bundle args = new Bundle();
+        args.putInt(QzoneShare.SHARE_TO_QZONE_KEY_TYPE, QzoneShare.SHARE_TO_QZONE_TYPE_IMAGE_TEXT);
+        args.putString(QzoneShare.SHARE_TO_QQ_TITLE, mFeed.title);
+        args.putString(QzoneShare.SHARE_TO_QQ_SUMMARY, mFeed.summary);
+        args.putString(QzoneShare.SHARE_TO_QQ_TARGET_URL, String.format("http://www.u148.net/article/%1$s.html", mFeed.id));
+        args.putStringArrayList(QzoneShare.SHARE_TO_QQ_IMAGE_URL, mImageList);
 
-        mTencent.shareToQzone((Activity) mContext, bundle, new IUiListener() {
-            @Override
-            public void onComplete(Object o) {
-            }
-
-            @Override
-            public void onError(UiError uiError) {
-            }
-
-            @Override
-            public void onCancel() {
-            }
-        });
+        mTencent.shareToQzone((Activity) mContext, args, mListener);
     }
 
     private void sendWebPage(int type, Bitmap bitmap) {
@@ -294,28 +291,8 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
     }
 
     private void shareToWB() {
-        Oauth2AccessToken token = Config.getAccessToken(getContext());
-
-        String content;
-        if (null != mFeed) {
-            String url = String.format(ARTICLE_URL, mFeed.id);
-            String title = mFeed.title + "-";
-            int summaryLength = 140 - url.length() - title.length();
-
-            String summary = mFeed.summary;
-            if (summary.length() > summaryLength) {
-                summary = summary.substring(0, summaryLength - 1);
-            }
-
-            content = title + summary + url;
-        } else {
-            content = getContext().getString(R.string.share_image_tip);
-        }
-
-        if (!token.isSessionValid()) {
-            authorize(content);
-        } else {
-        }
+        String url = mImageList.get(0);
+        NetworkRequest.getInstance().getBytes(url, this, this);
     }
 
     private Bitmap getThumbBitmap(Bitmap bitmap) {
@@ -337,38 +314,15 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
         return Bitmap.createScaledBitmap(bitmap, dstWidth, dstHeight, true);
     }
 
-    private void authorize(final String content) {
-        WeiboAuth weiboAuth = new WeiboAuth(mContext, WB_APP_ID, REDIRECT_URL, SCOPE);
-        weiboAuth.authorize(new WeiboAuthListener() {
-            @Override
-            public void onComplete(Bundle bundle) {
-                Oauth2AccessToken accessToken = Oauth2AccessToken.parseAccessToken(bundle);
-                Config.saveAccessToken(getContext(), accessToken);
-            }
-
-            @Override
-            public void onWeiboException(WeiboException e) {
-
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-        }, WeiboAuth.OBTAIN_AUTH_TOKEN);
-    }
-
     @Override
     public void onClick(View v) {
-        int tag = (Integer) v.getTag();
+        mType = (Integer) v.getTag();
 
-        switch (tag) {
+        switch (mType) {
             case SHARE_TO_SESSION:
-                checkStatus(SendMessageToWX.Req.WXSceneSession);
                 shareToWX(SendMessageToWX.Req.WXSceneSession);
                 break;
             case SHARE_TO_FRIENDS:
-                checkStatus(SendMessageToWX.Req.WXSceneTimeline);
                 shareToWX(SendMessageToWX.Req.WXSceneTimeline);
                 break;
             case SHARE_TO_WEIBO:
@@ -385,30 +339,18 @@ public class ShareDialog extends Dialog implements View.OnClickListener {
         dismiss();
     }
 
-    private void showWeiboMessage(final boolean success) {
-        Handler mainThread = new Handler(Looper.getMainLooper());
-        mainThread.post(new Runnable() {
-            @Override
-            public void run() {
-                Utils.showToast(getContext(), success ? R.string.weibo_share_success :
-                        R.string.weibo_share_fail);
-            }
-        });
+    @Override
+    public void onWbShareSuccess() {
+        Utils.showToast(getContext(), R.string.weibo_share_success);
     }
 
-    private void checkStatus(int type) {
-        if (!mWXAPI.isWXAppInstalled()) {
-            Utils.showToast(getContext(), R.string.wechat_not_install);
-            return;
-        }
+    @Override
+    public void onWbShareCancel() {
 
-        if (!mWXAPI.isWXAppSupportAPI()) {
-            Utils.showToast(getContext(), R.string.wechat_not_support);
-            return;
-        }
+    }
 
-        if (type == SHARE_TO_FRIENDS && mWXAPI.getWXAppSupportAPI() < TIMELINE_SUPPORTED_VERSION) {
-            Utils.showToast(getContext(), R.string.wechat_timeline_not_support);
-        }
+    @Override
+    public void onWbShareFail() {
+        Utils.showToast(getContext(), R.string.weibo_share_fail);
     }
 }

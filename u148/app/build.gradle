@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+def gitVersion() {
+    def cmd = 'git rev-list HEAD --count'
+    cmd.execute([], project.rootDir).text.trim().toInteger()
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -7,14 +12,29 @@ android {
         applicationId "com.chenjishi.u148"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode gitVersion();
+        versionName "2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        release {
+            storeFile file("../chenjishi.keystore")
+            storePassword "***************"
+            keyAlias "***************"
+            keyPassword "***************"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            applicationVariants.all {variant ->
+                variant.outputs.each {output ->
+                    def timestamp = new Date().format('yyyyMMddHHmmss')
+                    output.outputFile = new File(output.outputFile.parent, "U148-" + gitVersion() + "-" + timestamp + ".apk")
+                }
+            }
         }
     }
 }
@@ -26,7 +46,6 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
-    compile 'com.flurry.android:analytics:7.0.0@aar'
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'com.squareup.okio:okio:1.10.0'
@@ -35,4 +54,6 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.flurry.android:analytics:7.0.0@aar'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
+    compile 'com.sina.weibo.sdk:core:2.0.3:openDefaultRelease@aar'
 }

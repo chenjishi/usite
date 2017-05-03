@@ -3,10 +3,8 @@ package com.chenjishi.u148;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import com.chenjishi.u148.utils.QQAuthToken;
 import com.chenjishi.u148.home.UserInfo;
 import com.chenjishi.u148.utils.Constants;
-import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 
 /**
  * Created by jishichen on 2017/4/14.
@@ -29,12 +27,8 @@ public class Config {
 
     public static final String KEY_VIDEO_UPDATE_TIME = "last_update_time";
 
-    private static final String KEY_ACESS_TOKEN = "access_token";
-    private static final String KEY_EXPIRE_IN = "expire_in";
     private static final String KEY_CACHE_CLEAR_TIME = "cache_clear_time";
     private static final String KEY_CACHE_UPDATE_TIME = "cache_update_time";
-
-    private static final String KEY_AD_SHOW_TIME = "ad_show_time";
 
     private static final String KEY_REGISTER_TIME = "register_time";
 
@@ -43,16 +37,9 @@ public class Config {
     private static final String KEY_USER_ICON = "user_icon";
     private static final String KEY_USER_TOKEN = "user_token";
 
-    private static final String KEY_AD_SHOWED = "key_ad_showed";
     private static final String KEY_THEME_MODE = "theme_mode";
-    private static final String QQ_ACCESS_TOKEN = "qq_access_token";
-    private static final String QQ_OPEN_ID = "qq_open_id";
-    private static final String QQ_EXPIRES_IN = "qq_expires_in";
     private static final String SURPRISE_TITLE = "surprise_title";
     private static final String SURPRISE_DESC = "surprise_desc";
-    private static final String ADS_ID = "ads_id";
-
-    private static final String ADS_JSON = "ads_json";
 
     private Config() {
     }
@@ -108,22 +95,6 @@ public class Config {
         }
     }
 
-    public static QQAuthToken getQQAuthToken(Context ctx) {
-        QQAuthToken authToken = new QQAuthToken();
-
-        authToken.access_token = getString(ctx, QQ_ACCESS_TOKEN, "");
-        authToken.open_id = getString(ctx, QQ_OPEN_ID, "");
-        authToken.expires_in = getLong(ctx, QQ_EXPIRES_IN, -1L);
-
-        return authToken;
-    }
-
-    public static void putQQAuthToken(Context ctx, QQAuthToken token) {
-        putString(ctx, QQ_ACCESS_TOKEN, token.access_token);
-        putString(ctx, QQ_OPEN_ID, token.open_id);
-        putLong(ctx, QQ_EXPIRES_IN, System.currentTimeMillis() + token.expires_in * 1000);
-    }
-
     public static void saveSurpriseTitle(Context ctx, String title) {
         putString(ctx, SURPRISE_TITLE, title);
     }
@@ -146,28 +117,6 @@ public class Config {
 
     public static long getClearCacheTime(Context ctx) {
         return getLong(ctx, KEY_CACHE_CLEAR_TIME, -1L);
-    }
-
-    public static void saveAccessToken(Context ctx, Oauth2AccessToken token) {
-        putString(ctx, KEY_ACESS_TOKEN, token.getToken());
-        putLong(ctx, KEY_EXPIRE_IN, token.getExpiresTime());
-    }
-
-    public static Oauth2AccessToken getAccessToken(Context ctx) {
-        Oauth2AccessToken token = new Oauth2AccessToken();
-        token.setToken(getString(ctx, KEY_ACESS_TOKEN, ""));
-        token.setExpiresTime(getLong(ctx, KEY_EXPIRE_IN, 0L));
-        return token;
-    }
-
-    public static boolean getBoolean(Context context, String key, boolean defaultValue) {
-        return getPreferences(context).getBoolean(key, defaultValue);
-    }
-
-    public static void putBoolean(Context context, String key, boolean value) {
-        SharedPreferences.Editor editor = getPreferences(context).edit();
-        editor.putBoolean(key, value);
-        editor.apply();
     }
 
     public static int getInt(Context context, String key, int defaultValue) {

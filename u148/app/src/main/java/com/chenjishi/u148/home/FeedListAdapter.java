@@ -124,8 +124,8 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             holder.titleText.setText(Html.fromHtml(title));
             holder.numText.setText(res.getString(R.string.views, feed.count_browse, feed.count_review));
             holder.descText.setText(feed.summary);
-            holder.itemLayout.setTag(i);
-            holder.itemLayout.setOnClickListener(mOnClickListener);
+            holder.itemView.setTag(i);
+            holder.itemView.setOnClickListener(mOnClickListener);
         } else {
             FootViewHolder holder = (FootViewHolder) viewHolder;
             if (theme == Constants.MODE_NIGHT) {
@@ -168,8 +168,6 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private static final class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        public RelativeLayout itemLayout;
-
         public ImageView imageView;
 
         public GifMovieView gifView;
@@ -183,7 +181,6 @@ public class FeedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public ItemViewHolder(View itemView) {
             super(itemView);
 
-            itemLayout = (RelativeLayout) itemView.findViewById(R.id.cell_layout);
             imageView = (ImageView) itemView.findViewById(R.id.image_view);
             gifView = (GifMovieView) itemView.findViewById(R.id.gif_view);
             titleText = (TextView) itemView.findViewById(R.id.feed_title);

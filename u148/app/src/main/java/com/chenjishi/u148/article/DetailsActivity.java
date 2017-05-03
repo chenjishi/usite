@@ -22,7 +22,6 @@ import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.CircleView;
 import com.chenjishi.u148.widget.ShareDialog;
 import com.flurry.android.FlurryAgent;
-import com.tencent.connect.avatar.ImageActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -224,7 +223,6 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
 
     @Override
     public void onImageClicked(String url) {
-        Log.i("test", "#url " + url);
         Intent intent = new Intent(this, ImageBrowseActivity.class);
         intent.putExtra("imgsrc", url);
         intent.putStringArrayListExtra("images", mArticle.imageList);

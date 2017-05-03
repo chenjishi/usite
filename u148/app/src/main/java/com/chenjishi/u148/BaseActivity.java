@@ -34,7 +34,8 @@ public class BaseActivity extends AppCompatActivity {
         mRootView.setBackgroundColor(getResources().getColor(Constants.MODE_NIGHT == Config.getThemeMode(this)
                 ? R.color.background_night : R.color.background));
         mInflater = LayoutInflater.from(this);
-        setStatusViewColor(0xFFE5E5E5);
+        setStatusViewColor(Config.getThemeMode(this) ==
+                Constants.MODE_DAY ? 0xFFE5E5E5 : 0xFF1C1C1C);
     }
 
     @Override

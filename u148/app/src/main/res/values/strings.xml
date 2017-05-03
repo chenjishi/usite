@@ -54,12 +54,6 @@
 
     <string name="connection_error">网络连接错误</string>
     <string name="parse_error">数据解析出错了, 请稍后再试</string>
-
-    <string name="share_weibo">新浪微博</string>
-    <string name="share_session">微信好友</string>
-    <string name="share_friend">朋友圈</string>
-    <string name="qqzone">QQ空间</string>
-    <string name="qq_friends">QQ好友</string>
     <string name="app_author">作者：CountryHouses</string>
     <string name="copyright">©2007 &#8211; 2019 Www.U148.Net</string>
     <string name="close_dialog">关闭窗口</string>
@@ -139,6 +133,7 @@
     <string name="nickname_invalid">昵称太长，中文请限制在12字内，英文25字母内</string>
     <string name="register_ing">正在注册&#8230;</string>
     <string name="permission_denied">权限被拒绝，一些功能可能无法使用</string>
+    <string name="image_share">图片分享</string>
     <string-array name="menu_item">
         <item>设置</item>
         <item>夜间</item>
@@ -178,4 +173,11 @@
         <item>漂流</item>
         <item>游戏</item>
     </string-array>
+    <array name="share_items">
+        <item>微信好友</item>
+        <item>朋友圈</item>
+        <item>新浪微博</item>
+        <item>QQ空间</item>
+        <item>QQ好友</item>
+    </array>
 </resources>

@@ -74,7 +74,9 @@ public class MainActivity extends BaseActivity implements DrawerLayout.DrawerLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setBackgroundDrawable(null);
-        setStatusViewColor(getResources().getColor(R.color.action_bar_bg));
+        setStatusViewColor(getResources().getColor(
+                Config.getThemeMode(this) == MODE_DAY ?
+                        R.color.action_bar_bg : R.color.action_bar_bg_night));
 
         mLeftView = (LinearLayout) findViewById(R.id.left_view);
         mLeftView.setBackgroundResource(R.drawable.home_button_bkg);
