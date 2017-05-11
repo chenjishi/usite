@@ -85,7 +85,7 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     public void setTitle(CharSequence title) {
-        final TextView textView = (TextView) findViewById(R.id.tv_title);
+        TextView textView = (TextView) findViewById(R.id.tv_title);
         textView.setText(title);
         textView.setVisibility(View.VISIBLE);
     }
