@@ -24,15 +24,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.chenjishi.u148.BaseActivity;
 import com.chenjishi.u148.R;
-import com.chenjishi.u148.utils.ErrorListener;
-import com.chenjishi.u148.utils.Listener;
-import com.chenjishi.u148.utils.NetworkRequest;
-import com.chenjishi.u148.utils.Utils;
+import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.GifMovieView;
 import com.chenjishi.u148.widget.TouchImageView;
+import com.flurry.android.FlurryAgent;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -100,16 +99,16 @@ public class ImageBrowseActivity extends BaseActivity implements ViewPager.OnPag
     }
 
     public void onShareButtonClicked(View v) {
-//        ShareDialog dialog = new ShareDialog(this);
-//        String imageUrl = mImageList.get(mCurrentIndex);
-//        ArrayList<String> imageList = new ArrayList<>();
-//        imageList.add(imageUrl);
-//        dialog.setImageList(imageList);
-//        dialog.show();
-//
-//        HashMap<String, String> params = new HashMap<>();
-//        params.put(Constants.PARAM_URL, imageUrl);
-//        FlurryAgent.logEvent(Constants.EVENT_IMAGE_SHARE, params);
+        ShareDialog dialog = new ShareDialog(this);
+        String imageUrl = mImageList.get(mCurrentIndex);
+        ArrayList<String> imageList = new ArrayList<>();
+        imageList.add(imageUrl);
+        dialog.setImageList(imageList);
+        dialog.show();
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put(Constants.PARAM_URL, imageUrl);
+        FlurryAgent.logEvent(Constants.EVENT_IMAGE_SHARE, params);
     }
 
     private void onImageTap() {

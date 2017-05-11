@@ -19,6 +19,7 @@ import com.chenjishi.u148.home.Feed;
 import com.chenjishi.u148.home.UserInfo;
 import com.chenjishi.u148.utils.*;
 import com.chenjishi.u148.widget.CircleView;
+import com.flurry.android.FlurryAgent;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -28,9 +29,7 @@ import org.jsoup.select.Elements;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 import static android.text.TextUtils.isEmpty;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -114,19 +113,19 @@ public class DetailsActivity extends BaseActivity implements Listener<String>, E
     }
 
     private void share() {
-//        Map<String, String> params = new HashMap<>();
-//        params.put(PARAM_TITLE, mFeed.title);
-//        FlurryAgent.logEvent(EVENT_ARTICLE_SHARE, params);
-//
-//        ShareDialog dialog = new ShareDialog(this);
-//        ArrayList<String> imageList = mArticle.imageList;
-//        if (null == imageList || imageList.size() == 0) {
-//            imageList.add(mFeed.pic_mid);
-//        }
-//
-//        dialog.setShareFeed(mFeed);
-//        dialog.setImageList(imageList);
-//        dialog.show();
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TITLE, mFeed.title);
+        FlurryAgent.logEvent(EVENT_ARTICLE_SHARE, params);
+
+        ShareDialog dialog = new ShareDialog(this);
+        ArrayList<String> imageList = mArticle.imageList;
+        if (null == imageList || imageList.size() == 0) {
+            imageList.add(mFeed.pic_mid);
+        }
+
+        dialog.setShareFeed(mFeed);
+        dialog.setImageList(imageList);
+        dialog.show();
     }
 
     @Override

@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             storeFile file("../chenjishi.keystore")
-            storePassword "331500311113Ctrl"
-            keyAlias "chenjishi_key"
-            keyPassword "331500311113Ctrl"
+            storePassword "************"
+            keyAlias "************"
+            keyPassword "************"
         }
     }
     buildTypes {
@@ -54,4 +54,6 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.flurry.android:analytics:7.0.0@aar'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
+    compile 'com.sina.weibo.sdk:core:2.0.3:openDefaultRelease@aar'
 }
